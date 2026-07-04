@@ -4,6 +4,10 @@ A modern, AI-assisted Python editor as a FreeCAD plugin with freely arrangeable 
 syntax highlighting, 19 supported AI providers, and extensive tools for
 FreeCAD automation.
 
+## Zielgruppe & Umgang mit KI
+
+Die Anwendung richtet sich gleichermaßen an Profis, Einsteiger und Menschen mit Einschränkungen. Ziel ist es, den Zugang zu FreeCAD durch barrierearme Werkzeuge und eine leicht verständliche KI-Unterstützung zu erleichtern. Die KI wird dabei als Werkzeug verstanden — ähnlich wie ein Assistent oder ein anderes Software-Werkzeug. Sie soll dem Anwender nicht die komplette Arbeit abnehmen, sondern mit ihm interagieren, Fragen beantworten und Lösungsvorschläge machen. Bitte beachten Sie, dass KI-Modelle nicht fehlerfrei oder perfekt sind; prüfen Sie generierte Vorschläge sorgfältig und übernehmen Sie nur, was für Ihr Projekt geeignet ist.
+
 ---
 
 ## Preview
@@ -69,16 +73,16 @@ FreeCAD automation.
 - Two modes: 🟢 Beginner (detailed, plain language) / 🔵 Expert (concise, technical) — **selection is saved**
 - Generate macros from natural-language descriptions (FC11 / FC12 / FC13)
 - AI tool-calling for structured FreeCAD operations (FC14 JSON / "FC14 · Object commands (local)" preset)
-- **Skills** — domain knowledge (e.g. screw-hole dimension tables from `data/skills/`) is appended to the prompt automatically when keywords like "M6", "thread" or "hole" appear in the description
+- **Skills** — domain knowledge (e.g. screw-hole dimension tables from `data/skills/`) is appended to the prompt automatically when keywords like "M6", "thread" or "hole" appear in the descripti[...]
 - Ask the AI without any code in the editor (pure Q&A mode)
 - **FreeCAD document state** automatically included in the prompt — compact for Ollama, full for cloud models
 - **AGENTS.md support** — project-specific instructions next to the open file or in the home directory are loaded automatically
-- **👁 3D preview tab** — run the AI response (or the editor code) directly in FreeCAD and see the embedded 3D viewport as an editor tab (▶ Run · 🔄 Refresh · ⊡ Fit; ▶ turns into ⏹ Stop while running)
-- **Unified ⚠ error panel** — one surface combining output, runtime errors and the test sandbox. 🔍 **Translate** replaces the error text with a German explanation *in place* (same field, no duplication) and toggles back to 🔙 **Original** — one button, two states. 🐛 **AI explains** streams a detailed explanation, 🔧 **AI fix** returns corrected code (max. 3 attempts). Errors from F5/F9 runs and the preview land here automatically
+- **👁 3D preview tab** — run the AI response (or the editor code) directly in FreeCAD and see the embedded 3D viewport as an editor tab (▶ Run · 🔄 Refresh · ⊡ Fit; ▶ turns into ⏹[...]
+- **Unified ⚠ error panel** — one surface combining output, runtime errors and the test sandbox. 🔍 **Translate** replaces the error text with a German explanation *in place* (same field, no[...]
 - **🔌 Connection test** — checks Ollama reachability or API key status without an AI request
 - **Auto-insert** — AI response is automatically inserted into the editor after stream end (optional)
 - **Thinking mode** (Anthropic) — Extended Thinking with 8,000 budget tokens
-- **System prompt templates** — 📋 menu with predefined prompts (FreeCAD Part-Script, FC14 JSON, Code Analysis etc.), directly editable; a prompt starting with "You are" replaces the base prompt entirely
+- **System prompt templates** — 📋 menu with predefined prompts (FreeCAD Part-Script, FC14 JSON, Code Analysis etc.), directly editable; a prompt starting with "You are" replaces the base prom[...]
 - **Per-model parameters** — temperature, top-P, top-K, max tokens and context are saved per model and loaded automatically on switch
 - **API key from file** — enter `file:/path/to/key-file` as the API key → key is read at runtime
 
@@ -197,6 +201,7 @@ ln -s /path/to/FreeCAD_MultiAI_Panel ~/.var/app/org.freecad.FreeCAD/data/FreeCAD
 | **OpenRouter** | (all supported models) | `sk-or-…` |
 
 ### Ollama (local, free)
+
 ```bash
 # 1. Install Ollama: https://ollama.ai
 # 2. Download recommended model for FreeCAD code
