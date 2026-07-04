@@ -22,9 +22,9 @@ def init_toolbar(editor) -> None:
         "🔧  Werkzeuge", "dock_werkzeuge", _R, editor._werkzeug_leiste)
     editor.tabifyDockWidget(editor._dock_akt, editor._dock_werkzeuge)
 
-    for _d in (editor._dock_cfg, editor._dock_ki, editor._dock_snip,
-               editor._dock_hints, editor._dock_files, editor._dock_kitools,
-               editor._dock_akt, editor._dock_bib, editor._dock_werkzeuge,
+    for _d in (editor._dock_cfg, editor._dock_ki, editor._dock_snip_api,
+               editor._dock_files, editor._dock_werkzeugkasten,
+               editor._dock_akt, editor._dock_werkzeuge,
                editor._dock_fehler):
         _d.hide()
 
@@ -87,11 +87,9 @@ def init_toolbar(editor) -> None:
     _panel_btn(editor._dock_cfg,       "⚙",  "Einst.",       _L)
     _panel_btn(editor._dock_ki,        "🤖", "KI",            _L)
     _panel_btn(editor._dock_akt,       "🎛", "Akt.",          _R)
-    _panel_btn(editor._dock_snip,      "📦", "Snip",          _L, optional=True)
-    _panel_btn(editor._dock_hints,     "💡", "API",           _L, optional=True)
+    _panel_btn(editor._dock_snip_api,  "🧩", "Snippets & API", _L, optional=True)
     _panel_btn(editor._dock_files,     "📂", "Dat.",          _L, optional=True)
-    _panel_btn(editor._dock_kitools,   "🛠", "Tools",         _R, optional=True)
-    _panel_btn(editor._dock_bib,       "📚", "Bib.",          _R, optional=True)
+    _panel_btn(editor._dock_werkzeugkasten, "🧰", "Tools & Bib.", _R, optional=True)
     _panel_btn(editor._dock_werkzeuge, "🔧", "Werkz.",        _R, optional=True)
     _panel_btn(editor._dock_fehler,    "⚠",  "Fehler",        _B)
     editor._btn_bf_gruppe = _panel_btn(editor._dock_bf_gruppe, "♿", "Hilfe+Zugang", _R)

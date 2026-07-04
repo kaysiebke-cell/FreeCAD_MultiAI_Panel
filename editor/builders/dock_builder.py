@@ -719,21 +719,26 @@ def init_docks(editor) -> None:
     editor._dock_akt = editor._make_dock("⚙  Aktionen", "dock_aktionen", _R, _akt_scroll)
 
     # ── Weitere Docks (tabifiziert) ────────────────────────────────────────
-    editor._dock_snip  = editor._make_dock("📦  Snippets",  "dock_snippets",  _L,
-                                           editor._baue_snippet_tab())
-    editor.tabifyDockWidget(editor._dock_ki, editor._dock_snip)
-    editor._dock_hints = editor._make_dock("💡  API-Hints", "dock_hints",     _L,
-                                           editor._baue_hints_tab())
-    editor.tabifyDockWidget(editor._dock_ki, editor._dock_hints)
+    # ── Kombiniertes Dock: 📦 Snippets + 💡 API-Hints als Untertabs ──────
+    editor._snip_api_tabs = QtWidgets.QTabWidget()
+    editor._snip_api_tabs.setStyleSheet(theme.STY_TABBAR)
+    editor._snip_api_tabs.addTab(editor._baue_snippet_tab(), "📦  Snippets")
+    editor._snip_api_tabs.addTab(editor._baue_hints_tab(),   "💡  API-Hints")
+    editor._dock_snip_api = editor._make_dock(
+        "🧩  Snippets & API", "dock_snip_api", _L, editor._snip_api_tabs)
+    editor.tabifyDockWidget(editor._dock_ki, editor._dock_snip_api)
     editor._dock_files = editor._make_dock("📂  Dateien",   "dock_dateien",   _L,
                                            editor._baue_dateibrowser_tab())
     editor.tabifyDockWidget(editor._dock_ki, editor._dock_files)
-    editor._dock_kitools = editor._make_dock("🛠  KI-Tools", "dock_kitools",  _R,
-                                             editor._baue_ki_tools_tab())
-    editor.tabifyDockWidget(editor._dock_akt, editor._dock_kitools)
-    editor._dock_bib = editor._make_dock("📚  Bibliothek", "dock_bibliothek", _R,
-                                         editor._baue_bibliothek_tab())
-    editor.tabifyDockWidget(editor._dock_akt, editor._dock_bib)
+    # ── Kombiniertes Dock: 🛠 KI-Tools + 📚 Bibliothek als Untertabs ──────
+    editor._werkzeugkasten_tabs = QtWidgets.QTabWidget()
+    editor._werkzeugkasten_tabs.setStyleSheet(theme.STY_TABBAR)
+    editor._werkzeugkasten_tabs.addTab(editor._baue_ki_tools_tab(),   "🛠  KI-Tools")
+    editor._werkzeugkasten_tabs.addTab(editor._baue_bibliothek_tab(), "📚  Bibliothek")
+    editor._dock_werkzeugkasten = editor._make_dock(
+        "🧰  Tools & Bibliothek", "dock_werkzeugkasten", _R,
+        editor._werkzeugkasten_tabs)
+    editor.tabifyDockWidget(editor._dock_akt, editor._dock_werkzeugkasten)
 
     # ── Hilfe + Barrierefreiheit Dock ─────────────────────────────────────
     _bf_gruppe_widget = QtWidgets.QWidget()

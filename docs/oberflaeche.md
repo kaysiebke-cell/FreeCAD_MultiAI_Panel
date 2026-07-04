@@ -4,7 +4,7 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────┐
-│ │ ⚙ │ 🤖 │ 🎛 │ 📦 │ 💡 │ 📂 │ 🛠 │ 📚 │ 🔧 │ ⚠ │ ♿ │                          │
+│ │ ⚙ │ 🤖 │ 🎛 │ 🧩 │ 📂 │ 🧰 │ 🔧 │ ⚠ │ ♿ │                                  │
 ├──────────────┬───────────────────────────────────────────────────────────────────────┤
 │              │                                                                       │
 │  Dock Panel  │         Code Editor (Multi-Tab)                                       │
@@ -16,7 +16,7 @@
 └──────────────┴───────────────────────────────────────────────────────────────────────┘
 ```
 
-**Toolbar buttons** toggle the 11 panels on and off. By default buttons show only the emoji (32 px). In the `♿ Help+Access` dock → `♿ Access` tab, labels can be enabled, e.g. `⚙ Settings`.
+**Toolbar buttons** toggle the 9 panels on and off (🧩 Snippets & API and 🧰 Tools & Library are each one panel with two sub-tabs). By default buttons show only the emoji (32 px). In the `♿ Help+Access` dock → `♿ Access` tab, labels can be enabled, e.g. `⚙ Settings`.
 
 All panels can be:
 - **Freely moved** (drag the title bar)

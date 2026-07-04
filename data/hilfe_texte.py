@@ -18,7 +18,7 @@ Neu mit natürlicher Sprache arbeiten?
 → Fachsprache in FC11 einfügen → Code generieren"""),
 
     ("🏗️ Layout – Übersicht", """\
-Der Editor besteht aus 11 frei anordenbaren Panels (Docks).
+Der Editor besteht aus 9 frei anordenbaren Panels (Docks).
 
 TOOLBAR OBEN  –  links: 💾 Speichern (Strg+S)
 
@@ -44,11 +44,14 @@ Daneben alle Panels ein-/ausschalten:
                   · KI-Antwort (durch Labels getrennt),
                   Suche/Ersetzen, Projekt-Kontext (aufklappbar)
   🎛 Akt.         Alle Aktions-Buttons (Laden, Fragen, Ersetzen, Datei …)
-  📦 Snip         Code-Snippets nach Kategorie (lokal + Online-GitHub)
-  💡 API          FreeCAD API-Kurzreferenz
+  🧩 Snippets&API EIN Panel mit zwei Untertabs:
+                  📦 Snippets (Code-Snippets nach Kategorie,
+                  lokal + Online-GitHub) und 💡 API-Hints
+                  (FreeCAD API-Kurzreferenz)
   📂 Dat.         Datei-Browser (frei skalierbar)
-  🛠 Tools        FreeCAD-Dokumentkontext, Direkt-Werkzeuge, Protokoll
-  📚 Bib.         Makro-Bibliothek
+  🧰 Tools & Bib. EIN Panel mit zwei Untertabs:
+                  🛠 KI-Tools (Dokumentkontext, Direkt-Werkzeuge,
+                  Protokoll) und 📚 Bibliothek (Makro-Bibliothek)
   🔧 Werkz.       Code-Baum, Navigation, Edit-Funktionen, Bereinigung
   ⚠  Fehler       Fehler & Sandbox in EINER Fläche:
                   Ausgabe/Fehler, 🔍 Übersetzen, 🐛 KI erklärt,
@@ -279,7 +282,7 @@ AGENTS.md – Projektanweisungen:
 Tipp: Im Anfänger-Modus erklärt die KI jeden Schritt."""),
 
     ("📦 Snippets", """\
-Panel „📦 Snippets" öffnen (Toolbar):
+Panel „🧩 Snippets & API" öffnen (Toolbar) → Untertab „📦 Snippets":
 
 LOKAL (Offline)
   Kategorie aus der ComboBox wählen:
@@ -308,7 +311,7 @@ SCHNELLZUGRIFF IM KI-EINGABEFELD
   Enter oder Klick → Snippet ins Eingabefeld laden"""),
 
     ("💡 API-Hints", """\
-Panel „💡 API" öffnen (Toolbar):
+Panel „🧩 Snippets & API" öffnen (Toolbar) → Untertab „💡 API-Hints":
 
 Offline-Kurzreferenz aller wichtigen FreeCAD-Befehle:
   App · Part · Sketcher · Mesh · Draft
@@ -352,7 +355,7 @@ Lesezeichen:
   gespeicherte Ordner erscheinen als Schnellzugriff"""),
 
     ("🛠 Tools-Panel", """\
-Panel „🛠 Tools" öffnen (Toolbar).
+Panel „🧰 Tools & Bib." öffnen (Toolbar) → Untertab „🛠 KI-Tools".
 Enthält drei aufklappbare Bereiche:
 
 ── FREECAD-DOKUMENTKONTEXT ──────────────────────────
@@ -390,7 +393,7 @@ Enthält drei aufklappbare Bereiche:
   🗑 Leeren-Button löscht den Verlauf."""),
 
     ("📚 Bibliothek-Panel", """\
-Panel „📚 Bib." öffnen (Toolbar):
+Panel „🧰 Tools & Bib." öffnen (Toolbar) → Untertab „📚 Bibliothek":
 
 Persönliche Makro-Bibliothek — Makros speichern,
 suchen und per Doppelklick laden.
@@ -574,13 +577,15 @@ PANELS (Tastaturmodus, im ♿ Zugang aktivieren)
   Alt + 1         ⚙ Einstellungen
   Alt + 2         🤖 KI-Panel
   Alt + 3         🎛 Aktionen
-  Alt + 4         📦 Snippets
-  Alt + 5         💡 API-Hints
-  Alt + 6         📂 Datei-Browser
-  Alt + 7         🛠 Tools
-  Alt + 8         📚 Bibliothek
-  Alt + 9         🔧 Werkzeuge
-  Alt + 0         ⚠ Fehler
+  Alt + 4         🧩 Snippets & API
+  Alt + 5         📂 Datei-Browser
+  Alt + 6         🧰 Tools & Bibliothek
+  Alt + 7         🔧 Werkzeuge
+  Alt + 8         ⚠ Fehler
+  Alt + 9         ♿ Hilfe+Zugang
+(Die Alt-Nummern folgen der Reihenfolge der sichtbaren
+ Toolbar-Knöpfe — bei ausgeblendeten Panels verschieben
+ sie sich entsprechend.)
 
 IM FEHLER-ÜBERSETZER-TAB (linke Leiste)
   Strg + Return   Sofort übersetzen

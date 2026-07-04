@@ -127,7 +127,12 @@ All action buttons at a glance, grouped into sections:
 
 > Navigation (jump to line, code tree, bookmarks), Edit & Check and Cleanup live in the **🔧 Tools panel** — see below.
 
-## 📦 Snippets Panel
+## 🧩 Snippets & API Panel
+
+**📦 Snippets** and **💡 API Hints** share **one panel** with two sub-tabs (open it
+via the 🧩 toolbar button, then switch between the sub-tabs).
+
+### 📦 Snippets (sub-tab)
 
 **Local (Offline)**
 - Categories: Document · Part · Sketcher · Mesh · Draft · PartDesign
@@ -150,7 +155,7 @@ All action buttons at a glance, grouped into sections:
 - Continue typing to filter the list live
 - Enter or click → snippet is loaded into the input field
 
-## 💡 API Hints Panel
+### 💡 API Hints (sub-tab)
 Offline quick reference for all important FreeCAD Python commands:
 - **App** · Part · Sketcher · Mesh · Draft · Placement · Selection · GUI/View
 - Search field: multiple words at once (e.g. `part shape`, `mesh vector`)
@@ -165,7 +170,13 @@ Offline quick reference for all important FreeCAD Python commands:
 - **Right-click** on a file/folder → context menu: 📂 open in editor · 📁 navigate here · 🗂 set as macro path · 📄 new file here · 📋 copy path · ★ bookmark
 - **Bookmarks:** ☆ button → remember folder
 
-## 🛠 Tools Panel
+## 🧰 Tools & Library Panel
+
+**🛠 Tools** and **📚 Library** share **one panel** with two sub-tabs (open it via
+the 🧰 toolbar button, then switch between the **🛠 KI-Tools** and **📚 Library**
+sub-tabs).
+
+### 🛠 KI-Tools (sub-tab)
 
 Contains three sections as collapsible areas:
 
@@ -190,7 +201,7 @@ Result buttons: **▶ Run** · **📥 Into editor** · **➕ Append**
 **📋 Log**
 All executions with timestamp, ✅/❌ status and output. 🗑 Clear button.
 
-## 📚 Library Panel
+### 📚 Library (sub-tab)
 
 See [Macro Library](makro-bibliothek.md) for details.
 

@@ -83,7 +83,7 @@ FreeCAD automation.
 - **API key from file** — enter `file:/path/to/key-file` as the API key → key is read at runtime
 
 ### User Interface
-- 11 freely arrangeable dock panels (move, detach, merge into tabs)
+- 9 freely arrangeable dock panels (move, detach, merge into tabs) — 🧩 Snippets & API and 🧰 Tools & Library each share one panel with two sub-tabs
 - **Light and dark mode** switchable via 🌙/☀ button in settings, selection is saved
 - Every panel individually toggleable via toolbar
 - Welcome dialog on first start (provider cards for all 19 providers, set up immediately or skip)
@@ -280,7 +280,7 @@ FreeCAD_MultiAI_Panel/
 │   │
 │   ├── builders/        # UI construction
 │   │   ├── central_widget_builder.py  # Central widget + status bar
-│   │   ├── dock_builder.py            # All 11 dock panels
+│   │   ├── dock_builder.py            # All 9 dock panels
 │   │   └── toolbar_builder.py         # Panel toolbar
 │   │
 │   ├── subsysteme/      # Editor logic modules
