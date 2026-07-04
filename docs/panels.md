@@ -1,4 +1,4 @@
-[← Back: The User Interface](oberflaeche.md) | [Back to README](../README.md) | Next: [AI Workflow & Presets →](ki-workflow.md)
+[← Prev: The User Interface](oberflaeche.md) | [Home](../README.md) | [Next: Feature Overview →](feature-overview.md)
 
 # Panels in Detail
 
@@ -377,4 +377,4 @@ saved and automatically restored on the next start.
 
 ---
 
-[← Back: The User Interface](oberflaeche.md) | [Back to README](../README.md) | Next: [AI Workflow & Presets →](ki-workflow.md)
+[← Prev: The User Interface](oberflaeche.md) | [Home](../README.md) | [Next: Feature Overview →](feature-overview.md)

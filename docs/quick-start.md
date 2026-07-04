@@ -1,3 +1,5 @@
+[Home](../README.md) | [Next: Requirements & Installation →](requirements.md)
+
 # Quick Start
 
 A short quick-start to get the workbench running.
@@ -22,3 +24,7 @@ pip install requests
 ## Workflow note
 
 The integrated AI workflow (see `docs/ki-workflow.md`) demonstrates how AI support fits into development — from presets to streaming and tool-based FC14 calls.
+
+---
+
+[Home](../README.md) | [Next: Requirements & Installation →](requirements.md)

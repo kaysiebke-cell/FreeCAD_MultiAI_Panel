@@ -1,4 +1,4 @@
-[← Back: Error Panel & Backup System](fehler-und-backup.md) | [Back to README](../README.md)
+[← Prev: Keyboard Shortcuts](keyboard-shortcuts.md) | [Home](../README.md) | [Next: Project Structure →](project-structure.md)
 
 # Ollama + FreeCAD — An Honest Field Report
 
@@ -640,4 +640,4 @@ because you have to catch every model error yourself.
 
 ---
 
-[← Back: Error Panel & Backup System](fehler-und-backup.md) | [Back to README](../README.md)
+[← Prev: Keyboard Shortcuts](keyboard-shortcuts.md) | [Home](../README.md) | [Next: Project Structure →](project-structure.md)

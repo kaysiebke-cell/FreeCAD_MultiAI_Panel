@@ -1,4 +1,4 @@
-[← Back: Panels in Detail](panels.md) | [Back to README](../README.md) | Next: [Macro from Description →](makro-generator.md)
+[← Prev: Feature Overview](feature-overview.md) | [Home](../README.md) | [Next: Setting Up AI Providers →](setting-up-ai-providers.md)
 
 # AI Workflow & Presets
 
@@ -145,4 +145,4 @@ from structured input than from free-form text.
 
 ---
 
-[← Back: Panels in Detail](panels.md) | [Back to README](../README.md) | Next: [Macro from Description →](makro-generator.md)
+[← Prev: Feature Overview](feature-overview.md) | [Home](../README.md) | [Next: Setting Up AI Providers →](setting-up-ai-providers.md)

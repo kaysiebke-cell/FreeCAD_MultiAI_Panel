@@ -1,4 +1,4 @@
-[← Back: First Start](erststart.md) | [Back to README](../README.md) | Next: [Panels in Detail →](panels.md)
+[← Prev: First Start & Welcome](erststart.md) | [Home](../README.md) | [Next: Panels in Detail →](panels.md)
 
 # The User Interface
 
@@ -40,4 +40,4 @@ The editor automatically detects whether a panel's preferred side is already occ
 
 ---
 
-[← Back: First Start](erststart.md) | [Back to README](../README.md) | Next: [Panels in Detail →](panels.md)
+[← Prev: First Start & Welcome](erststart.md) | [Home](../README.md) | [Next: Panels in Detail →](panels.md)

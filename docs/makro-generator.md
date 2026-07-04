@@ -1,4 +1,4 @@
-[← Back: AI Workflow & Presets](ki-workflow.md) | [Back to README](../README.md) | Next: [Snippets, API Hints & Tools →](snippets-und-werkzeuge.md)
+[← Prev: Setting Up AI Providers](setting-up-ai-providers.md) | [Home](../README.md) | [Next: Snippets, API Hints & Tools →](snippets-und-werkzeuge.md)
 
 # FC11–FC14 – Macro from Description
 
@@ -92,4 +92,6 @@ Open 🤝 Assist. panel
 The result is significantly more precise than the direct NL→Code path, because Ollama
 only has to handle one clearly defined task per step.
 
-[← Back: AI Workflow & Presets](ki-workflow.md) | [Back to README](../README.md) | Next: [Snippets, API Hints & Tools →](snippets-und-werkzeuge.md)
+---
+
+[← Prev: Setting Up AI Providers](setting-up-ai-providers.md) | [Home](../README.md) | [Next: Snippets, API Hints & Tools →](snippets-und-werkzeuge.md)

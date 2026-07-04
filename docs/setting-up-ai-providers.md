@@ -1,3 +1,5 @@
+[← Prev: AI Workflow & Presets](ki-workflow.md) | [Home](../README.md) | [Next: Macro from Description →](makro-generator.md)
+
 # Setting Up AI Providers
 
 This document lists supported providers and shows how to set up local (Ollama) and cloud providers.
@@ -66,3 +68,7 @@ export OPENROUTER_API_KEY=sk-or-...
 ## Security note
 
 API keys are stored unencrypted in FreeCAD settings — do not use production keys with full account permissions. Consider using restricted keys or file-based keys where supported.
+
+---
+
+[← Prev: AI Workflow & Presets](ki-workflow.md) | [Home](../README.md) | [Next: Macro from Description →](makro-generator.md)

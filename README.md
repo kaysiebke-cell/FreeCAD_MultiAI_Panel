@@ -68,24 +68,26 @@ If the AI helps a beginner understand something new, enables an experienced user
 
 ## Documentation
 
+The pages are ordered as a guided read — each one links to the previous and next page (← Prev · Home · Next →), so you can page through them like a book.
+
 | Topic | Document |
 |-------|----------|
-| Quick start | [quick-start.md](docs/quick-start.md) |
-| Requirements & installation | [requirements.md](docs/requirements.md) |
-| Full feature overview | [feature-overview.md](docs/feature-overview.md) |
-| AI provider setup (19) | [setting-up-ai-providers.md](docs/setting-up-ai-providers.md) |
-| Keyboard shortcuts | [keyboard-shortcuts.md](docs/keyboard-shortcuts.md) |
-| First start & welcome dialog | [erststart.md](docs/erststart.md) |
-| The user interface | [oberflaeche.md](docs/oberflaeche.md) |
-| Panels in detail | [panels.md](docs/panels.md) |
-| AI workflow & presets | [ki-workflow.md](docs/ki-workflow.md) |
-| FC11–FC14 – macro from description | [makro-generator.md](docs/makro-generator.md) |
-| Snippets, API hints & tools panel | [snippets-und-werkzeuge.md](docs/snippets-und-werkzeuge.md) |
-| Macro library | [makro-bibliothek.md](docs/makro-bibliothek.md) |
-| Error panel & backup system | [fehler-und-backup.md](docs/fehler-und-backup.md) |
-| Ollama – field report | [OLLAMA_ERFAHRUNGEN.md](docs/OLLAMA_ERFAHRUNGEN.md) |
-| Project structure | [project-structure.md](docs/project-structure.md) |
-| Known limitations | [known-limitations.md](docs/known-limitations.md) |
+| 1 · Quick start | [quick-start.md](docs/quick-start.md) |
+| 2 · Requirements & installation | [requirements.md](docs/requirements.md) |
+| 3 · First start & welcome dialog | [erststart.md](docs/erststart.md) |
+| 4 · The user interface | [oberflaeche.md](docs/oberflaeche.md) |
+| 5 · Panels in detail | [panels.md](docs/panels.md) |
+| 6 · Full feature overview | [feature-overview.md](docs/feature-overview.md) |
+| 7 · AI workflow & presets | [ki-workflow.md](docs/ki-workflow.md) |
+| 8 · AI provider setup (19) | [setting-up-ai-providers.md](docs/setting-up-ai-providers.md) |
+| 9 · FC11–FC14 – macro from description | [makro-generator.md](docs/makro-generator.md) |
+| 10 · Snippets, API hints & tools panel | [snippets-und-werkzeuge.md](docs/snippets-und-werkzeuge.md) |
+| 11 · Macro library | [makro-bibliothek.md](docs/makro-bibliothek.md) |
+| 12 · Error panel & backup system | [fehler-und-backup.md](docs/fehler-und-backup.md) |
+| 13 · Keyboard shortcuts | [keyboard-shortcuts.md](docs/keyboard-shortcuts.md) |
+| 14 · Ollama – field report | [OLLAMA_ERFAHRUNGEN.md](docs/OLLAMA_ERFAHRUNGEN.md) |
+| 15 · Project structure | [project-structure.md](docs/project-structure.md) |
+| 16 · Known limitations | [known-limitations.md](docs/known-limitations.md) |
 
 ---
 

@@ -1,3 +1,5 @@
+[← Prev: Project Structure](project-structure.md) | [Home](../README.md)
+
 # Known Limitations
 
 | Problem | Cause | Solution |
@@ -12,3 +14,7 @@
 | Stopping an AI request waits for the next chunk | The stream breaks at the next received line, not mid-socket | A fully stalled provider still ends via the 120 s timeout |
 
 If you want, I can split or expand any of these into separate troubleshooting pages.
+
+---
+
+[← Prev: Project Structure](project-structure.md) | [Home](../README.md)

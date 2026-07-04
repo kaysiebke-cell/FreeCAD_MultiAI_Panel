@@ -1,4 +1,4 @@
-[← Back: Macro from Description](makro-generator.md) | [Back to README](../README.md) | Next: [Macro Library →](makro-bibliothek.md)
+[← Prev: Macro from Description](makro-generator.md) | [Home](../README.md) | [Next: Macro Library →](makro-bibliothek.md)
 
 # Snippets & API Hints
 
@@ -53,4 +53,4 @@ All operations run inside a **FreeCAD undo transaction** — fully reversible.
 
 ---
 
-[← Back: Macro from Description](makro-generator.md) | [Back to README](../README.md) | Next: [Macro Library →](makro-bibliothek.md)
+[← Prev: Macro from Description](makro-generator.md) | [Home](../README.md) | [Next: Macro Library →](makro-bibliothek.md)

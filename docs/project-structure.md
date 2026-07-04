@@ -1,3 +1,5 @@
+[← Prev: Ollama – Field Report](OLLAMA_ERFAHRUNGEN.md) | [Home](../README.md) | [Next: Known Limitations →](known-limitations.md)
+
 # Project Structure
 
 Top-level layout of the repository (important files and folders):
@@ -20,3 +22,7 @@ FreeCAD_MultiAI_Panel/
 ```
 
 For a detailed view of files and responsibilities, consult the original full README content moved to `docs/full_readme.md`.
+
+---
+
+[← Prev: Ollama – Field Report](OLLAMA_ERFAHRUNGEN.md) | [Home](../README.md) | [Next: Known Limitations →](known-limitations.md)

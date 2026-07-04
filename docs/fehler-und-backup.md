@@ -1,4 +1,4 @@
-[← Back: Macro Library](makro-bibliothek.md) | [Back to README](../README.md) | Next: [Ollama – Field Report →](OLLAMA_ERFAHRUNGEN.md)
+[← Prev: Macro Library](makro-bibliothek.md) | [Home](../README.md) | [Next: Keyboard Shortcuts →](keyboard-shortcuts.md)
 
 # Error Panel & Sandbox
 
@@ -64,4 +64,4 @@ Macro folder/
 
 ---
 
-[← Back: Macro Library](makro-bibliothek.md) | [Back to README](../README.md) | Next: [Ollama – Field Report →](OLLAMA_ERFAHRUNGEN.md)
+[← Prev: Macro Library](makro-bibliothek.md) | [Home](../README.md) | [Next: Keyboard Shortcuts →](keyboard-shortcuts.md)

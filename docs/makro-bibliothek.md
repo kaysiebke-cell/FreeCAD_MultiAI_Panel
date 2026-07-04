@@ -1,4 +1,4 @@
-[← Back: Snippets, API Hints & Tools](snippets-und-werkzeuge.md) | [Back to README](../README.md) | Next: [Error Panel & Backup →](fehler-und-backup.md)
+[← Prev: Snippets, API Hints & Tools](snippets-und-werkzeuge.md) | [Home](../README.md) | [Next: Error Panel & Backup →](fehler-und-backup.md)
 
 # Macro Library
 
@@ -30,4 +30,4 @@ Each entry shows: **Name · Date · Run counter · AI flag · Code preview**
 
 ---
 
-[← Back: Snippets, API Hints & Tools](snippets-und-werkzeuge.md) | [Back to README](../README.md) | Next: [Error Panel & Backup →](fehler-und-backup.md)
+[← Prev: Snippets, API Hints & Tools](snippets-und-werkzeuge.md) | [Home](../README.md) | [Next: Error Panel & Backup →](fehler-und-backup.md)

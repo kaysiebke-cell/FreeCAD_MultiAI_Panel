@@ -1,3 +1,5 @@
+[← Prev: Panels in Detail](panels.md) | [Home](../README.md) | [Next: AI Workflow & Presets →](ki-workflow.md)
+
 # Feature Overview
 
 This file summarizes the main features of the FreeCAD MultiAI Panel: editor capabilities, AI integration, and UI highlights.
@@ -34,3 +36,7 @@ This file summarizes the main features of the FreeCAD MultiAI Panel: editor capa
 - Accessibility options: font size, contrast, keyboard mode, simplified view, tooltip delay, reduced animations
 
 For detailed workflows and presets see `docs/ki-workflow.md`.
+
+---
+
+[← Prev: Panels in Detail](panels.md) | [Home](../README.md) | [Next: AI Workflow & Presets →](ki-workflow.md)

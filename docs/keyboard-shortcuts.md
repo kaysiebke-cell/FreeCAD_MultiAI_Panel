@@ -1,3 +1,5 @@
+[← Prev: Error Panel & Backup](fehler-und-backup.md) | [Home](../README.md) | [Next: Ollama – Field Report →](OLLAMA_ERFAHRUNGEN.md)
+
 # Keyboard Shortcuts
 
 Main shortcuts used in the editor and panels:
@@ -19,3 +21,7 @@ Main shortcuts used in the editor and panels:
 - Ctrl+Enter — Error-translator tab (left panel): translate immediately
 
 Note: Central actions (F5, F9, Ctrl+Shift+K, ...) are maintained in a single action registry so the in-app help remains in sync.
+
+---
+
+[← Prev: Error Panel & Backup](fehler-und-backup.md) | [Home](../README.md) | [Next: Ollama – Field Report →](OLLAMA_ERFAHRUNGEN.md)

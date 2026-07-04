@@ -1,3 +1,5 @@
+[← Prev: Quick Start](quick-start.md) | [Home](../README.md) | [Next: First Start & Welcome →](erststart.md)
+
 # Requirements & Installation
 
 ## Requirements
@@ -83,3 +85,7 @@ Place the folder in:
 ```
 
 > Note for Linux: FreeCAD 1.x stores user data under `v1-1/` — older guides without this subfolder will not work.
+
+---
+
+[← Prev: Quick Start](quick-start.md) | [Home](../README.md) | [Next: First Start & Welcome →](erststart.md)

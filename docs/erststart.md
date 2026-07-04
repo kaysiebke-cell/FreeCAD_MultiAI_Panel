@@ -1,4 +1,4 @@
-[Back to README](../README.md) | Next: [The User Interface →](oberflaeche.md)
+[← Prev: Requirements & Installation](requirements.md) | [Home](../README.md) | [Next: The User Interface →](oberflaeche.md)
 
 # First Start & Welcome Dialog
 
@@ -15,4 +15,6 @@ Confirmation + tip about the Project Context → the editor opens immediately.
 
 The dialog can be skipped at any time. All settings are also available in the **⚙ Settings panel**.
 
-[Back to README](../README.md) | Next: [The User Interface →](oberflaeche.md)
+---
+
+[← Prev: Requirements & Installation](requirements.md) | [Home](../README.md) | [Next: The User Interface →](oberflaeche.md)
