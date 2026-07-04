@@ -1,25 +1,21 @@
-<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <!-- Cube outer edges -->
-  <line x1="100" y1="35" x2="155" y2="65" stroke="#5A9FFF" stroke-width="3" stroke-linecap="round"/>
-  <line x1="155" y1="65" x2="155" y2="125" stroke="#5A9FFF" stroke-width="3" stroke-linecap="round"/>
-  <line x1="155" y1="125" x2="100" y2="155" stroke="#5A9FFF" stroke-width="3" stroke-linecap="round"/>
-  <line x1="100" y1="155" x2="45" y2="125" stroke="#5A9FFF" stroke-width="3" stroke-linecap="round"/>
-  <line x1="45" y1="125" x2="45" y2="65" stroke="#5A9FFF" stroke-width="3" stroke-linecap="round"/>
-  <line x1="45" y1="65" x2="100" y2="35" stroke="#5A9FFF" stroke-width="3" stroke-linecap="round"/>
-  <!-- Cube inner edges (dashed) -->
-  <line x1="100" y1="35" x2="100" y2="95" stroke="#5A9FFF" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.6"/>
-  <line x1="155" y1="65" x2="100" y2="95" stroke="#5A9FFF" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.6"/>
-  <line x1="45" y1="65" x2="100" y2="95" stroke="#5A9FFF" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.6"/>
-  <line x1="100" y1="95" x2="100" y2="155" stroke="#5A9FFF" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.6"/>
-  <line x1="100" y1="95" x2="155" y2="125" stroke="#5A9FFF" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.6"/>
-  <line x1="100" y1="95" x2="45" y2="125" stroke="#5A9FFF" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.6"/>
-  <!-- Corner dots -->
-  <circle cx="100" cy="35" r="4.5" fill="#5A9FFF"/>
-  <circle cx="155" cy="65" r="4.5" fill="#5A9FFF"/>
-  <circle cx="155" cy="125" r="4.5" fill="#5A9FFF"/>
-  <circle cx="100" cy="155" r="4.5" fill="#5A9FFF"/>
-  <circle cx="45" cy="65" r="4.5" fill="#5A9FFF"/>
-  <circle cx="45" cy="125" r="4.5" fill="#5A9FFF"/>
-  <!-- Lightning bolt -->
-  <path d="M92,50 L116,50 L106,100 L120,100 L105,153 L81,153 L96,100 L82,100 Z" fill="#FFB830"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Transparenter Hintergrund: passt sich hellem wie dunklem Theme an.
+       Farben so gewählt, dass sie auf beiden Untergründen lesbar bleiben. -->
+
+  <!-- Code-Klammern < > : der Editor, umschließen den Würfel -->
+  <polyline points="44,32 20,64 44,96" fill="none"
+            stroke="#3B82F6" stroke-width="9"
+            stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="84,32 108,64 84,96" fill="none"
+            stroke="#3B82F6" stroke-width="9"
+            stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- FreeCAD-Würfel: die erzeugte 3D-Geometrie -->
+  <polygon points="64,42 80,52 64,62 48,52" fill="#FDBA74"/>
+  <polygon points="48,52 64,62 64,86 48,76" fill="#F97316"/>
+  <polygon points="80,52 64,62 64,86 80,76" fill="#C2410C"/>
+
+  <!-- KI-Funke -->
+  <polygon points="108,14 111,24 121,27 111,30 108,40 105,30 95,27 105,24"
+           fill="#FBBF24"/>
 </svg>

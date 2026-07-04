@@ -1,17 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <!-- Hintergrund -->
-  <rect x="2" y="2" width="60" height="60" rx="8" ry="8"
-        fill="#1E2A1E" stroke="#4A8A4A" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="64" height="64">
+  <!-- Transparenter Hintergrund: passt sich hellem wie dunklem Theme an.
+       Farben so gewählt, dass sie auf beiden Untergründen lesbar bleiben. -->
 
-  <!-- Code-Klammern -->
-  <text x="6" y="28" font-family="monospace" font-size="22" font-weight="bold"
-        fill="#4EC94E">&lt;/&gt;</text>
+  <!-- Code-Klammern < > : der Editor, umschließen den Würfel -->
+  <polyline points="44,32 20,64 44,96" fill="none"
+            stroke="#3B82F6" stroke-width="9"
+            stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="84,32 108,64 84,96" fill="none"
+            stroke="#3B82F6" stroke-width="9"
+            stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- KI-Blitz -->
-  <polygon points="38,8 30,32 38,32 26,56 46,28 36,28 44,8"
-           fill="#E5A000" opacity="0.92"/>
+  <!-- FreeCAD-Würfel: die erzeugte 3D-Geometrie -->
+  <polygon points="64,42 80,52 64,62 48,52" fill="#FDBA74"/>
+  <polygon points="48,52 64,62 64,86 48,76" fill="#F97316"/>
+  <polygon points="80,52 64,62 64,86 80,76" fill="#C2410C"/>
 
-  <!-- Unterstrich-Linie -->
-  <line x1="6" y1="52" x2="58" y2="52"
-        stroke="#4A8A4A" stroke-width="2" stroke-linecap="round"/>
+  <!-- KI-Funke -->
+  <polygon points="108,14 111,24 121,27 111,30 108,40 105,30 95,27 105,24"
+           fill="#FBBF24"/>
 </svg>
