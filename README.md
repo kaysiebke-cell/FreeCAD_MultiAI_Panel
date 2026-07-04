@@ -4,6 +4,34 @@ A modern, AI-assisted Python editor as a FreeCAD plugin with freely arrangeable 
 syntax highlighting, 19 supported AI providers, and extensive tools for
 FreeCAD automation.
 
+
+---
+
+## Project Philosophy
+
+Technology should make things easier—not create new barriers.
+
+This project is designed to make AI-assisted FreeCAD development accessible to everyone: experienced professionals, beginners, students, hobbyists, and people with accessibility needs.
+
+Accessibility is a core design principle. The workbench provides multiple experience levels, integrated help, keyboard accessibility, and AI-assisted guidance so that more people can use and learn FreeCAD with confidence.
+
+### AI as a Tool
+
+This project does **not** treat artificial intelligence as a replacement for human knowledge or creativity.
+
+Instead, AI is considered a tool—like a compiler, a calculator, or a CAD application. Its purpose is to support the user by answering questions, explaining concepts, suggesting solutions, assisting with debugging, and helping to improve code.
+
+The user always remains in control. Every decision and every final result belongs to the person using the software.
+
+### No AI Is Perfect
+
+Like every AI system, the integrated AI can make mistakes, misunderstand requirements, or generate incorrect code. AI-generated content should therefore always be reviewed before it is used.
+
+The goal of this project is **not** to automate thinking or replace developers. Its goal is to help people learn, become more productive, solve problems more easily, and lower the barriers to FreeCAD development.
+
+If the AI helps a beginner understand something new, enables an experienced user to work more efficiently, or makes development more accessible for someone with disabilities, then it has fulfilled its purpose.
+
+---
 ---
 
 ## Preview
