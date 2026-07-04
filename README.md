@@ -4,6 +4,12 @@ A modern, AI-assisted Python editor as a FreeCAD plugin with freely arrangeable 
 syntax highlighting, 19 supported AI providers, and extensive tools for
 FreeCAD automation.
 
+## Audience & AI usage
+
+This application is intended equally for professionals, beginners, and people with disabilities. Its goal is to make FreeCAD more accessible through barrier-reduced tools and easy-to-understand AI assistance. The AI is treated as a tool—like an assistant or any other software tool. It should not do all the work for the user, but interact with them, answer questions, and suggest solutions. AI models are not error-free or perfect; please review generated suggestions carefully and apply only what fits your project.
+
+Workflow note: The integrated AI workflow (see "AI Workflow & Presets") shows how AI support can be embedded into your development process — from presets and streaming responses to tool-based FC14 calls.
+
 ---
 
 ## Preview
