@@ -1,6 +1,6 @@
 [← Back: AI Workflow & Presets](ki-workflow.md) | [Back to README](../README.md) | Next: [Snippets, API Hints & Tools →](snippets-und-werkzeuge.md)
 
-# FC11, FC12 & FC13 – Macro from Description
+# FC11–FC14 – Macro from Description
 
 Convert natural language directly into FreeCAD Python code.
 
@@ -42,6 +42,33 @@ Recommended: Claude (Anthropic) · GPT-4o · Groq (llama-3.3-70b) · Llama API
 - They redefine variables instead of reusing them (`doc = App.newDocument(...)` instead of `App.ActiveDocument`)
 - The context window of llama3 (8,192 tokens) is too small for longer macros
 - For simple Part models with Ollama: use **FC11**
+
+## FC14 – Object Commands (local)
+```
+Select preset "FC14 · Object commands (local)"
+→ Enter description
+→ Generates macros using simple Part commands only:
+   Box, Cylinder, Sphere, Cut, Fuse
+   (no PartDesign, no Sketch, no GUI dialogs)
+```
+✅ Ideal for **local models (Ollama)** and for AI **JSON tool-calling** — the structured commands are converted to Python code automatically.
+
+---
+
+## Skills – domain knowledge appended automatically
+
+If your description mentions screws, threads, holes or metric sizes
+(M3, M6 …), the dimension table from `data/skills/fastener-hole.md`
+(clearance, tap-drill and counterbore holes, M2–M12) is appended to the
+FC11 prompt automatically — the AI uses real dimensions instead of guessing.
+
+## AGENTS.md – project instructions
+
+An `AGENTS.md` file next to the open file (or in your home directory) is
+detected automatically and appended to the FC11 prompt. Example `~/AGENTS.md`:
+```
+All dimensions in mm. Default material: aluminium.
+```
 
 ---
 

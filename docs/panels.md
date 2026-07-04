@@ -6,10 +6,21 @@
 
 The panel is scrollable — all sections are accessible even in a small dock window.
 
+### QUICK START
+Three profile buttons set template, temperature, mode and thinking to proven values with one click:
+- **🎯 FreeCAD Code** – Part-Script template, temperature 0.2, expert mode
+- **💬 Explanation** – Python Expert template, temperature 0.7, beginner mode
+- **🧠 Thinking** – Part-Script template + Extended Thinking (Anthropic only)
+
 ### AI SOURCE
 - **AI source** select (dropdown with all 19 providers)
 - **🔄 Reload models** – fetch a fresh model list from the provider
 - **🔌 Connection test** – checks without an AI request whether Ollama is reachable or an API key is stored; result appears as a label below the model box
+
+### PRESET
+Menu button ("── Choose preset ──"): the ★ Quick presets appear at the top level,
+all other categories (🔧 Code · ⚡ FC: Performance · 🧱 FreeCAD: Create ·
+🔍 FreeCAD: Analyse · 📦 FreeCAD: Extend) as submenus.
 
 ### MODEL PARAMETERS
 - **Temperature** 0.0–2.0 (recommended: 0.0–0.3 for code, 0.5–0.8 for documentation)
@@ -52,13 +63,13 @@ The panel is scrollable — all sections are accessible even in a small dock win
 - Only effective with Anthropic models
 
 ## 🤖 AI Panel
-- **AI input field** (green background) – a single field, subdivided internally by a label:
-  - **Top:** enter a question or task freely (overrides the selected preset)
-  - **Code block:** below – paste code to analyse or edit
-  - Both areas are sent to the AI together on `🤖 Ask`
-  - Type `/snippetname` → snippet autocomplete opens
-- **AI response** (blue background) – response appears live-streamed
-- **Project context** – sent with every AI call as background information
+- **One combined field** for input and response, subdivided internally by labels only:
+  - **❓ Question:** at the top – enter a question or task freely (overrides the selected preset)
+  - **Code block:** below – paste code to analyse or edit (type `/snippetname` → snippet autocomplete opens)
+  - **AI response:** at the bottom – response appears live-streamed; same green background as the input areas, separated only by the label
+  - All three areas are **freely resizable** — drag the boundary between them with the mouse
+  - Question + code block are sent to the AI together on `🤖 Ask`
+- **Project context** – collapsible section (▶ 📌) at the bottom of the panel; its content is sent with every AI call as background information. Collapsed by default so the input and response fields get the full panel height
 - **Search/Replace** (Ctrl+F) – directly in the panel
 - **💾 Save session** – save chat history + AI response + provider as `.json`
 - **📂 Load session** – restore a saved session
@@ -66,21 +77,31 @@ The panel is scrollable — all sections are accessible even in a small dock win
 - Chat history with automatic compacting
 
 ## 🎛 Actions Panel
-All action buttons at a glance:
+All action buttons at a glance, grouped into sections:
 
-**AI Actions**
+**Search field / AI input**
 
 | Button | Function |
 |--------|----------|
 | 📥 Load | Load selected code from editor into AI input field |
 | 🔍 Mark | Search & highlight AI input field content in editor |
-| 🤖 Ask | Query the AI (with current preset) |
+| 🗑 Clear | Empty the AI input field |
+
+**AI Actions**
+
+| Button | Function |
+|--------|----------|
+| 🤖 Ask | Query the AI (with current preset); turns into **⏹ Stop** while streaming to cancel the request |
+| 🔎 Analyse | Explain entire code immediately (no selection needed) |
 | 🔍 Plan | **Plan mode** – display and confirm AI response before inserting |
 | ✅ Replace | Replace highlighted block with AI response |
 | ➕ Insert | Append AI response after the highlighted block |
-| 🔎 Auto-Analyze | Explain entire code immediately |
+| 👁 Preview | Run AI response (or editor code) directly in FreeCAD → embedded 3D viewport opens as an editor tab (▶ Run turns into ⏹ Stop while running) |
 
-**File Actions**
+> **Running your own editor code:** press **F5** (whole macro) or **F9** (selected
+> lines only) — no button needed. Press F5 again to abort a running execution.
+
+**File**
 
 | Button | Function |
 |--------|----------|
@@ -88,40 +109,23 @@ All action buttons at a glance:
 | 💾✕ Save & close | Save and close tab |
 | ↺ Reload | Reload file (discards unsaved changes) |
 | ↩ Backup | Load newest .bak backup into editor |
-| 📋 Select all | Select all code |
-| 🗑 Clear | Empty editor content |
+
+**Editor**
+
+| Button | Function |
+|--------|----------|
+| ☰ Select all | Select all code |
+| ✕ Delete | Delete selection |
 | ✨ autopep8 / 🪄 Indent | Auto-format code |
 
-**Navigation**
-
-| Function | Description |
-|----------|-------------|
-| Jump to line | Enter line number → Enter |
-| Code tree | All `def` and `class` shown as a live tree — double-click jumps to definition |
-| Bookmarks | ＋ set · ↑↓ navigate · 🗑 delete |
-
-**Edit & Check**
+**Library**
 
 | Button | Function |
 |--------|----------|
-| → Indent | Indent selection by 4 spaces |
-| ← Unindent | Unindent selection |
-| # Toggle | Add or remove comment character |
-| ⧉ Duplicate | Duplicate selection/line |
-| ✂ Delete | Delete selection/line |
-| ⬆ / ⬇ Move | Move line(s) up/down |
-| ABC / abc / Abc | Transform case |
-| ↺ Statistics | Lines, comments, def, class, import, characters |
-| ▶ Syntax check | Check Python syntax → error location with line number |
+| 📚 Save | Save current editor content to the macro library |
+| 🤖📚 AI→Lib | Save the AI response to the macro library (flagged as AI-generated) |
 
-**Cleanup**
-
-| Button | Function |
-|--------|----------|
-| ␣ Trailing spaces | Remove whitespace at end of lines |
-| ⬜ Max 2 blank lines | Trim more than 2 consecutive blank lines |
-| ¶ Trailing blank lines | Remove blank lines at end of file |
-| Remove BOM | Remove UTF-8 byte-order mark from file |
+> Navigation (jump to line, code tree, bookmarks), Edit & Check and Cleanup live in the **🔧 Tools panel** — see below.
 
 ## 📦 Snippets Panel
 
@@ -155,9 +159,10 @@ Offline quick reference for all important FreeCAD Python commands:
 
 ## 📂 File Browser
 - Freely resizable (drag the panel edge)
-- **Navigation:** `^` folder up · `Hom` home directory · `Macr` macro folder · path field + `GO`
+- **Navigation:** ⬆ folder up · 🏠 home directory · 📁 macro folder — compact icon buttons with tooltips; the path field sits on its own full-width row below (Enter jumps to the path)
 - **Filter:** `.py` only / `.FCMacro` only / all files
 - **Double-click:** `.py`/`.FCMacro` → open in editor · other files → copy path
+- **Right-click** on a file/folder → context menu: 📂 open in editor · 📁 navigate here · 🗂 set as macro path · 📄 new file here · 📋 copy path · ★ bookmark
 - **Bookmarks:** ☆ button → remember folder
 
 ## 🛠 Tools Panel
@@ -190,14 +195,51 @@ All executions with timestamp, ✅/❌ status and output. 🗑 Clear button.
 See [Macro Library](makro-bibliothek.md) for details.
 
 ## 🔧 Tools Panel
-- **Code tree:** all `def`/`class` listed automatically → double-click jumps to definition
-- **Navigation:** jump to line · set/navigate/delete bookmarks
-- **Edit & Check:** indent, unindent, comment, move, syntax check
-- **Cleanup:** trailing spaces, blank lines, BOM
+
+**Code tree:** all `def`/`class` listed automatically → double-click jumps to definition
+
+**Navigation**
+
+| Function | Description |
+|----------|-------------|
+| Jump to line | Enter line number → Enter |
+| Bookmarks | ＋ set · ↑↓ navigate · 🗑 delete |
+
+**Edit & Check**
+
+| Button | Function |
+|--------|----------|
+| → Indent / ← Unindent | Indent/unindent selection by 4 spaces |
+| # Toggle | Add or remove comment character |
+| ⧉ Duplicate | Duplicate selection/line |
+| ✂ Delete | Delete selection/line |
+| ⬆ / ⬇ Move | Move line(s) up/down |
+| ABC / abc / Abc | Transform case |
+| ↺ Statistics | Lines, comments, def, class, import, characters |
+| ▶ Syntax check | Check Python syntax → error location with line number |
+
+**Cleanup**
+
+| Button | Function |
+|--------|----------|
+| ␣ Trailing spaces | Remove whitespace at end of lines |
+| ⬜ Max 2 blank lines | Trim more than 2 consecutive blank lines |
+| ¶ Trailing blank lines | Remove blank lines at end of file |
+| Remove BOM | Remove UTF-8 byte-order mark from file |
+
+## ♿ Help+Access Panel
+
+One dock with four tabs: **🤝 Assist.** (interactive assistant) · **🔧 Helper** (dyslexia assistant + vision) · **♿ Access** (accessibility settings) · **❓ Help** (built-in documentation). The individual tabs are described below.
+
+### ❓ Help Tab
+
+Searchable, collapsible built-in documentation covering all panels, workflows,
+shortcuts and known limitations. The search field filters sections live —
+matching sections expand automatically.
 
 ## 🔧 Helper Panel (Accessibility & Vision)
 
-A standalone chat panel with two functions:
+A chat tab (in the ♿ Help+Access dock) with two functions:
 
 ### Dyslexia Assistant
 Convert freely written text (spelling errors OK) into a clean FreeCAD description:
@@ -227,7 +269,11 @@ i need a box with hole to screw on the wall
 
 ## ⚠ Error Panel
 
-See [Error Translator & Backup System](fehler-und-backup.md) for details.
+One single surface (no page switching): output, runtime errors and the test
+sandbox share the same field. Buttons: 🧪 Test · 🔧 AI fix · 🔍 Translate ⇄
+🔙 Original (in place) · 🐛 AI explains · 🗑 Clear.
+
+See [Error Panel & Sandbox / Backup System](fehler-und-backup.md) for details.
 
 ---
 

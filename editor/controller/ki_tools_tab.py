@@ -7,6 +7,7 @@ import os
 
 from core.qt_compat import QtWidgets, QtCore, QtGui
 from core import theme
+from core import schrift
 
 
 # ── Aufklappbarer Abschnitt ───────────────────────────────────────────────────
@@ -20,11 +21,11 @@ class KlappSektion(QtWidgets.QWidget):
         self._titel = titel
 
         vl = QtWidgets.QVBoxLayout(self)
-        vl.setContentsMargins(0, 2, 0, 2)
-        vl.setSpacing(0)
+        vl.setContentsMargins(theme.ABST_KEIN, theme.ABST_XS, theme.ABST_KEIN, theme.ABST_XS)
+        vl.setSpacing(theme.ABST_KEIN)
 
         self._btn = QtWidgets.QPushButton(self._titel_text())
-        self._btn.setMinimumHeight(28)
+        self._btn.setMinimumHeight(theme.KLAPP_BTN_MIN_H)
         self._btn.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self._btn.setStyleSheet(theme.STY_TAB_BTN())
         self._btn.clicked.connect(self._toggle)
@@ -34,8 +35,8 @@ class KlappSektion(QtWidgets.QWidget):
         self._inhalt = QtWidgets.QWidget()
         self._inhalt.setVisible(offen)
         il = QtWidgets.QVBoxLayout(self._inhalt)
-        il.setContentsMargins(8, 2, 4, 6)
-        il.setSpacing(4)
+        il.setContentsMargins(theme.ABST_XL, theme.ABST_XS, theme.ABST_M, theme.ABST_L)
+        il.setSpacing(theme.ABST_M)
         self._inhalt_layout = il
         vl.addWidget(self._inhalt)
 
@@ -67,8 +68,8 @@ class KiToolsTab:
     def _baue_ki_tools_tab(self) -> QtWidgets.QWidget:
         w = QtWidgets.QWidget()
         aussen = QtWidgets.QVBoxLayout(w)
-        aussen.setContentsMargins(0, 0, 0, 0)
-        aussen.setSpacing(0)
+        aussen.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+        aussen.setSpacing(theme.ABST_KEIN)
 
         # Info-Banner
         _verstecke = []
@@ -89,8 +90,8 @@ class KiToolsTab:
 
         inhalt = QtWidgets.QWidget()
         vl = QtWidgets.QVBoxLayout(inhalt)
-        vl.setContentsMargins(4, 4, 4, 4)
-        vl.setSpacing(4)
+        vl.setContentsMargins(theme.ABST_M, theme.ABST_M, theme.ABST_M, theme.ABST_M)
+        vl.setSpacing(theme.ABST_M)
 
         # ── Sektion 1: Dokumentkontext (aufgeklappt) ──────────────────────
         sek1 = KlappSektion("📄 FreeCAD-Dokumentkontext", offen=True)
@@ -103,13 +104,13 @@ class KiToolsTab:
 
         self._kontext_anzeige = QtWidgets.QPlainTextEdit()
         self._kontext_anzeige.setReadOnly(True)
-        self._kontext_anzeige.setFont(QtGui.QFont("Courier New", 9))
-        self._kontext_anzeige.setFixedHeight(100)
+        self._kontext_anzeige.setFont(schrift.mono_font(schrift.STUFE_SM))
+        self._kontext_anzeige.setFixedHeight(theme.KITOOLS_ANZEIGE_H)
         self._kontext_anzeige.setPlaceholderText("(Kein FreeCAD-Dokument)")
         sek1.addWidget(self._kontext_anzeige)
 
         btn_refresh = QtWidgets.QPushButton("🔄 Aktualisieren")
-        btn_refresh.setFixedHeight(26)
+        btn_refresh.setFixedHeight(theme.KITOOLS_BTN_H)
         btn_refresh.clicked.connect(self._kontext_aktualisieren)
         sek1.addWidget(btn_refresh)
         vl.addWidget(sek1)
@@ -127,7 +128,7 @@ class KiToolsTab:
             from editor.ki.ki_werkzeuge import WERKZEUG_REGISTER
             for name, defn in WERKZEUG_REGISTER.items():
                 btn_start = QtWidgets.QPushButton(f"▶  {name}")
-                btn_start.setFixedHeight(26)
+                btn_start.setFixedHeight(theme.KITOOLS_BTN_H)
                 btn_start.setToolTip(defn.beschreibung)
                 btn_start.setStyleSheet(theme.STY_KI_WERKZEUG_BTN())
                 sek2.addWidget(btn_start)
@@ -147,13 +148,13 @@ class KiToolsTab:
 
         self._protokoll_area = QtWidgets.QPlainTextEdit()
         self._protokoll_area.setReadOnly(True)
-        self._protokoll_area.setFont(QtGui.QFont("Courier New", 9))
-        self._protokoll_area.setFixedHeight(100)
+        self._protokoll_area.setFont(schrift.mono_font(schrift.STUFE_SM))
+        self._protokoll_area.setFixedHeight(theme.KITOOLS_ANZEIGE_H)
         self._protokoll_area.setPlaceholderText("Ergebnisse erscheinen hier …")
         sek3.addWidget(self._protokoll_area)
 
         btn_clear = QtWidgets.QPushButton("🗑 Leeren")
-        btn_clear.setFixedHeight(26)
+        btn_clear.setFixedHeight(theme.KITOOLS_BTN_H)
         btn_clear.clicked.connect(lambda: self._protokoll_area.clear())
         sek3.addWidget(btn_clear)
         vl.addWidget(sek3)
@@ -183,12 +184,12 @@ class KiToolsTab:
     def _werkzeug_dialog(self, name: str, defn):
         dlg = QtWidgets.QDialog(self._e)
         dlg.setWindowTitle(f"🛠 {name}")
-        dlg.setMinimumWidth(420)
-        dlg.setMinimumHeight(300)
+        dlg.setMinimumWidth(theme.KITOOLS_DLG_MIN_B)
+        dlg.setMinimumHeight(theme.KITOOLS_DLG_MIN_H)
 
         haupt = QtWidgets.QVBoxLayout(dlg)
-        haupt.setContentsMargins(10, 10, 10, 10)
-        haupt.setSpacing(8)
+        haupt.setContentsMargins(theme.KITOOLS_DLG_RAND, theme.KITOOLS_DLG_RAND, theme.KITOOLS_DLG_RAND, theme.KITOOLS_DLG_RAND)
+        haupt.setSpacing(theme.ABST_XL)
 
         beschr = QtWidgets.QLabel(
             f"<b>{name}</b><br>"
@@ -209,8 +210,8 @@ class KiToolsTab:
 
         felder_widget = QtWidgets.QWidget()
         grid = QtWidgets.QFormLayout(felder_widget)
-        grid.setContentsMargins(0, 4, 0, 4)
-        grid.setSpacing(8)
+        grid.setContentsMargins(theme.ABST_KEIN, theme.ABST_M, theme.ABST_KEIN, theme.ABST_M)
+        grid.setSpacing(theme.ABST_XL)
         grid.setLabelAlignment(QtCore.Qt.AlignRight)
 
         eingaben: dict = {}
@@ -222,7 +223,7 @@ class KiToolsTab:
                 feld.setRange(-99999, 99999)
                 feld.setDecimals(2)
                 feld.setValue(float(param.standard or 0))
-                feld.setMinimumWidth(120)
+                feld.setMinimumWidth(theme.KITOOLS_FELD_MIN)
                 if param.name in ("x","y","z","laenge","breite","hoehe","radius","radius2"):
                     feld.setSuffix(" mm")
                 elif param.name == "drehwinkel":
@@ -230,20 +231,20 @@ class KiToolsTab:
             elif param.enum:
                 feld = QtWidgets.QComboBox()
                 feld.addItems(param.enum)
-                feld.setMinimumWidth(120)
+                feld.setMinimumWidth(theme.KITOOLS_FELD_MIN)
                 if param.standard and param.standard in param.enum:
                     feld.setCurrentText(param.standard)
             elif param.typ == "string" and param.name == "code":
                 feld = QtWidgets.QPlainTextEdit()
-                feld.setFont(QtGui.QFont("Courier New", 9))
-                feld.setMinimumHeight(120)
+                feld.setFont(schrift.mono_font(schrift.STUFE_SM))
+                feld.setMinimumHeight(theme.KITOOLS_FELD_MIN)
                 feld.setPlaceholderText("Python-Code hier eingeben …")
             else:
                 feld = QtWidgets.QLineEdit()
                 feld.setPlaceholderText("optional" if not param.pflicht else param.beschreibung)
                 if param.standard:
                     feld.setText(str(param.standard))
-                feld.setMinimumWidth(120)
+                feld.setMinimumWidth(theme.KITOOLS_FELD_MIN)
             lbl.setToolTip(param.beschreibung)
             grid.addRow(lbl, feld)
             eingaben[param.name] = feld
@@ -253,7 +254,7 @@ class KiToolsTab:
 
         ergebnis_lbl = QtWidgets.QLabel("")
         ergebnis_lbl.setWordWrap(True)
-        ergebnis_lbl.setMinimumHeight(24)
+        ergebnis_lbl.setMinimumHeight(theme.KITOOLS_ERGEBNIS_LBL_H)
         ergebnis_lbl.setStyleSheet(theme.sty_status(dlg))
         haupt.addWidget(ergebnis_lbl)
 
@@ -265,25 +266,25 @@ class KiToolsTab:
         btn_zeile = QtWidgets.QHBoxLayout()
 
         btn_ausfuehren = QtWidgets.QPushButton("▶  Ausführen")
-        btn_ausfuehren.setMinimumHeight(32)
+        btn_ausfuehren.setMinimumHeight(theme.KITOOLS_DLG_BTN_H)
         btn_ausfuehren.setStyleSheet(theme.STY_KI_AUSFUEHREN_BTN)
         btn_zeile.addWidget(btn_ausfuehren)
 
         btn_in_editor = QtWidgets.QPushButton("📥  In Editor")
-        btn_in_editor.setMinimumHeight(32)
+        btn_in_editor.setMinimumHeight(theme.KITOOLS_DLG_BTN_H)
         btn_in_editor.setToolTip("Generierten Code in den aktiven Editor-Tab einfügen")
         btn_in_editor.setEnabled(False)
         btn_zeile.addWidget(btn_in_editor)
 
         btn_anhaengen = QtWidgets.QPushButton("➕  Anhängen")
-        btn_anhaengen.setMinimumHeight(32)
+        btn_anhaengen.setMinimumHeight(theme.KITOOLS_DLG_BTN_H)
         btn_anhaengen.setToolTip("Code ans Ende des aktiven Editor-Tabs anhängen")
         btn_anhaengen.setEnabled(False)
         btn_zeile.addWidget(btn_anhaengen)
 
         btn_abbrechen = QtWidgets.QPushButton("✕")
-        btn_abbrechen.setMinimumHeight(32)
-        btn_abbrechen.setFixedWidth(36)
+        btn_abbrechen.setMinimumHeight(theme.KITOOLS_DLG_BTN_H)
+        btn_abbrechen.setFixedWidth(theme.KITOOLS_ABBRECHEN_B)
         btn_zeile.addWidget(btn_abbrechen)
         haupt.addLayout(btn_zeile)
 

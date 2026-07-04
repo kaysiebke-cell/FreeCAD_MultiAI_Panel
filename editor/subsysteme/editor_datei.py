@@ -10,7 +10,7 @@ import glob
 import shutil
 from datetime import datetime
 
-from core.qt_compat import QtWidgets, QtCore
+from core.qt_compat import QtWidgets, QtCore, single_shot_sicher
 
 from ui.fehler import uebersetze_fehler
 
@@ -41,7 +41,7 @@ class DateiLogik:
             e._editor_tab_widget.setTabText(idx, name)
             e.setWindowTitle(f"Makro-Editor  –  {name}")
             e._set_status("✔  Gespeichert")
-            QtCore.QTimer.singleShot(500, lambda: setattr(e, "_watcher_pause", False))
+            single_shot_sicher(500, e, lambda: setattr(e, "_watcher_pause", False))
             if tab["pfad"] not in e._datei_watcher.files():
                 e._datei_watcher.addPath(tab["pfad"])
         except Exception as ex:
@@ -78,7 +78,7 @@ class DateiLogik:
         e = self._e
         if e._watcher_pause:
             return
-        QtCore.QTimer.singleShot(100, lambda: e._datei_watcher.addPath(e._pfad))
+        single_shot_sicher(100, e, lambda: e._datei_watcher.addPath(e._pfad))
         e._set_status(
             "⚠  Datei wurde extern geändert  –  [↺ Neu laden] um zu aktualisieren", ms=0)
 

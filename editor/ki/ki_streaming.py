@@ -237,7 +237,7 @@ class KIStreaming:
             stream=True, timeout=None)
         r.raise_for_status()
         for line in r.iter_lines():
-            if not self._c._alive:
+            if not self._c._alive or getattr(self._c, "_ki_stop", False):
                 break
             if line:
                 data  = json.loads(line)
@@ -273,7 +273,7 @@ class KIStreaming:
             stream=True, timeout=120)
         r.raise_for_status()
         for line in r.iter_lines():
-            if not self._c._alive:
+            if not self._c._alive or getattr(self._c, "_ki_stop", False):
                 break
             if line and line.startswith(b"data: "):
                 try:
@@ -318,7 +318,7 @@ class KIStreaming:
             stream=True, timeout=120)
         r.raise_for_status()
         for line in r.iter_lines():
-            if not self._c._alive:
+            if not self._c._alive or getattr(self._c, "_ki_stop", False):
                 break
             if line and line.startswith(b"data: "):
                 try:
@@ -380,7 +380,7 @@ class KIStreaming:
         r.raise_for_status()
         antwort_teile = []
         for line in r.iter_lines():
-            if not self._c._alive:
+            if not self._c._alive or getattr(self._c, "_ki_stop", False):
                 break
             if line and line.startswith(b"data: "):
                 try:
@@ -419,7 +419,7 @@ class KIStreaming:
             stream=True, timeout=120)
         r.raise_for_status()
         for line in r.iter_lines():
-            if not self._c._alive:
+            if not self._c._alive or getattr(self._c, "_ki_stop", False):
                 break
             if line and line.startswith(b"data: "):
                 raw = line[6:]
@@ -456,7 +456,7 @@ class KIStreaming:
         r.raise_for_status()
         antwort_teile = []
         for line in r.iter_lines():
-            if not self._c._alive:
+            if not self._c._alive or getattr(self._c, "_ki_stop", False):
                 break
             if line and line.startswith(b"data: "):
                 raw = line[6:]

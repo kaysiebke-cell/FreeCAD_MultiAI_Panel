@@ -7,9 +7,10 @@ Farbschema-Umschaltung, Barrierefreiheits-Handler und Widget-Blinken.
 
 import re
 
-from core.qt_compat import QtWidgets, QtCore, QtGui
+from core.qt_compat import QtWidgets, QtCore, QtGui, single_shot_sicher
 
 from core import theme
+from core import schrift
 from core import params
 
 
@@ -36,8 +37,16 @@ class BarriereLogik:
         if hasattr(e, "_hl_ki"):    e._hl_ki.aktualisiere_theme()
         if hasattr(e, "_frage_feld"): theme.apply_input_bg_suche(e._frage_feld)
         if hasattr(e, "find_area"):  theme.apply_input_bg_suche(e.find_area)
-        if hasattr(e, "_ki_area"):   theme.apply_input_bg_ki(e._ki_area)
+        if hasattr(e, "_ki_area"):   theme.apply_input_bg_suche(e._ki_area)
         if hasattr(e, "_kontext"):   theme.apply_input_bg_kontext(e._kontext)
+        # Rahmen hinter den Feldern (scheint in Splittergriffen/Abständen durch)
+        if hasattr(e, "_ki_feld_rahmen"):
+            theme.apply_input_bg_suche(e._ki_feld_rahmen)
+        # Trenner-Labels im KI-Feld (❓ Frage / Code-Block / 🤖 KI-Antwort)
+        # ebenfalls umfärben — sonst behalten sie die Farben des alten Schemas
+        for _lbl in ("_frage_lbl", "_ki_trenner_lbl", "_ki_antwort_lbl"):
+            if hasattr(e, _lbl):
+                theme.apply_trenner_lbl_style(getattr(e, _lbl))
 
     def on_barrierefreiheit(self, schluessel, wert):
         e = self._e
@@ -47,7 +56,7 @@ class BarriereLogik:
             e.setFont(font)
             QtWidgets.QApplication.instance().setFont(font)
         elif schluessel == "editor_schrift":
-            f = QtGui.QFont("Courier New", int(wert))
+            f = QtGui.QFont(schrift.FAMILIE_MONO, int(wert))
             for tab in getattr(e, "_tabs", []):
                 editor = tab.get("editor")
                 if editor:
@@ -55,20 +64,20 @@ class BarriereLogik:
             if hasattr(e, "find_area"): e.find_area.setFont(f)
             if hasattr(e, "_ki_area"):  e._ki_area.setFont(f)
         elif schluessel == "button_groesse":
-            groessen = {0: 26, 1: 34, 2: 42}
-            hoehe = groessen.get(int(wert), 26)
+            groessen = dict(enumerate(theme.BF_BTN_HOEHEN))
+            hoehe = groessen.get(int(wert), theme.BF_BTN_HOEHEN[0])
             for btn in e.findChildren(QtWidgets.QPushButton):
-                if btn.height() in (26, 34, 42):
+                if btn.height() in theme.BF_BTN_HOEHEN:
                     btn.setFixedHeight(hoehe)
         elif schluessel == "icon_text":
             for btn, ico, lbl in getattr(e, "_panel_btns", []):
                 if wert:
                     btn.setText(f"{ico}  {lbl}")
-                    btn.setMinimumWidth(44)
-                    btn.setMaximumWidth(16777215)
+                    btn.setMinimumWidth(theme.BF_PANEL_BTN_MIN_B)
+                    btn.setMaximumWidth(theme.BF_MAX_BREITE)
                 else:
                     btn.setText(ico)
-                    btn.setFixedWidth(32)
+                    btn.setFixedWidth(theme.BF_PANEL_BTN_B)
         elif schluessel == "einfache_ansicht":
             for btn in getattr(e, "_panel_btns_optional", []):
                 btn.setVisible(not wert)
@@ -156,9 +165,9 @@ class BarriereLogik:
             if isinstance(widget, QtWidgets.QDockWidget):
                 widget.setStyleSheet(
                     f"QDockWidget::title {{ background-color: {farbe}; }}")
-                QtCore.QTimer.singleShot(ms, lambda w=widget, s=orig: w.setStyleSheet(s))
+                single_shot_sicher(ms, widget, lambda w=widget, s=orig: w.setStyleSheet(s))
             else:
                 widget.setStyleSheet(
                     orig + f"\nQPushButton {{ background-color: {farbe};"
                            f" border: 2px solid {farbe}; }}")
-                QtCore.QTimer.singleShot(ms, lambda w=widget, s=orig: w.setStyleSheet(s))
+                single_shot_sicher(ms, widget, lambda w=widget, s=orig: w.setStyleSheet(s))

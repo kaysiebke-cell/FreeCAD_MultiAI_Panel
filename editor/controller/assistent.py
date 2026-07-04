@@ -19,7 +19,8 @@ from __future__ import annotations
 import json
 import re
 
-from core.qt_compat import QtCore, QtWidgets, QtGui
+from core.qt_compat import QtCore, QtWidgets, QtGui, single_shot_sicher
+from core import theme
 
 from core.qt_compat import requests as _requests, HAS_REQUESTS as _HAS_REQUESTS
 
@@ -180,8 +181,8 @@ class AssistentPanel(QtWidgets.QWidget):
     def _setup_ui(self):
         from core import schrift
         lay = QtWidgets.QVBoxLayout(self)
-        lay.setContentsMargins(6, 6, 6, 6)
-        lay.setSpacing(4)
+        lay.setContentsMargins(theme.ABST_L, theme.ABST_L, theme.ABST_L, theme.ABST_L)
+        lay.setSpacing(theme.ABST_M)
 
         # Umschalter: Hilfe-Assistent ↔ Fachsprache-Übersetzer
         self._chk_fachsprache = QtWidgets.QCheckBox(
@@ -205,15 +206,15 @@ class AssistentPanel(QtWidgets.QWidget):
 
         _unten = QtWidgets.QWidget()
         _unten_lay = QtWidgets.QVBoxLayout(_unten)
-        _unten_lay.setContentsMargins(0, 4, 0, 0)
-        _unten_lay.setSpacing(4)
+        _unten_lay.setContentsMargins(theme.ABST_KEIN, theme.ABST_M, theme.ABST_KEIN, theme.ABST_KEIN)
+        _unten_lay.setSpacing(theme.ABST_M)
 
         # Eingabe (volle Breite)
         self._eingabe = QtWidgets.QPlainTextEdit()
         self._eingabe.setPlaceholderText(
             'z.B. "wie übersetze ich einen Fehler?" oder "wie richte ich Ollama ein?"\n'
             '(Enter = Senden  |  Shift+Enter = neue Zeile)')
-        self._eingabe.setMinimumHeight(30)
+        self._eingabe.setMinimumHeight(theme.ASSIST_EINGABE_MIN_H)
         self._eingabe.installEventFilter(self)
         _unten_lay.addWidget(self._eingabe)
 
@@ -325,8 +326,8 @@ class AssistentPanel(QtWidgets.QWidget):
                           if not (x in gesehen or gesehen.add(x))]
 
         for i, name in enumerate(treffer_unique):
-            QtCore.QTimer.singleShot(
-                i * 2200, lambda n=name: self.widget_blinken.emit(n))
+            single_shot_sicher(
+                i * 2200, self, lambda n=name: self.widget_blinken.emit(n))
 
     def _on_fehler(self, msg: str):
         self._btn_fragen.setEnabled(True)

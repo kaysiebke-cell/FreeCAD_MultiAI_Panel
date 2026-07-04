@@ -20,27 +20,25 @@ class KIFehlerUI:
         self._c = controller
 
     def fehler_anzeigen(self, fehlertext: str):
-        """Öffnet das Fehler-Panel und füllt die Fehlermeldung ein."""
-        if not self._c._fehler_inhalt.isVisible():
-            self._c._fehler_inhalt.setVisible(True)
-            self._c._btn_fehler_toggle.setText("▼")
-            splitter = self._c._fehler_inhalt.parent().parent()
-            if isinstance(splitter, QtWidgets.QSplitter):
-                h = splitter.height()
-                splitter.setSizes([int(h * 0.65), int(h * 0.35)])
-
-        self._c._fehler_eingabe.setPlainText(fehlertext)
-
-        from ui.fehler import uebersetze_text
-        self._c._fehler_ausgabe.setPlainText(uebersetze_text(fehlertext))
-
+        """Zeigt die Fehlermeldung im Fehler-Panel und öffnet den Dock.
+        Übersetzen erledigt der User dort per 🔍-Button im selben Feld."""
+        panel = getattr(self._c, "_fehler_panel", None)
+        if panel is not None:
+            # setzt Ausgabefeld, roten Rahmen, KI-Buttons — eine Fläche
+            panel._sandbox_ergebnis(False, fehlertext, "")
+        if hasattr(self._c, "_dock_fehler"):
+            self._c._dock_fehler.show()
+            self._c._dock_fehler.raise_()
         self._c._set_status("⚠ Fehler erkannt → Fehler-Panel geöffnet")
 
     def on_ki_error(self, msg: str):
         """Slot für _ki_error-Signal: Fehlermeldung anzeigen und Panel öffnen."""
+        # Vom User abgebrochen → kein Fehler-Popup, Abbruch-Zustand behalten
+        if getattr(self._c, "_ki_stop", False):
+            return
         self._c._chunk.stop_stream_timers()
+        self._c._ki_lauf_ui(False)
         self._c._ki_area.setPlainText(msg)
-        self._c._btn_ki.setEnabled(True)
         self._c._set_status("❌ Fehler – Details in der KI-Antwort")
         fehlertext = msg.replace("# ❌ Fehler:\n", "").strip()
         if fehlertext:
@@ -103,7 +101,7 @@ class KIFehlerUI:
         self._c._stream_start_time  = time.monotonic()
         self._c._flush_timer.start()
         self._c._status_timer.start()
-        self._c._btn_ki.setEnabled(False)
+        self._c._ki_lauf_ui(True)   # Button → ⏹ Stopp
         self._c._set_status("🔧 KI korrigiert Sandbox-Fehler …")
 
         fehler_panel_ref = self._c._fehler_panel
@@ -111,6 +109,13 @@ class KIFehlerUI:
         set_status_ref   = self._c._set_status
 
         def _nach_stream():
+            # Vom User abgebrochen → partiellen Text nicht als Korrektur laden
+            if getattr(self._c, "_ki_stop", False):
+                try:
+                    self._c._ki_stream_done.disconnect(_nach_stream)
+                except Exception:
+                    pass
+                return
             korrigiert = ki_area_ref.toPlainText().strip()
             korrigiert = _re.sub(r"```python|```", "", korrigiert).strip()
             if korrigiert:
@@ -119,7 +124,7 @@ class KIFehlerUI:
             def _gui_update():
                 if korrigiert:
                     fehler_panel_ref.sandbox_setze_code(korrigiert)
-                    set_status_ref("🔧 Korrektur bereit – ▶ Ausführen drücken")
+                    set_status_ref("🔧 Korrektur bereit – 🧪 Testen drücken")
                 verbleibend = (fehler_panel_ref._max_korrekturen
                                - fehler_panel_ref._korrektur_zaehler)
                 fehler_panel_ref._btn_sb_ki.setEnabled(verbleibend > 0)

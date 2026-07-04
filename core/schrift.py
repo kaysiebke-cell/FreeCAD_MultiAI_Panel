@@ -79,9 +79,6 @@ def pt(stufe: float = STUFE_BASE) -> int:
     return max(7, min(int(round(_system_pt() * stufe)), 36))
 
 
-def css(stufe: float = STUFE_BASE) -> str:
-    """CSS-Snippet 'font-size: Xpt;' für StyleSheets."""
-    return f"font-size:{pt(stufe)}pt;"
 
 
 def ui_font(stufe: float = STUFE_BASE) -> QtGui.QFont:

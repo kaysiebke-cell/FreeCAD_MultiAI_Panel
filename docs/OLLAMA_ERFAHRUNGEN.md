@@ -1,4 +1,4 @@
-[← Back: Error Translator & Backup System](fehler-und-backup.md) | [Back to README](../README.md)
+[← Back: Error Panel & Backup System](fehler-und-backup.md) | [Back to README](../README.md)
 
 # Ollama + FreeCAD — An Honest Field Report
 
@@ -640,4 +640,4 @@ because you have to catch every model error yourself.
 
 ---
 
-[← Back: Error Translator & Backup System](fehler-und-backup.md) | [Back to README](../README.md)
+[← Back: Error Panel & Backup System](fehler-und-backup.md) | [Back to README](../README.md)

@@ -249,7 +249,7 @@ class KIAnfrage:
         if kontext:
             prompt = f"Projektkontext: {kontext}\n\n{prompt}"
 
-        self._c._btn_ki.setEnabled(False)
+        self._c._ki_lauf_ui(True)   # Button → ⏹ Stopp
         self._c._btn_ersetzen.setEnabled(False)
         self._c._ki_area.clear()
         self._c._chunk_buffer.clear()
@@ -508,17 +508,19 @@ class KIAnfrage:
     # ── Fehler-Erklärung ──────────────────────────────────────────────────
 
     def ki_fehler_erklaeren(self):
-        """Fehlertext aus _fehler_eingabe mit Code-Ausschnitt an KI senden."""
+        """Aktuellen Fehlertext aus dem Fehler-Panel mit Code-Ausschnitt an
+        die KI senden. Nimmt stets den echten (englischen) Fehler — auch wenn
+        gerade die deutsche Übersetzung im Feld steht."""
         if not _HAS_REQUESTS:
             self._c._set_status("❌ requests-Modul nicht installiert")
             return
 
-        fehler_widget = getattr(self._c, "_fehler_eingabe", None)
-        if fehler_widget is None:
+        panel = getattr(self._c, "_fehler_panel", None)
+        if panel is None:
             self._c._set_status("⚠  Fehler-Panel nicht gefunden")
             return
 
-        fehler_text = fehler_widget.toPlainText().strip()
+        fehler_text = panel.aktueller_fehlertext().strip()
         if not fehler_text:
             self._c._set_status("⚠  Fehler-Panel ist leer")
             return
@@ -557,7 +559,7 @@ class KIAnfrage:
         self._c._flush_timer.start()
         self._c._status_timer.start()
         self._c._set_status("⏳ Verbinde mit KI ...")
-        self._c._btn_ki.setEnabled(False)
+        self._c._ki_lauf_ui(True)   # Button → ⏹ Stopp
         self._c._btn_ersetzen.setEnabled(False)
 
         threading.Thread(

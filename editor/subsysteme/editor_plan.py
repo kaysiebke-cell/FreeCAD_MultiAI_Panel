@@ -8,6 +8,8 @@ Plan-Modus und KI-Code-Einfüge-Operationen für den MakroEditor.
 import ast as _ast
 
 from core.qt_compat import QtWidgets, QtGui
+from core import theme
+from core import schrift
 
 
 def _sandbox_fehler(e, code: str, fehler: str,
@@ -16,9 +18,6 @@ def _sandbox_fehler(e, code: str, fehler: str,
     panel = getattr(e, "_fehler_inhalt", None)
     if panel is not None:
         panel._sandbox_ergebnis(False, fehler, code)
-        panel._stack.setCurrentIndex(1)
-        panel._ist_sandbox = True
-        panel._btn_toggle.setText("🔍 Fehler-Übersetzer")
     if hasattr(e, "_dock_fehler"):
         e._dock_fehler.show()
         e._dock_fehler.raise_()
@@ -47,9 +46,9 @@ class PlanLogik:
         e = self._e
         dlg = QtWidgets.QDialog(e)
         dlg.setWindowTitle("🔍 Plan-Modus — Code prüfen")
-        dlg.resize(700, 450)
+        dlg.resize(theme.PLAN_DLG_BREITE, theme.PLAN_DLG_HOEHE)
         lay = QtWidgets.QVBoxLayout(dlg)
-        lay.setSpacing(8)
+        lay.setSpacing(theme.ABST_XL)
         info = QtWidgets.QLabel(
             "Die KI möchte folgenden Code einfügen. Bitte prüfen und bestätigen:")
         info.setWordWrap(True)
@@ -57,13 +56,13 @@ class PlanLogik:
         vorschau = QtWidgets.QPlainTextEdit()
         vorschau.setPlainText(neu_code)
         vorschau.setReadOnly(True)
-        vorschau.setFont(QtGui.QFont("Courier New", 10))
+        vorschau.setFont(schrift.mono_font())
         lay.addWidget(vorschau, 1)
         btns   = QtWidgets.QHBoxLayout()
         btn_ok = QtWidgets.QPushButton("✅  Ausführen")
         btn_ab = QtWidgets.QPushButton("❌  Abbrechen")
-        btn_ok.setFixedHeight(30)
-        btn_ab.setFixedHeight(30)
+        btn_ok.setFixedHeight(theme.PLAN_DLG_BTN_H)
+        btn_ab.setFixedHeight(theme.PLAN_DLG_BTN_H)
         btn_ok.clicked.connect(dlg.accept)
         btn_ab.clicked.connect(dlg.reject)
         btns.addStretch()

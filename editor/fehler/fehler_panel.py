@@ -2,17 +2,46 @@
 """
 fehler_panel.py
 ───────────────
-FehlerPanel – Eigenständiges Fehler-Übersetzer-Widget mit Sandbox.
-Seite 0 (Fehler-Übersetzer) und Seite 1 (Sandbox) liegen in einem
-QStackedWidget; zeige_seite() schaltet via setCurrentIndex() um.
+FehlerPanel – EINE Fläche: Sandbox-Ausgabe + Fehler-Übersetzung in-place.
+
+Es gibt kein Seiten-Umschalten mehr. Der Fehler steht im Ausgabefeld;
+🔍 Übersetzen ersetzt den Text 1:1 durch die deutsche Erklärung (Browser-
+Prinzip: gleiches Fenster, Inhalt wird ausgetauscht). Derselbe Button wird
+danach zu 🔙 Original und schaltet zurück — ein Button, zwei Zustände.
+
+Der originale (englische) Fehlertext wird separat gemerkt, damit 🔙 Original
+zurückkann und 🐛 KI erklärt / 🔧 KI korrigieren stets den echten Fehler
+verwenden, nicht die Übersetzung (siehe aktueller_fehlertext()).
 """
 
 from __future__ import annotations
+import re
 import traceback
 from typing import Callable, Dict, Optional
 from core.qt_compat import QtWidgets, QtCore, QtGui
 from core import theme
 from core import schrift
+
+# Erkennt Zeilenangaben in Tracebacks und übersetzten Fehlermeldungen
+_ZEILEN_MUSTER = re.compile(r"(?:[Zz]eile|line)\s+(\d+)")
+
+
+class _KlickbareAusgabe(QtWidgets.QPlainTextEdit):
+    """Ausgabefeld: Doppelklick auf eine Zeile mit »Zeile N« / »line N«
+    springt über den zeilen_cb-Callback zur Zeile im Editor."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.zeilen_cb: Optional[Callable[[int], None]] = None
+
+    def mouseDoubleClickEvent(self, event: QtGui.QMouseEvent) -> None:
+        if self.zeilen_cb is not None:
+            block = self.cursorForPosition(event.pos()).block()
+            m = _ZEILEN_MUSTER.search(block.text())
+            if m:
+                self.zeilen_cb(int(m.group(1)))
+                return
+        super().mouseDoubleClickEvent(event)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Vordefinierte Themes
@@ -20,25 +49,10 @@ from core import schrift
 
 THEME_STANDARD: Dict[str, object] = {
     "bg": "",
-    "eingabe_bg": "",
-    "eingabe_fg": "",
-    "eingabe_border": "",
     "ausgabe_bg": "",
     "ausgabe_fg": "",
     "ausgabe_border": "",
     "lbl_fg": "",
-    "btn_ue_bg": "",
-    "btn_ue_border": "",
-    "btn_ue_fg": "",
-    "btn_ue_bg_h": "",
-    "btn_ue_border_h": "",
-    "btn_ue_bg_p": "",
-    "btn_sec_bg": "",
-    "btn_sec_border": "",
-    "btn_sec_fg": "",
-    "btn_sec_bg_h": "",
-    "btn_sec_border_h": "",
-    "btn_sec_bg_p": "",
     "font_family": "Courier New",
     "font_size": 9,
     "lbl_font_size": 9,
@@ -82,36 +96,31 @@ class FehlerPanel(QtWidgets.QWidget):
         self._max_h             = max_hoehe
         self._theme             = _merge(THEME_STANDARD, theme)
         self._sandbox_toggle_cb  = None
-        self._ist_sandbox        = False
         self._geladener_code     = ""
         self._korrektur_zaehler  = 0
         self._max_korrekturen    = 3
         self._ki_korrektur_cb    = None   # wird vom Editor gesetzt
         self._laufzeit_check_cb  = None   # wird vom Editor gesetzt (vorschau._vorschau_exec)
+        # Übersetzen ⇄ Original (Browser-Prinzip: ein Feld, Inhalt wird getauscht)
+        self._zeigt_uebersetzung = False
+        self._fehler_original    = ""
         self._baue_ui()
 
     # ── öffentliche API ───────────────────────────────────────────────────
 
     def setze_sandbox_toggle_cb(self, cb: Callable[[bool], None]) -> None:
-        """Wird vom Editor aufgerufen, um den Toggle-Status zu synchronisieren."""
+        """Wird vom Editor aufgerufen, um beim Anzeigen den Dock zu öffnen."""
         self._sandbox_toggle_cb = cb
 
-    def eingabe_text(self) -> str:
-        return self._ein.toPlainText()
-
-    def setze_eingabe(self, text: str) -> None:
-        self._ein.setPlainText(text)
-        self._ein.moveCursor(QtGui.QTextCursor.End)
-
-    def setze_ausgabe(self, text: str) -> None:
-        self._aus.setPlainText(text)
-
-    def leeren(self) -> None:
-        self._ein.clear()
-        self._aus.clear()
-        self._ein.setFocus()
+    def aktueller_fehlertext(self) -> str:
+        """Der echte (englische) Fehlertext — auch wenn gerade die deutsche
+        Übersetzung angezeigt wird. Für KI erklärt / KI korrigieren."""
+        if self._zeigt_uebersetzung:
+            return self._fehler_original
+        return self._sb_ausgabe.toPlainText()
 
     def sandbox_leeren(self) -> None:
+        self._reset_uebersetzung()
         self._sb_ausgabe.clear()
         self._sb_ausgabe.setStyleSheet("")   # Rahmen zurücksetzen
         self._sb_status.clear()
@@ -122,12 +131,15 @@ class FehlerPanel(QtWidgets.QWidget):
             self._btn_sb_ki.setText("🔧 KI korrigieren")
 
     def sandbox_setze_code(self, code: str) -> None:
-        """Zeigt die Sandbox und lädt den Code – Ausführen muss der User per Button."""
-        self.zeige_seite(True)
+        """Lädt KI-Korrektur-Code – Ausführen muss der User per 🧪 Testen.
+        Öffnet den Dock (wie früher zeige_seite(True))."""
+        if self._sandbox_toggle_cb:
+            self._sandbox_toggle_cb(True)
+        self._reset_uebersetzung()
         self._geladener_code = code
         # Zähler NICHT zurücksetzen — KI-Korrekturversuche sollen kumulieren
         verbleibend = self._max_korrekturen - self._korrektur_zaehler
-        self._sb_ausgabe.setPlainText(f"# KI-Korrektur geladen – ▶ Ausführen zum Testen")
+        self._sb_ausgabe.setPlainText("# KI-Korrektur geladen – 🧪 Testen drücken")
         self._sb_status.setText(f"📋 Korrektur bereit – noch {verbleibend}x möglich")
         if hasattr(self, "_btn_sb_ki"):
             self._btn_sb_ki.setEnabled(False)
@@ -141,6 +153,10 @@ class FehlerPanel(QtWidgets.QWidget):
         """Editor übergibt hier den FreeCAD-Laufzeit-Check (vorschau._vorschau_exec)."""
         self._laufzeit_check_cb = cb
 
+    def setze_gehe_zu_zeile_cb(self, cb: Callable[[int], None]) -> None:
+        """Editor übergibt hier den Sprung-Callback für Doppelklick auf »Zeile N«."""
+        self._sb_ausgabe.zeilen_cb = cb
+
     def _ki_korrektur_anfordern(self) -> None:
         """Schickt den fehlerhaften Code + Fehlermeldung an die KI (max. 3x)."""
         if self._korrektur_zaehler >= self._max_korrekturen:
@@ -151,7 +167,7 @@ class FehlerPanel(QtWidgets.QWidget):
             self._sb_status.setText("⚠ Kein KI-Korrektur-Callback gesetzt")
             return
 
-        fehler_text = self._sb_ausgabe.toPlainText()
+        fehler_text = self.aktueller_fehlertext()
         code        = self._geladener_code
 
         if not code or not fehler_text:
@@ -169,19 +185,28 @@ class FehlerPanel(QtWidgets.QWidget):
     def sandbox_ausgabe(self) -> str:
         return self._sb_ausgabe.toPlainText()
 
+    def _ki_erklaeren_aus_sandbox(self) -> None:
+        """Ein-Klick-Weg vom Fehler zur KI-Erklärung. Der KI-Callback liest
+        den Fehler selbst über aktueller_fehlertext() — kein Kopieren nötig."""
+        if self._ki_cb is None:
+            return
+        if not self.aktueller_fehlertext().strip():
+            self._sb_status.setText("⚠ Kein Fehler zum Erklären vorhanden")
+            return
+        self._sb_status.setText("🐛 KI erklärt den Fehler — Antwort im KI-Panel")
+        self._ki_cb()
+
     def ausgabe_starten(self, code: str = "") -> None:
-        """Leert Sandbox-Ausgabe und schaltet auf Seite 1 — für Live-Ausgabe."""
+        """Leert das Ausgabefeld für einen neuen Live-Lauf."""
+        self._reset_uebersetzung()
         self._sb_ausgabe.clear()
         self._sb_ausgabe.setStyleSheet("")
         self._sb_status.setText("⏳ Läuft …")
         self._geladener_code = code
         self._btn_sb_ki.setEnabled(False)
-        self._stack.setCurrentIndex(1)
-        self._ist_sandbox = True
-        self._btn_toggle.setText("🔍 Fehler-Übersetzer")
 
     def ausgabe_anhaengen(self, text: str) -> None:
-        """Hängt eine Zeile an die Sandbox-Ausgabe an ohne den Inhalt zu ersetzen."""
+        """Hängt eine Zeile an die Ausgabe an ohne den Inhalt zu ersetzen."""
         self._sb_ausgabe.appendPlainText(text)
         sb = self._sb_ausgabe.verticalScrollBar()
         sb.setValue(sb.maximum())
@@ -198,81 +223,19 @@ class FehlerPanel(QtWidgets.QWidget):
                                  theme.KEIN_RAND, theme.KEIN_RAND)
         haupt.setSpacing(theme.KEIN_ABSTAND)
 
-        # QStackedWidget: schaltet zwischen Seiten um
-        self._stack = QtWidgets.QStackedWidget()
-
-        # ─────────────────────────────────────────────────────────────────
-        # SEITE 0: FEHLER-ÜBERSETZER
-        # ─────────────────────────────────────────────────────────────────
-        self._seite0 = QtWidgets.QWidget()
-        layout0 = QtWidgets.QHBoxLayout(self._seite0)
-        layout0.setContentsMargins(theme.FEHLER_LAYOUT0_RAND_L, theme.FEHLER_LAYOUT0_RAND_T,
-                                   theme.FEHLER_LAYOUT0_RAND_L, theme.FEHLER_LAYOUT0_RAND_T)
-        layout0.setSpacing(theme.FEHLER_LAYOUT0_ABST)
-
-        # Links: Eingabe
-        links = QtWidgets.QVBoxLayout()
-        links.setSpacing(theme.FEHLER_SPALTEN_ABST)
-        self._lbl_ein = QtWidgets.QLabel("Fehlermeldung (Englisch):")
-        links.addWidget(self._lbl_ein)
-        self._ein = QtWidgets.QPlainTextEdit()
-        _fix_align(self._ein)
-        links.addWidget(self._ein)
-        layout0.addLayout(links, stretch=1)
-
-        # Mitte: Buttons
-        mitte = QtWidgets.QVBoxLayout()
-        mitte.setSpacing(theme.FEHLER_ABST_MITTE)
-        mitte.addStretch()
-        self._btn_ue = QtWidgets.QPushButton("🔍 Übersetzen")
-        self._btn_ue.setFixedWidth(theme.FEHLER_BTN_W)
-        self._btn_ue.setMinimumHeight(theme.FEHLER_BTN_UE_MIN_H)
-        mitte.addWidget(self._btn_ue)
-        self._btn_clear = QtWidgets.QPushButton("🗑 Leeren")
-        self._btn_clear.setFixedWidth(theme.FEHLER_BTN_W)
-        self._btn_clear.setMinimumHeight(theme.FEHLER_BTN_MIN_H)
-        mitte.addWidget(self._btn_clear)
-        self._btn_ki = QtWidgets.QPushButton("🐛 KI erklärt")
-        self._btn_ki.setFixedWidth(theme.FEHLER_BTN_W)
-        self._btn_ki.setMinimumHeight(theme.FEHLER_BTN_MIN_H)
-        self._btn_ki.setVisible(self._ki_cb is not None)
-        mitte.addWidget(self._btn_ki)
-        mitte.addStretch()
-        layout0.addLayout(mitte)
-
-        # Rechts: Ausgabe
-        rechts = QtWidgets.QVBoxLayout()
-        rechts.setSpacing(theme.FEHLER_SPALTEN_ABST)
-        self._lbl_aus = QtWidgets.QLabel("Erklärung (Deutsch):")
-        rechts.addWidget(self._lbl_aus)
-        self._aus = QtWidgets.QPlainTextEdit()
-        self._aus.setReadOnly(True)
-        _fix_align(self._aus)
-        rechts.addWidget(self._aus)
-        layout0.addLayout(rechts, stretch=1)
-
-        self._stack.addWidget(self._seite0)   # Index 0
-
-        # ─────────────────────────────────────────────────────────────────
-        # SEITE 1: SANDBOX
-        # ─────────────────────────────────────────────────────────────────
-        self._seite1 = QtWidgets.QWidget()
-        layout1 = QtWidgets.QVBoxLayout(self._seite1)
-        layout1.setContentsMargins(theme.KEIN_RAND, theme.KEIN_RAND,
-                                   theme.KEIN_RAND, theme.KEIN_RAND)
-        layout1.setSpacing(theme.KEIN_ABSTAND)
-
-        # Top: Buttons
+        # ── Button-Zeile ──────────────────────────────────────────────────
         btn_layout = QtWidgets.QHBoxLayout()
         btn_layout.setContentsMargins(theme.FEHLER_SB_RAND, theme.FEHLER_SB_RAND,
                                       theme.FEHLER_SB_RAND, theme.FEHLER_SB_RAND)
         btn_layout.setSpacing(theme.FEHLER_SB_ABST)
 
-        self._btn_sb_run = QtWidgets.QPushButton("▶ Ausführen")
+        self._btn_sb_run = QtWidgets.QPushButton("🧪 Testen")
         self._btn_sb_run.setMinimumHeight(theme.FEHLER_SB_BTN_MIN_H)
         self._btn_sb_run.setDefault(True)
         self._btn_sb_run.setAutoDefault(True)
-        self._btn_sb_run.setToolTip("Code aus KI-Antwort in die Sandbox laden und ausführen")
+        self._btn_sb_run.setToolTip(
+            "KI-Antwort testen: Syntax-Prüfung + Probelauf ohne echte\n"
+            "Dokument-Änderungen (Editor-Code direkt ausführen: F5)")
         self._btn_sb_run.clicked.connect(lambda: self._sandbox_ausfuehren())
         btn_layout.addWidget(self._btn_sb_run)
 
@@ -283,6 +246,26 @@ class FehlerPanel(QtWidgets.QWidget):
         self._btn_sb_ki.setEnabled(False)
         self._btn_sb_ki.clicked.connect(lambda: self._ki_korrektur_anfordern())
         btn_layout.addWidget(self._btn_sb_ki)
+
+        # 🔍 Übersetzen ⇄ 🔙 Original — ein Button, zwei Zustände
+        self._btn_sb_uebersetzen = QtWidgets.QPushButton("🔍 Übersetzen")
+        self._btn_sb_uebersetzen.setMinimumHeight(theme.FEHLER_SB_BTN_MIN_H)
+        self._btn_sb_uebersetzen.setAutoDefault(False)
+        self._btn_sb_uebersetzen.setToolTip(
+            "Fehlermeldung ins Deutsche übersetzen — ersetzt den Text 1:1\n"
+            "im selben Feld. Erneut klicken: zurück zum Original.")
+        self._btn_sb_uebersetzen.clicked.connect(self._uebersetzung_umschalten)
+        btn_layout.addWidget(self._btn_sb_uebersetzen)
+
+        self._btn_sb_erklaeren = QtWidgets.QPushButton("🐛 KI erklärt")
+        self._btn_sb_erklaeren.setMinimumHeight(theme.FEHLER_SB_BTN_MIN_H)
+        self._btn_sb_erklaeren.setAutoDefault(False)
+        self._btn_sb_erklaeren.setToolTip(
+            "Fehlermeldung von der KI auf Deutsch erklären lassen\n"
+            "(ausführliche Antwort im KI-Panel — ändert keinen Code)")
+        self._btn_sb_erklaeren.setVisible(self._ki_cb is not None)
+        self._btn_sb_erklaeren.clicked.connect(self._ki_erklaeren_aus_sandbox)
+        btn_layout.addWidget(self._btn_sb_erklaeren)
 
         self._btn_sb_clear = QtWidgets.QPushButton("🗑 Leeren")
         self._btn_sb_clear.setMinimumHeight(theme.FEHLER_SB_BTN_MIN_H)
@@ -296,64 +279,56 @@ class FehlerPanel(QtWidgets.QWidget):
         self._sb_status.setStyleSheet(theme.STY_LABEL_SM_NP(schrift.pt(schrift.STUFE_SM)))
         btn_layout.addWidget(self._sb_status)
 
-        layout1.addLayout(btn_layout)
+        haupt.addLayout(btn_layout)
 
-        lbl_ausgabe = QtWidgets.QLabel("Ausgabe / Fehler:")
-        lbl_ausgabe.setStyleSheet(
+        self._lbl_ausgabe = QtWidgets.QLabel("Ausgabe / Fehler:")
+        self._lbl_ausgabe.setStyleSheet(
             theme.STY_LABEL_SM_PADDED(schrift.pt(schrift.STUFE_SM)))
-        layout1.addWidget(lbl_ausgabe)
+        haupt.addWidget(self._lbl_ausgabe)
 
-        self._sb_ausgabe = QtWidgets.QPlainTextEdit()
+        self._sb_ausgabe = _KlickbareAusgabe()
         self._sb_ausgabe.setReadOnly(True)
+        self._sb_ausgabe.setToolTip(
+            "Doppelklick auf »Zeile N« springt zur Zeile im Editor")
         _fix_align(self._sb_ausgabe)
-        layout1.addWidget(self._sb_ausgabe, stretch=1)
-
-        self._stack.addWidget(self._seite1)   # Index 1
-
-        # Toggle Button + Stack in einem festen Container
-        # Stack bekommt alles minus Toggle-Button-Höhe (28px) + Spacing
-        self._stack.setSizePolicy(
-            QtWidgets.QSizePolicy.Expanding,
-            QtWidgets.QSizePolicy.Expanding)
-
-        haupt.addWidget(self._stack, stretch=1)
-
-        self._btn_toggle = QtWidgets.QPushButton("🧪 Sandbox")
-        self._btn_toggle.setFixedHeight(theme.FEHLER_TOGGLE_H)
-        self._btn_toggle.setSizePolicy(
-            QtWidgets.QSizePolicy.Expanding,
-            QtWidgets.QSizePolicy.Fixed)
-        self._btn_toggle.clicked.connect(
-            lambda: self.zeige_seite(not self._ist_sandbox))
-        haupt.addWidget(self._btn_toggle)
-
-        # Signale verbinden
-        self._btn_ue.clicked.connect(self._uebersetzen)
-        self._btn_clear.clicked.connect(self.leeren)
-        if self._ki_cb:
-            self._btn_ki.clicked.connect(self._ki_cb)
+        self._sb_ausgabe.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        haupt.addWidget(self._sb_ausgabe, stretch=1)
 
         self.setMinimumHeight(theme.FEHLER_MIN_H)
         self.setMaximumHeight(theme.FEHLER_MAX_H)
         self._style_anwenden()
 
-    # ── Seiten umschalten ─────────────────────────────────────────────────
+    # ── Übersetzen ⇄ Original (in-place, ein Feld) ─────────────────────────
 
-    def zeige_seite(self, sandbox: bool) -> None:
-        """Schaltet zwischen Übersetzer (Index 0) und Sandbox (Index 1) um.
-        Die Höhe des Widgets passt sich dem Dock frei an.
-        """
-        self._ist_sandbox = sandbox
+    def _reset_uebersetzung(self) -> None:
+        """Setzt den Übersetzungs-Zustand zurück — immer wenn frischer Inhalt
+        ins Ausgabefeld kommt (neuer Lauf, neuer Fehler, Leeren)."""
+        self._zeigt_uebersetzung = False
+        self._fehler_original    = ""
+        if hasattr(self, "_btn_sb_uebersetzen"):
+            self._btn_sb_uebersetzen.setText("🔍 Übersetzen")
 
-        if sandbox:
-            self._stack.setCurrentIndex(1)
-            self._btn_toggle.setText("🔍 Fehler-Übersetzer")
-        else:
-            self._stack.setCurrentIndex(0)
-            self._btn_toggle.setText("🧪 Sandbox")
-
-        if self._sandbox_toggle_cb:
-            self._sandbox_toggle_cb(sandbox)
+    def _uebersetzung_umschalten(self) -> None:
+        """🔍 Übersetzen ⇄ 🔙 Original — tauscht den Feldinhalt aus, ohne
+        neue Box und ohne Dopplung (Browser-Prinzip)."""
+        if self._zeigt_uebersetzung:
+            # zurück zum Original
+            self._sb_ausgabe.setPlainText(self._fehler_original)
+            self._zeigt_uebersetzung = False
+            self._btn_sb_uebersetzen.setText("🔍 Übersetzen")
+            self._sb_status.setText("↩ Original (Englisch)")
+            return
+        text = self._sb_ausgabe.toPlainText().strip()
+        if not text:
+            self._sb_status.setText("⚠ Kein Fehler zum Übersetzen")
+            return
+        # exakten Inhalt (mit Whitespace) für die Rückkehr merken
+        self._fehler_original = self._sb_ausgabe.toPlainText()
+        self._sb_ausgabe.setPlainText(self._uebersetze(text))
+        self._zeigt_uebersetzung = True
+        self._btn_sb_uebersetzen.setText("🔙 Original")
+        self._sb_status.setText("🔍 Übersetzt (Deutsch)")
 
     # ── Sandbox-Ausführung ────────────────────────────────────────────────
 
@@ -376,7 +351,7 @@ class FehlerPanel(QtWidgets.QWidget):
         threading.Thread(target=self._sandbox_worker, args=(code,), daemon=True).start()
 
     def _sb_rahmen(self, art: str) -> None:
-        """Setzt einen farbigen Rahmen um das Sandbox-Ausgabefeld."""
+        """Setzt einen farbigen Rahmen um das Ausgabefeld."""
         from core import theme as _theme
         farbe = _theme.farbe_ok(self._sb_ausgabe) if art == "ok" else _theme.farbe_fehler(self._sb_ausgabe)
         self._sb_ausgabe.setStyleSheet(
@@ -385,8 +360,10 @@ class FehlerPanel(QtWidgets.QWidget):
 
     @QtCore.Slot(bool, str, str)
     def _sandbox_ergebnis(self, erfolg: bool, ausgabe: str, code: str) -> None:
-        """Empfängt Ergebnis im GUI-Thread."""
+        """Empfängt Ergebnis im GUI-Thread. Frischer Inhalt → Übersetzungs-
+        Zustand zurücksetzen (der zeigt sonst noch die alte Übersetzung)."""
         self._btn_sb_run.setEnabled(True)
+        self._reset_uebersetzung()
         if erfolg:
             self._sb_ausgabe.setPlainText(ausgabe)
             # Laufzeit-Check direkt im Haupt-Thread anhängen
@@ -459,21 +436,9 @@ class FehlerPanel(QtWidgets.QWidget):
         except SyntaxError as e:
             return {"success": False, "error": f"Syntax-Fehler Zeile {e.lineno}: {e.msg}"}
 
-    # ── interne Slots ─────────────────────────────────────────────────────
-
-    def _uebersetzen(self) -> None:
-        text = self._ein.toPlainText().strip()
-        if text:
-            self._aus.setPlainText(self._uebersetze(text))
-
     # ── Styling ───────────────────────────────────────────────────────────
 
     def _style_anwenden(self) -> None:
-        t   = self._theme
-        r   = int(t["border_radius"])
-        ff  = str(t["font_family"])
-        fs  = int(t["font_size"])
-        lfs = int(t["lbl_font_size"])
-
-        for lbl in (self._lbl_ein, self._lbl_aus):
-            pass
+        # Farben/Schrift kommen zentral aus core/theme + core/schrift;
+        # hier bleibt bewusst nichts Hartkodiertes.
+        pass

@@ -22,6 +22,7 @@ from ui.barrierefreiheit import BarrierefreiheitPanel
 from editor.panel import FreecadHelferPanel
 from data.hilfe import HilfeTab
 from editor.controller.assistent import AssistentPanel
+from editor.controller.ki_tools_tab import KlappSektion
 from editor.controller.snippet_widgets import SnipCommandEdit
 
 
@@ -329,7 +330,7 @@ def init_docks(editor) -> None:
 
         dlg = QtWidgets.QDialog(editor)
         dlg.setWindowTitle("FC-Prompt Regeln bearbeiten")
-        dlg.resize(680, 560)
+        dlg.resize(theme.FCREGELN_DLG_BREITE, theme.FCREGELN_DLG_HOEHE)
         _v = QtWidgets.QVBoxLayout(dlg)
 
         _combo = QtWidgets.QComboBox()
@@ -438,7 +439,6 @@ def init_docks(editor) -> None:
     ki_layout.setContentsMargins(theme.DOCK_KI_RAND, theme.DOCK_KI_RAND,
                                  theme.DOCK_KI_RAND, theme.DOCK_KI_RAND)
     ki_layout.setSpacing(theme.DOCK_KI_ABSTAND)
-    _ki_splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
 
     def _alle_snippets() -> dict:
         from data.freecad_data import SNIPPETS as _SNIPS
@@ -460,9 +460,9 @@ def init_docks(editor) -> None:
                                 theme.DOCK_KI_RAHMEN_RAND, theme.DOCK_KI_RAHMEN_RAND)
     _input_l.setSpacing(theme.DOCK_KI_INPUT_ABST)
 
-    # Header-Zeile über dem kombinierten Feld
+    # Werkzeug-Zeile über dem kombinierten Feld — nur die Sitzungs-Buttons,
+    # kein Label: Dock-Titel und interne Bereichs-Labels reichen aus.
     _input_hdr = QtWidgets.QHBoxLayout()
-    _input_hdr.addWidget(QtWidgets.QLabel("🔍 KI-Input"))
     _input_hdr.addStretch()
     for ico, tip, slot in [
         ("🧹", "Gesprächsverlauf zurücksetzen",                               editor._ki_verlauf_reset),
@@ -482,26 +482,58 @@ def init_docks(editor) -> None:
     _feld_rahmen.setObjectName("ki_eingabe_rahmen")
     _feld_rahmen.setStyleSheet(theme.STY_KI_EINGABE_RAHMEN())
     theme.apply_input_bg_suche(_feld_rahmen)
+    # Referenz für den Farbschema-Wechsel (Hintergrund muss mit umgefärbt werden)
+    editor._ki_feld_rahmen = _feld_rahmen
     _feld_rahmen_l = QtWidgets.QVBoxLayout(_feld_rahmen)
     _feld_rahmen_l.setContentsMargins(theme.DOCK_KI_RAHMEN_RAND, theme.DOCK_KI_RAHMEN_RAND,
                                       theme.DOCK_KI_RAHMEN_RAND, theme.DOCK_KI_RAHMEN_RAND)
     _feld_rahmen_l.setSpacing(theme.DOCK_KI_RAHMEN_ABST)
+
+    # Innerer Splitter mit drei frei skalierbaren Bereichen:
+    # Frage | Code-Block | KI-Antwort — jede Grenze per Maus verschiebbar,
+    # optisch weiterhin ein durchgehendes Feld.
+    _feld_splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+    _feld_splitter.setChildrenCollapsible(False)
+    _feld_splitter.setHandleWidth(theme.DOCK_KI_SPLITTER_GRIFF)
+
+    def _mindesthoehe(widget, zeilen: int) -> None:
+        fm = widget.fontMetrics()
+        widget.setMinimumHeight(
+            fm.lineSpacing() * zeilen + theme.DOCK_KI_FELD_RAND_EXTRA)
+
+    # ── Bereich 1: Frage (Label + Feld) ──
+    _frage_teil = QtWidgets.QWidget()
+    _frage_l = QtWidgets.QVBoxLayout(_frage_teil)
+    _frage_l.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+    _frage_l.setSpacing(theme.DOCK_KI_RAHMEN_ABST)
+
+    editor._frage_lbl = QtWidgets.QLabel("  ❓ Frage:")
+    editor._frage_lbl.setFixedHeight(theme.DOCK_TRENNER_LBL_HOEHE)
+    theme.apply_trenner_lbl_style(editor._frage_lbl)
+    _frage_l.addWidget(editor._frage_lbl)
+    _frage_l.addSpacing(theme.DOCK_KI_CODE_LABEL_ABST)
 
     editor._frage_feld = QtWidgets.QPlainTextEdit()
     editor._frage_feld.setFont(schrift.mono_font())
     editor._frage_feld.setLineWrapMode(QtWidgets.QPlainTextEdit.WidgetWidth)
     editor._frage_feld.setStyleSheet(theme.STY_KI_EINGABE_FELD())
     editor._frage_feld.setPlaceholderText("Frage oder Aufgabe … (optional, überschreibt Preset)")
-    editor._frage_feld.setSizePolicy(
-        QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     theme.apply_input_bg_suche(editor._frage_feld)
-    _feld_rahmen_l.addWidget(editor._frage_feld)
+    _mindesthoehe(editor._frage_feld, theme.DOCK_KI_FRAGE_MIN_ZEILEN)
+    _frage_l.addWidget(editor._frage_feld, stretch=1)
+    _feld_splitter.addWidget(_frage_teil)
+
+    # ── Bereich 2: Code-Block (Label + Feld) ──
+    _code_teil = QtWidgets.QWidget()
+    _code_l = QtWidgets.QVBoxLayout(_code_teil)
+    _code_l.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+    _code_l.setSpacing(theme.DOCK_KI_RAHMEN_ABST)
 
     editor._ki_trenner_lbl = QtWidgets.QLabel("  Code-Block:")
     editor._ki_trenner_lbl.setFixedHeight(theme.DOCK_TRENNER_LBL_HOEHE)
     theme.apply_trenner_lbl_style(editor._ki_trenner_lbl)
-    _feld_rahmen_l.addWidget(editor._ki_trenner_lbl)
-    _feld_rahmen_l.addSpacing(theme.DOCK_KI_CODE_LABEL_ABST)
+    _code_l.addWidget(editor._ki_trenner_lbl)
+    _code_l.addSpacing(theme.DOCK_KI_CODE_LABEL_ABST)
 
     editor.find_area = SnipCommandEdit(_alle_snippets)
     editor.find_area.snip_gewaehlt.connect(editor._on_snip_slash_cmd)
@@ -514,71 +546,52 @@ def init_docks(editor) -> None:
     theme.apply_input_bg_suche(editor.find_area)
     editor.find_area.setPlaceholderText(
         "Code-Block hier einfügen …\n/ + Snippet-Name → Autocomplete")
-    editor.find_area.setSizePolicy(
-        QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     editor._hl_find = PythonHighlighter(editor.find_area.document())
     QtCore.QTimer.singleShot(200, editor._hl_find.aktualisiere_theme)
-    _feld_rahmen_l.addWidget(editor.find_area)
+    _mindesthoehe(editor.find_area, theme.DOCK_KI_CODE_MIN_ZEILEN)
+    _code_l.addWidget(editor.find_area, stretch=1)
+    _feld_splitter.addWidget(_code_teil)
 
-    # Spacer damit Felder oben bleiben wenn beide klein sind
-    _feld_rahmen_l.addStretch(1)
+    # ── Bereich 3: KI-Antwort (Label + Feld) ──
+    _antwort_teil = QtWidgets.QWidget()
+    _antwort_l = QtWidgets.QVBoxLayout(_antwort_teil)
+    _antwort_l.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+    _antwort_l.setSpacing(theme.DOCK_KI_RAHMEN_ABST)
 
-    # ── Auto-Resize: Felder passen sich der Inhaltshöhe an ───────────────────
-    def _ki_feld_hoehe_anpassen(widget, min_z: int, max_z: int):
-        fm   = widget.fontMetrics()
-        rand = widget.contentsMargins()
-        rahmen = widget.frameWidth() * 2
-        zeilen = max(min_z, min(max_z, widget.document().blockCount()))
-        h = fm.lineSpacing() * zeilen + rand.top() + rand.bottom() + rahmen + theme.DOCK_KI_FELD_RAND_EXTRA
-        widget.setFixedHeight(h)
+    editor._ki_antwort_lbl = QtWidgets.QLabel("  🤖 KI-Antwort:")
+    editor._ki_antwort_lbl.setFixedHeight(theme.DOCK_TRENNER_LBL_HOEHE)
+    theme.apply_trenner_lbl_style(editor._ki_antwort_lbl)
+    _antwort_l.addWidget(editor._ki_antwort_lbl)
+    _antwort_l.addSpacing(theme.DOCK_KI_CODE_LABEL_ABST)
 
-    _ki_feld_hoehe_anpassen(editor._frage_feld,
-                            theme.DOCK_KI_FRAGE_MIN_ZEILEN,
-                            theme.DOCK_KI_FRAGE_MAX_ZEILEN)
-    _ki_feld_hoehe_anpassen(editor.find_area,
-                            theme.DOCK_KI_CODE_MIN_ZEILEN,
-                            theme.DOCK_KI_CODE_MAX_ZEILEN)
-
-    editor._frage_feld.document().contentsChanged.connect(
-        lambda: _ki_feld_hoehe_anpassen(editor._frage_feld,
-                                        theme.DOCK_KI_FRAGE_MIN_ZEILEN,
-                                        theme.DOCK_KI_FRAGE_MAX_ZEILEN))
-    editor.find_area.document().contentsChanged.connect(
-        lambda: _ki_feld_hoehe_anpassen(editor.find_area,
-                                        theme.DOCK_KI_CODE_MIN_ZEILEN,
-                                        theme.DOCK_KI_CODE_MAX_ZEILEN))
-
-    _input_l.addWidget(_feld_rahmen)
-
-    _ki_splitter.addWidget(_input_w)
-
-    _output_w = QtWidgets.QWidget()
-    _output_l = QtWidgets.QVBoxLayout(_output_w)
-    _output_l.setContentsMargins(theme.DOCK_KI_RAHMEN_RAND, theme.DOCK_KI_RAHMEN_RAND,
-                                 theme.DOCK_KI_RAHMEN_RAND, theme.DOCK_KI_RAHMEN_RAND)
-    _output_l.setSpacing(theme.DOCK_KI_OUTPUT_ABST)
-    _output_l.addWidget(QtWidgets.QLabel("🤖 KI-Antwort"))
     editor._ki_area = QtWidgets.QPlainTextEdit()
     editor._ki_area.setFont(schrift.mono_font())
     editor._ki_area.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
     _opt2 = editor._ki_area.document().defaultTextOption()
     _opt2.setAlignment(QtCore.Qt.AlignLeft)
     editor._ki_area.document().setDefaultTextOption(_opt2)
-    editor._ki_area.setStyleSheet(theme.STY_KI_OUTPUT_FIELD())
-    theme.apply_input_bg_ki(editor._ki_area)
+    # Gleicher Look wie Frage- und Code-Feld: grüner Hintergrund, kein Rahmen
+    editor._ki_area.setStyleSheet(theme.STY_KI_EINGABE_FELD())
+    theme.apply_input_bg_suche(editor._ki_area)
     editor._ki_area.setPlaceholderText("KI-Antwort erscheint hier …")
     editor._hl_ki = PythonHighlighter(editor._ki_area.document())
     QtCore.QTimer.singleShot(200, editor._hl_ki.aktualisiere_theme)
-    _output_l.addWidget(editor._ki_area)
-    _ki_splitter.addWidget(_output_w)
+    _mindesthoehe(editor._ki_area, theme.DOCK_KI_CODE_MIN_ZEILEN)
+    _antwort_l.addWidget(editor._ki_area, stretch=1)
+    _feld_splitter.addWidget(_antwort_teil)
 
-    _kontext_w = QtWidgets.QWidget()
-    _kontext_w.setMinimumHeight(theme.DOCK_KI_KONTEXT_MIN_H)
-    _kontext_l = QtWidgets.QVBoxLayout(_kontext_w)
-    _kontext_l.setContentsMargins(theme.DOCK_KI_RAHMEN_RAND, theme.DOCK_KI_RAHMEN_RAND,
-                                  theme.DOCK_KI_RAHMEN_RAND, theme.DOCK_KI_RAHMEN_RAND)
-    _kontext_l.setSpacing(theme.DOCK_KI_KONTEXT_ABST)
-    _kontext_l.addWidget(QtWidgets.QLabel("📌 Projekt-Kontext"))
+    # Beim Vergrößern des Panels wächst bevorzugt die Antwort
+    _feld_splitter.setStretchFactor(0, 0)
+    _feld_splitter.setStretchFactor(1, 1)
+    _feld_splitter.setStretchFactor(2, 2)
+    _feld_splitter.setSizes(theme.DOCK_KI_SPLITTER_START)
+    _feld_rahmen_l.addWidget(_feld_splitter)
+
+    _input_l.addWidget(_feld_rahmen, stretch=1)
+
+    # Projekt-Kontext als zugeklappte Sektion ganz unten —
+    # das kombinierte Eingabe/Antwort-Feld bekommt so die volle Panel-Höhe.
+    _kontext_sek = KlappSektion("📌 Projekt-Kontext", offen=False)
     editor._kontext = QtWidgets.QPlainTextEdit()
     editor._kontext.setFont(schrift.mono_font())
     editor._kontext.setLineWrapMode(QtWidgets.QPlainTextEdit.WidgetWidth)
@@ -589,14 +602,14 @@ def init_docks(editor) -> None:
     theme.apply_input_bg_kontext(editor._kontext)
     editor._kontext.setPlaceholderText(
         "Kurze Beschreibung deines Projekts …\nWird bei jedem KI-Aufruf mitgeschickt.")
+    editor._kontext.setMinimumHeight(theme.DOCK_KI_KONTEXT_MIN_H)
     editor._kontext.setPlainText(lade_kontext())
     editor._kontext.textChanged.connect(
         lambda: speichere_kontext(editor._kontext.toPlainText()))
-    _kontext_l.addWidget(editor._kontext)
-    _ki_splitter.addWidget(_kontext_w)
+    _kontext_sek.addWidget(editor._kontext)
 
-    _ki_splitter.setSizes([320, 220, 100])
-    ki_layout.addWidget(_ki_splitter, stretch=1)
+    ki_layout.addWidget(_input_w, stretch=1)
+    ki_layout.addWidget(_kontext_sek)
     editor._dock_ki = editor._make_dock("🤖  KI", "dock_ki", _L, ki_widget)
 
     # ── Aktionen-Dock ──────────────────────────────────────────────────────
@@ -646,7 +659,8 @@ def init_docks(editor) -> None:
         _abtn("🗑  Leeren",    "Suchfeld leeren", lambda: editor.find_area.clear()),
     )
     _abschnitt("KI-AKTIONEN")
-    editor._btn_ki    = _abtn("🤖  Fragen",  "KI befragen", editor._ki_fragen, h=30)
+    editor._btn_ki    = editor._aktionen.verbinde_button(
+        "ki_fragen", _abtn("🤖  Fragen", "KI befragen", h=30))
     _btn_analyse      = _abtn("🔎  Analyse", "Code automatisch analysieren", editor._auto_analyse)
     editor._plan_modus_aktiv = False
     editor._btn_plan  = QtWidgets.QPushButton("🔍  Plan")
@@ -669,24 +683,28 @@ def init_docks(editor) -> None:
             editor.vorschau_starten()
 
     _btn_vorschau = _abtn(
-        "👁  Vorschau",
-        "KI-Code direkt in FreeCAD ausführen und 3D-Viewport anzeigen",
+        "👁  KI-Vorschau",
+        "KI-Antwort in FreeCAD ausführen und 3D-Viewport anzeigen\n"
+        "(Editor-Code direkt ausführen: F5)",
         _vorschau_mit_ki_code)
     _agrid(editor._btn_ki, _btn_analyse, editor._btn_plan,
            editor._btn_ersetzen, editor._btn_einfuegen, _btn_vorschau)
 
     _abschnitt("DATEI")
+    # Speichern & Ausführen leben zentral in der Toolbar (💾 / ▶) — hier nur
+    # die Aktionen, die es sonst nirgends gibt.
     _agrid(
-        _abtn("💾  Speichern",   "Datei speichern",            editor.speichern),
         _abtn("💾✕  Schließen", "Speichern & Schließen",      editor.speichern_und_schliessen),
-        _abtn("↺  Neu laden",   "Letzten Speicherstand laden", editor.neu_laden),
+        editor._aktionen.verbinde_button("neu_laden",
+                                         _abtn("↺  Neu laden", "Letzten Speicherstand laden")),
         _abtn("↩  Backup",      "Backup wiederherstellen",     editor._backup_wiederherstellen),
     )
     _abschnitt("EDITOR")
     _agrid(
         _abtn("☰  Alles",   "Alles markieren",  editor.alles_auswaehlen),
         _abtn("✕  Löschen", "Auswahl löschen",  editor.loeschen_auswahl),
-        _abtn(_fmt_lbl,     "Code formatieren", editor._formatieren),
+        editor._aktionen.verbinde_button(
+            "formatieren", _abtn(_fmt_lbl, "Code formatieren")),
     )
     _abschnitt("BIBLIOTHEK")
     _agrid(
@@ -740,7 +758,8 @@ def init_docks(editor) -> None:
     editor._bf_panel = BarrierefreiheitPanel()
     editor._bf_panel.geaendert.connect(editor._on_barrierefreiheit)
     editor._bf_stack.addWidget(editor._bf_panel)          # 2
-    editor._bf_stack.addWidget(HilfeTab())                # 3
+    editor._bf_stack.addWidget(HilfeTab(zusaetze={        # 3
+        "⌨️ Tastenkürzel": editor._aktionen.shortcut_uebersicht()}))
 
     _fs_bg = schrift.pt(schrift.STUFE_BASE)
     _bg_btn_gruppe = QtWidgets.QButtonGroup(_bf_gruppe_widget)
@@ -777,10 +796,8 @@ def init_docks(editor) -> None:
     editor._fehler_inhalt = editor._baue_fehler_panel()
     editor._fehler_inhalt.setVisible(True)
     fp.addWidget(editor._fehler_inhalt)
-    editor._btn_fehler_toggle = QtWidgets.QPushButton()
-    editor._btn_fehler_toggle.hide()
     editor._dock_fehler = editor._make_dock(
-        "⚠  Fehler-Übersetzer", "dock_fehler", _B, fehler_panel_widget)
+        "⚠  Fehler & Sandbox", "dock_fehler", _B, fehler_panel_widget)
     editor._dock_fehler.hide()
 
     def _sandbox_toggle_cb(sandbox_aktiv: bool):
@@ -801,6 +818,17 @@ def init_docks(editor) -> None:
     editor._fehler_inhalt.setze_laufzeit_check_cb(
         lambda code: editor._vorschau._vorschau_exec(code, nur_pruefen=True)
     )
+
+    def _springe_zu_fehlerzeile(nr: int):
+        # Zum Datei-Tab zurückwechseln falls z.B. der Vorschau-Tab aktiv ist
+        tw = editor._editor_tab_widget
+        for i in range(tw.count()):
+            if tw.widget(i).isAncestorOf(editor._editor):
+                tw.setCurrentIndex(i)
+                break
+        editor.gehe_zu_zeile(nr)
+
+    editor._fehler_inhalt.setze_gehe_zu_zeile_cb(_springe_zu_fehlerzeile)
 
     editor._rechte_tabs = QtWidgets.QStackedWidget()
     editor._rechte_tabs.hide()

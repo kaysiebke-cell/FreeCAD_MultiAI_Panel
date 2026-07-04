@@ -53,12 +53,12 @@ class Snippets:
         container = _BlauBanner()
         container.setObjectName("infoBanner")
         vbox = QtWidgets.QVBoxLayout(container)
-        vbox.setContentsMargins(0, 0, 0, 0)
-        vbox.setSpacing(0)
+        vbox.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+        vbox.setSpacing(theme.ABST_KEIN)
 
         btn = QtWidgets.QPushButton(f"▶  {titel}")
         btn.setCheckable(True)
-        btn.setMinimumHeight(28)
+        btn.setMinimumHeight(theme.SNIP_BTN_H)
         btn.setObjectName("_bannerBtn")
         btn.setStyleSheet(theme.STY_BANNER_BTN(schrift.pt(schrift.STUFE_LG)))
         vbox.addWidget(btn)
@@ -95,8 +95,8 @@ class Snippets:
         """Snippet-Browser mit Lokal- und Online-Modus."""
         w      = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(w)
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(4)
+        layout.setContentsMargins(theme.ABST_M, theme.ABST_M, theme.ABST_M, theme.ABST_M)
+        layout.setSpacing(theme.ABST_M)
 
         # Interne Zustandsdaten
         self._online_makro_links  = {}
@@ -143,7 +143,7 @@ class Snippets:
         # Kategorie-Auswahl (nur Lokal sichtbar)
         self._kat_widget = QtWidgets.QWidget()
         kat_row = QtWidgets.QHBoxLayout(self._kat_widget)
-        kat_row.setContentsMargins(0, 0, 0, 0)
+        kat_row.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
         kat_lbl = QtWidgets.QLabel("Kat:")
         kat_lbl.setStyleSheet(theme.STY_ABSCHNITT_LABEL(schrift.pt(schrift.STUFE_LG)))
         self._snippet_kat = QtWidgets.QComboBox()
@@ -176,15 +176,15 @@ class Snippets:
         layout.addWidget(vw_lbl)
         self._snippet_vorschau = QtWidgets.QTextEdit()
         self._snippet_vorschau.setReadOnly(True)
-        self._snippet_vorschau.setMaximumHeight(90)
-        self._snippet_vorschau.setFont(QtGui.QFont("Courier New", 9))
+        self._snippet_vorschau.setMaximumHeight(theme.SNIP_VORSCHAU_MAX_H)
+        self._snippet_vorschau.setFont(schrift.mono_font(schrift.STUFE_SM))
         self._snippet_vorschau.setStyleSheet(theme.STY_SNIPPET_VORSCHAU)
         layout.addWidget(self._snippet_vorschau)
 
         # Aktions-Buttons
         btn_row_w = QtWidgets.QWidget()
         btn_row = QtWidgets.QHBoxLayout(btn_row_w)
-        btn_row.setContentsMargins(0, 0, 0, 0)
+        btn_row.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
         btn_einfuegen = QtWidgets.QPushButton("↪ In Editor")
         btn_einfuegen.setToolTip(
             "Snippet an der aktuellen Cursor-Position in den Editor einfügen.\n"
@@ -414,8 +414,8 @@ class Snippets:
         """Durchsuchbare FreeCAD-API-Kurzreferenz."""
         w = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(w)
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(4)
+        layout.setContentsMargins(theme.ABST_M, theme.ABST_M, theme.ABST_M, theme.ABST_M)
+        layout.setSpacing(theme.ABST_M)
 
         # ── Info-Banner ───────────────────────────────────────────────────
         _hints_verstecke = []
@@ -446,7 +446,7 @@ class Snippets:
 
         self._hint_liste = QtWidgets.QListWidget()
         self._hint_liste.setAlternatingRowColors(True)
-        self._hint_liste.setFont(QtGui.QFont("Courier New", 9))
+        self._hint_liste.setFont(schrift.mono_font(schrift.STUFE_SM))
         self._hint_liste.setStyleSheet(theme.STY_HINTS_LISTE)
         self._hint_liste.currentItemChanged.connect(self._hint_desc_aktualisieren)
         layout.addWidget(self._hint_liste, stretch=1)
@@ -458,7 +458,7 @@ class Snippets:
         layout.addWidget(self._hint_desc)
 
         btn = QtWidgets.QPushButton("📋  Signatur kopieren")
-        btn.setMinimumHeight(28)
+        btn.setMinimumHeight(theme.SNIP_BTN_H)
         btn.setStyleSheet(theme.STY_BTN_BORDER(schrift.pt(schrift.STUFE_BASE)))
         btn.clicked.connect(self._hint_kopieren)
         layout.addWidget(btn)
@@ -509,8 +509,8 @@ class Snippets:
         from ui.fehler import uebersetze_text as _ue
         w = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(w)
-        layout.setContentsMargins(6, 6, 6, 6)
-        layout.setSpacing(6)
+        layout.setContentsMargins(theme.ABST_L, theme.ABST_L, theme.ABST_L, theme.ABST_L)
+        layout.setSpacing(theme.ABST_L)
 
         # ── Info-Banner ───────────────────────────────────────────────────
         _fehler_verstecke = []
@@ -540,12 +540,12 @@ class Snippets:
         layout.addWidget(lbl_ein)
 
         self._ftab_eingabe = QtWidgets.QPlainTextEdit()
-        self._ftab_eingabe.setFont(QtGui.QFont("Courier New", 9))
+        self._ftab_eingabe.setFont(schrift.mono_font(schrift.STUFE_SM))
         self._ftab_eingabe.setPlaceholderText(
             "'NoneType' object has no attribute 'Shape'\n"
             "name 'doc' is not defined\n"
             "No active document")
-        self._ftab_eingabe.setMaximumHeight(120)
+        self._ftab_eingabe.setMaximumHeight(theme.SNIP_FTAB_EINGABE_MAX_H)
         self._ftab_eingabe.setStyleSheet(theme.STY_FEHLER_TAB_FELD)
         _opt = self._ftab_eingabe.document().defaultTextOption()
         _opt.setAlignment(QtCore.Qt.AlignLeft)
@@ -553,7 +553,7 @@ class Snippets:
         layout.addWidget(self._ftab_eingabe)
 
         btn = QtWidgets.QPushButton("🔍  Übersetzen  (Strg+Return)")
-        btn.setMinimumHeight(32)
+        btn.setMinimumHeight(theme.SNIP_FTAB_BTN_H)
         btn.setStyleSheet(theme.STY_BTN_BORDER_BOLD(schrift.pt(schrift.STUFE_LG)))
         layout.addWidget(btn)
 
@@ -563,7 +563,7 @@ class Snippets:
 
         self._ftab_ausgabe = QtWidgets.QPlainTextEdit()
         self._ftab_ausgabe.setReadOnly(True)
-        self._ftab_ausgabe.setFont(QtGui.QFont("Courier New", 9))
+        self._ftab_ausgabe.setFont(schrift.mono_font(schrift.STUFE_SM))
         self._ftab_ausgabe.setPlaceholderText("Deutsche Erklärung erscheint hier …")
         self._ftab_ausgabe.setStyleSheet(theme.STY_FEHLER_TAB_FELD)
         _opt = self._ftab_ausgabe.document().defaultTextOption()
@@ -579,13 +579,7 @@ class Snippets:
             text = self._ftab_eingabe.toPlainText().strip()
             if not text:
                 return
-            ergebnis = _ue(text)
-            self._ftab_ausgabe.setPlainText(ergebnis)
-            # ins untere Panel spiegeln wenn vorhanden
-            if hasattr(self._e, "_fehler_eingabe"):
-                self._e._fehler_eingabe.setPlainText(text)
-            if hasattr(self._e, "_fehler_ausgabe"):
-                self._e._fehler_ausgabe.setPlainText(ergebnis)
+            self._ftab_ausgabe.setPlainText(_ue(text))
 
         btn.clicked.connect(_uebersetzen)
         _QShortcut = getattr(QtGui, "QShortcut", None) or getattr(QtWidgets, "QShortcut", None)
@@ -603,16 +597,20 @@ class Snippets:
         from ui.fehler import uebersetze_text as _ue
         from editor.fehler.fehler_panel import FehlerPanel
 
+        def _ki_erklaeren_mit_dock():
+            # Die Erklärung streamt ins KI-Antwort-Feld — das KI-Dock
+            # vorher sichtbar machen, sonst läuft die Antwort unsichtbar
+            if (hasattr(self._e, "_dock_ki")
+                    and not self._e._dock_ki.isVisible()
+                    and hasattr(self._e, "_zeige_panel")):
+                self._e._zeige_panel(self._e._dock_ki,
+                                     QtCore.Qt.LeftDockWidgetArea)
+            self._e._ki_fehler_erklaeren()
+
         panel = FehlerPanel(
             uebersetze_fn = _ue,
-            ki_callback   = self._e._ki_fehler_erklaeren,
+            ki_callback   = _ki_erklaeren_mit_dock,
         )
-
-        # Rückwärts-Kompatibilität: Attribute die ki_fehler.py direkt auf dem
-        # echten Editor liest (self._e statt self, da diese Klasse jetzt
-        # komponiert statt gemixt ist).
-        self._e._fehler_eingabe = panel._ein
-        self._e._fehler_ausgabe = panel._aus
 
         # KI-Korrektur-Callback verdrahten
         panel.setze_ki_korrektur_cb(self._e._on_self_correction_needed)

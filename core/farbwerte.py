@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-farben.py – Explizite Farbdefinitionen für Hell- und Dunkel-Modus.
+farbwerte.py – Explizite Farbdefinitionen für Hell- und Dunkel-Modus.
 
 Jeder Modus hat sein eigenes Dict. Keine Palette-Erkennung, kein Raten.
 """

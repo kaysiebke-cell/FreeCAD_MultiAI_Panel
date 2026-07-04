@@ -17,4 +17,26 @@ except ImportError:
     requests = None  # type: ignore[assignment]
     HAS_REQUESTS = False
 
-__all__ = ["QtWidgets", "QtCore", "QtGui", "requests", "HAS_REQUESTS"]
+
+def single_shot_sicher(ms: int, empfaenger, fn) -> None:
+    """QTimer.singleShot, das nicht crasht, wenn das Ziel-Widget beim
+    Feuern bereits zerstört wurde ("Internal C++ object already deleted").
+
+    Bevorzugt die Qt-Kontext-Variante: Der Timer wird automatisch
+    verworfen, sobald `empfaenger` zerstört wird. Als Fallback (ältere
+    Bindings ohne Kontext-Overload) wird ein RuntimeError beim Aufruf
+    verschluckt.
+    """
+    def _sicher():
+        try:
+            fn()
+        except RuntimeError:
+            pass  # Widget wurde zwischenzeitlich gelöscht — Timer läuft ins Leere
+    try:
+        QtCore.QTimer.singleShot(ms, empfaenger, _sicher)
+    except TypeError:
+        QtCore.QTimer.singleShot(ms, _sicher)
+
+
+__all__ = ["QtWidgets", "QtCore", "QtGui", "requests", "HAS_REQUESTS",
+           "single_shot_sicher"]

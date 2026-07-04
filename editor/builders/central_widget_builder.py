@@ -6,7 +6,7 @@ Baut das zentrale Widget (Tab-Leiste + Schnellsuche-Leiste) des MakroEditors auf
 Aufgerufen einmalig aus MakroEditor.__init__.
 """
 
-from core.qt_compat import QtWidgets, QtGui
+from core.qt_compat import QtWidgets
 from core import theme
 from core import schrift
 
@@ -14,13 +14,14 @@ from core import schrift
 def init_central_widget(editor) -> None:
     """Erstellt zentrales Widget, Suche-Leiste und Statusbar und setzt sie am editor."""
 
-    def mkbtn(label, tip, slot, w=None, h=theme.SUCHE_BTN_MIN_H):
+    def mkbtn(label, tip, slot=None, w=None, h=theme.SUCHE_BTN_MIN_H):
         b = QtWidgets.QPushButton(label)
         b.setToolTip(tip)
         b.setMinimumHeight(h)
         if w:
             b.setFixedWidth(w)
-        b.clicked.connect(slot)
+        if slot is not None:
+            b.clicked.connect(slot)
         return b
 
     editor._suche_widget = QtWidgets.QWidget()
@@ -37,8 +38,9 @@ def init_central_widget(editor) -> None:
     editor._ersatz_feld = QtWidgets.QLineEdit()
     editor._ersatz_feld.setPlaceholderText("Ersatztext …")
     sl.addWidget(editor._ersatz_feld)
-    for lbl, tip, slot in [("→", "Weiter", editor._suche_weiter),
-                            ("✍", "Ersetzen", editor._ersetzen_text),
+    sl.addWidget(editor._aktionen.verbinde_button(
+        "suche_weiter", mkbtn("→", "Weiter", None, h=26)))
+    for lbl, tip, slot in [("✍", "Ersetzen", editor._ersetzen_text),
                             ("Alle", "Alle ersetzen", editor._alles_ersetzen)]:
         sl.addWidget(mkbtn(lbl, tip, slot, h=26))
     _bx = QtWidgets.QPushButton("✕")
@@ -48,8 +50,7 @@ def init_central_widget(editor) -> None:
     sl.addWidget(_bx)
     editor._suche_widget.setVisible(False)
 
-    _sc_suche = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+F"), editor)
-    _sc_suche.activated.connect(editor._toggle_suche)
+    # Ctrl+F kommt zentral aus der Aktions-Registry (editor_aktionen.py)
 
     editor._tabs = []
     editor._editor = None

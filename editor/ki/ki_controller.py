@@ -77,7 +77,45 @@ class Ki:
 
     def _ki_fragen(self):
         self._ki_bereit()
+        # ▶ Fragen / ⏹ Stopp am selben Button: läuft schon eine Anfrage,
+        # bricht ein erneuter Klick (bzw. Strg+Umsch+K) sie ab.
+        if getattr(self._e, "_ki_aktiv", False):
+            self._ki_stoppen()
+            return
         self._e._anfrage.ki_fragen()
+
+    # ── Start/Stop-UI der KI-Anfrage ──────────────────────────────────────
+
+    def _ki_lauf_ui(self, laeuft: bool):
+        """Schaltet den KI-Button zwischen „🤖 Fragen" und „⏹ Stopp".
+        Ein Button, zwei Zustände — kein zusätzliches Element."""
+        self._e._ki_aktiv = laeuft
+        if laeuft:
+            self._e._ki_stop = False   # neuen Lauf freigeben
+        btn = getattr(self._e, "_btn_ki", None)
+        if btn is not None:
+            btn.setEnabled(True)       # bleibt klickbar, um zu stoppen
+            if laeuft:
+                btn.setText("⏹  Stopp")
+                btn.setToolTip("Laufende KI-Anfrage abbrechen  [Strg+Umsch+K]")
+            else:
+                btn.setText("🤖  Fragen")
+                btn.setToolTip("KI befragen  [Strg+Umsch+K]")
+
+    def _ki_stoppen(self):
+        """Bricht die laufende KI-Anfrage ab. Der Worker-Thread stoppt an
+        der nächsten empfangenen Zeile (wie der _alive-Check beim Schließen);
+        der bereits generierte Text bleibt stehen."""
+        self._ki_bereit()
+        self._e._chunk.stop_stream_timers()   # flush + Timer stoppen
+        self._ki_lauf_ui(False)
+        self._e._ki_stop = True               # NACH _ki_lauf_ui, das False nicht überschreibt
+        vorhanden = self._e._ki_area.toPlainText().rstrip()
+        if vorhanden and not vorhanden.startswith("🧠"):
+            self._e._ki_area.setPlainText(vorhanden + "\n\n# ⏹ Von dir abgebrochen")
+        else:
+            self._e._ki_area.setPlainText("# ⏹ Abgebrochen — keine Antwort")
+        self._e._set_status("⏹ KI-Anfrage abgebrochen")
 
     # ── Fehler-Erklärung ──────────────────────────────────────────────────
 

@@ -5,7 +5,7 @@
 On first launch, a setup dialog appears automatically:
 
 **Step 1 – Choose an AI provider:**
-Clickable cards for Ollama, Anthropic, OpenAI, GitHub Copilot, or "Set up later".
+Clickable cards for all 19 providers (Ollama, Anthropic, OpenAI, GitHub Copilot, DeepSeek, Gemini, Groq, Mistral, OpenRouter …) in a scrollable two-column grid, plus "Later" to start without AI.
 
 **Step 2 – Enter API key:**
 Password field with a "Show key" option (skipped for Ollama and "Later").

@@ -25,9 +25,44 @@ from core import schrift
 
 try:
     import jedi
+    # Eingebetteter Modus: Jedi analysiert im laufenden Prozess statt einen
+    # Hilfsprozess über sys.executable zu starten. In der FreeCAD-GUI zeigt
+    # sys.executable auf die FreeCAD-Programmdatei — Jedis Hilfsprozess würde
+    # nie antworten und jeder Vervollständigungs-Thread bliebe für immer in
+    # pickle_load() hängen (kein Popup, Thread-Leck pro Tastendruck).
+    from jedi.api.environment import InterpreterEnvironment as _JediUmgebung
+    _JEDI_ENV = _JediUmgebung()
     _HAS_JEDI = True
 except ImportError:
+    _JEDI_ENV = None
     _HAS_JEDI = False
+
+# Wartezeit nach dem letzten Tastendruck, bevor Jedi angeworfen wird (ms)
+_JEDI_DEBOUNCE_MS = 150
+
+_jedi_warm = False
+
+
+def _jedi_aufwaermen():
+    """Zieht den ersten (teuren) Jedi-Lauf in den Hintergrund vor.
+
+    Der Erstaufruf baut Typindex und Modul-Cache auf und kann Sekunden
+    dauern — danach sind Aufrufe schnell. Einmal pro FreeCAD-Sitzung.
+    """
+    global _jedi_warm
+    if _jedi_warm or not _HAS_JEDI:
+        return
+    _jedi_warm = True
+
+    def _lauf():
+        try:
+            jedi.Script(code="import os\nos.pa",
+                        environment=_JEDI_ENV).complete(line=2, column=5)
+            jedi.Script(code="print(",
+                        environment=_JEDI_ENV).get_signatures(line=1, column=6)
+        except Exception:
+            pass
+    threading.Thread(target=_lauf, daemon=True, name="jedi-warmup").start()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -435,9 +470,14 @@ class JediEditor(CodeEditor):
             theme.STY_JEDI_POPUP(schrift.pt(schrift.STUFE_BASE)))
         self._jedi_timer = QtCore.QTimer(self)
         self._jedi_timer.setSingleShot(True)
-        self._jedi_timer.setInterval(300)
+        self._jedi_timer.setInterval(_JEDI_DEBOUNCE_MS)
         self._jedi_timer.timeout.connect(self._start_jedi_thread)
         self._completions_ready.connect(self._show_completions)
+        # Nur ein Jedi-Thread zugleich — neueste Anfrage gewinnt
+        self._jedi_lock = threading.Lock()
+        self._jedi_laeuft = False
+        self._jedi_naechste = None
+        QtCore.QTimer.singleShot(800, _jedi_aufwaermen)
         self._hint_timer = QtCore.QTimer(self)
         self._hint_timer.setSingleShot(True)
         self._hint_timer.setInterval(150)
@@ -457,17 +497,36 @@ class JediEditor(CodeEditor):
         line   = self.textCursor().blockNumber() + 1
         col    = self.textCursor().columnNumber()
         prefix = self._text_under_cursor()
+        # Läuft bereits eine Analyse, nur die neueste Anfrage vormerken —
+        # verhindert Thread-Stau und GIL-Konkurrenz bei schnellem Tippen.
+        with self._jedi_lock:
+            if self._jedi_laeuft:
+                self._jedi_naechste = (code, line, col, prefix)
+                return
+            self._jedi_laeuft = True
         threading.Thread(
-            target=self._fetch_completions,
+            target=self._jedi_worker,
             args=(code, line, col, prefix),
             daemon=True
         ).start()
+
+    def _jedi_worker(self, code, line, col, prefix):
+        while True:
+            self._fetch_completions(code, line, col, prefix)
+            with self._jedi_lock:
+                if self._jedi_naechste is None:
+                    self._jedi_laeuft = False
+                    return
+                code, line, col, prefix = self._jedi_naechste
+                self._jedi_naechste = None
 
     def _fetch_completions(self, code: str, line: int, col: int, prefix: str):
         names: list[str] = []
         if _HAS_JEDI:
             try:
-                matches = jedi.Script(code=code).complete(line=line, column=col)
+                matches = jedi.Script(
+                    code=code, environment=_JEDI_ENV,
+                ).complete(line=line, column=col)
                 names   = [m.name for m in matches]
             except Exception:
                 pass
@@ -652,6 +711,11 @@ class JediEditor(CodeEditor):
 
         # Nach "(": Arg-Popup für bekannte Funktionen, sonst Tooltip-Hint
         if zeichen == "(":
+            # Wort-Vervollständigung ist ab hier obsolet — Timer stoppen und
+            # Popup schließen, sonst unterdrückt es den Signatur-Tooltip
+            # (der bricht ab, solange ein Completer-Popup sichtbar ist).
+            self._jedi_timer.stop()
+            self.completer.popup().hide()
             zeile_text = self.textCursor().block().text()
             col_now    = self.textCursor().columnNumber()
             m = re.search(r'(\w+)\s*\($', zeile_text[:col_now].rstrip())
@@ -834,10 +898,14 @@ class JediEditor(CodeEditor):
             try:
                 code = self.toPlainText()
                 line = self.textCursor().blockNumber() + 1
-                sigs = jedi.Script(code=code).get_signatures(line=line, column=col)
+                sigs = jedi.Script(
+                    code=code, environment=_JEDI_ENV,
+                ).get_signatures(line=line, column=col)
                 if sigs:
                     sig      = sigs[0]
-                    params   = [p.description for p in sig.params]
+                    # Jedi liefert "param breite" — Präfix fürs Anzeigen entfernen
+                    params   = [p.description.removeprefix("param ")
+                                for p in sig.params]
                     sig_text = f"{sig.name}({', '.join(params)})"
             except Exception:
                 pass

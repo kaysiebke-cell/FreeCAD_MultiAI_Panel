@@ -22,7 +22,7 @@ UI-Struktur:
 
 import os
 
-from core.qt_compat import QtWidgets, QtCore, QtGui
+from core.qt_compat import QtWidgets, QtCore, QtGui, single_shot_sicher
 from core import schrift
 from core import theme
 
@@ -41,8 +41,8 @@ class Bibliothek:
     def _baue_bibliothek_tab(self) -> QtWidgets.QWidget:
         w = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(w)
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(4)
+        layout.setContentsMargins(theme.ABST_M, theme.ABST_M, theme.ABST_M, theme.ABST_M)
+        layout.setSpacing(theme.ABST_M)
 
         # ── Info-Banner ───────────────────────────────────────────────────
         _bib_verstecke = []
@@ -64,7 +64,7 @@ class Bibliothek:
         such_zeile.addWidget(self._bib_suche)
 
         btn_neu = QtWidgets.QPushButton("➕")
-        btn_neu.setFixedWidth(30)
+        btn_neu.setFixedWidth(theme.BIB_BTN_NEU_B)
         btn_neu.setToolTip("Neuen leeren Eintrag anlegen")
         btn_neu.clicked.connect(self._bib_neu_dialog)
         such_zeile.addWidget(btn_neu)
@@ -77,8 +77,8 @@ class Bibliothek:
         # ── Liste ─────────────────────────────────────────────────────────
         self._bib_liste = QtWidgets.QListWidget()
         self._bib_liste.setAlternatingRowColors(True)
-        self._bib_liste.setMinimumHeight(120)
-        self._bib_liste.setFont(QtGui.QFont("Courier New", 9))
+        self._bib_liste.setMinimumHeight(theme.BIB_LISTE_MIN_H)
+        self._bib_liste.setFont(schrift.mono_font(schrift.STUFE_SM))
         self._bib_liste.currentRowChanged.connect(self._bib_vorschau_aktualisieren)
         _bib_verstecke.append(self._bib_liste)
         layout.addWidget(self._bib_liste)
@@ -86,8 +86,8 @@ class Bibliothek:
         # ── Vorschau ──────────────────────────────────────────────────────
         vorschau_widget = QtWidgets.QWidget()
         vl = QtWidgets.QVBoxLayout(vorschau_widget)
-        vl.setContentsMargins(0, 0, 0, 0)
-        vl.setSpacing(2)
+        vl.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+        vl.setSpacing(theme.ABST_XS)
 
         self._bib_beschr_lbl = QtWidgets.QLabel("")
         self._bib_beschr_lbl.setWordWrap(True)
@@ -97,8 +97,8 @@ class Bibliothek:
 
         self._bib_code_vorschau = QtWidgets.QPlainTextEdit()
         self._bib_code_vorschau.setReadOnly(True)
-        self._bib_code_vorschau.setFont(QtGui.QFont("Courier New", 9))
-        self._bib_code_vorschau.setMaximumHeight(130)
+        self._bib_code_vorschau.setFont(schrift.mono_font(schrift.STUFE_SM))
+        self._bib_code_vorschau.setMaximumHeight(theme.BIB_VORSCHAU_MAX_H)
         self._bib_code_vorschau.setPlaceholderText("Code-Vorschau …")
         vl.addWidget(self._bib_code_vorschau)
 
@@ -109,22 +109,22 @@ class Bibliothek:
         btn_zeile = QtWidgets.QHBoxLayout()
 
         self._bib_btn_ausfuehren = QtWidgets.QPushButton("▶ Ausführen")
-        self._bib_btn_ausfuehren.setMinimumHeight(28)
+        self._bib_btn_ausfuehren.setMinimumHeight(theme.BIB_BTN_H)
         self._bib_btn_ausfuehren.setStyleSheet(theme.STY_BOLD_BTN)
         self._bib_btn_ausfuehren.setEnabled(False)
         self._bib_btn_ausfuehren.clicked.connect(self._bib_ausfuehren)
         btn_zeile.addWidget(self._bib_btn_ausfuehren)
 
         self._bib_btn_laden = QtWidgets.QPushButton("📥 In Editor")
-        self._bib_btn_laden.setMinimumHeight(28)
+        self._bib_btn_laden.setMinimumHeight(theme.BIB_BTN_H)
         self._bib_btn_laden.setToolTip("Code in den Editor laden")
         self._bib_btn_laden.setEnabled(False)
         self._bib_btn_laden.clicked.connect(self._bib_in_editor_laden)
         btn_zeile.addWidget(self._bib_btn_laden)
 
         self._bib_btn_loeschen = QtWidgets.QPushButton("🗑")
-        self._bib_btn_loeschen.setFixedWidth(34)
-        self._bib_btn_loeschen.setMinimumHeight(28)
+        self._bib_btn_loeschen.setFixedWidth(theme.BIB_BTN_LOESCHEN_B)
+        self._bib_btn_loeschen.setMinimumHeight(theme.BIB_BTN_H)
         self._bib_btn_loeschen.setToolTip("Eintrag löschen")
         self._bib_btn_loeschen.setEnabled(False)
         self._bib_btn_loeschen.clicked.connect(self._bib_loeschen)
@@ -315,10 +315,10 @@ class Bibliothek:
         """Zeigt den Speichern-Dialog und legt den Eintrag an."""
         dlg = QtWidgets.QDialog(self._e)
         dlg.setWindowTitle("💾 In Bibliothek speichern")
-        dlg.setMinimumWidth(440)
+        dlg.setMinimumWidth(theme.BIB_DLG_MIN_B)
 
         vl = QtWidgets.QVBoxLayout(dlg)
-        vl.setSpacing(8)
+        vl.setSpacing(theme.ABST_XL)
 
         form = QtWidgets.QFormLayout()
 
@@ -339,8 +339,8 @@ class Bibliothek:
         form.addRow("", ki_cb)
 
         code_area = QtWidgets.QPlainTextEdit()
-        code_area.setFont(QtGui.QFont("Courier New", 9))
-        code_area.setMinimumHeight(150)
+        code_area.setFont(schrift.mono_font(schrift.STUFE_SM))
+        code_area.setMinimumHeight(theme.BIB_DLG_CODE_MIN_H)
         code_area.setPlainText(code)
         form.addRow("Code:", code_area)
 
@@ -353,7 +353,7 @@ class Bibliothek:
 
         btn_zeile = QtWidgets.QHBoxLayout()
         btn_ok = QtWidgets.QPushButton("💾 Speichern")
-        btn_ok.setMinimumHeight(30)
+        btn_ok.setMinimumHeight(theme.BIB_DLG_BTN_H)
         btn_ok.setStyleSheet(theme.STY_BOLD_BTN)
         btn_ab = QtWidgets.QPushButton("Abbrechen")
         btn_zeile.addWidget(btn_ok)
@@ -384,7 +384,7 @@ class Bibliothek:
                 status_lbl.setStyleSheet(f"color:{theme.farbe_ok(dlg)};")
                 status_lbl.setText(f"✅ '{name}' gespeichert!")
                 self._bib_liste_aktualisieren()
-                QtCore.QTimer.singleShot(800, dlg.accept)
+                single_shot_sicher(800, dlg, dlg.accept)
             except Exception as ex:
                 status_lbl.setStyleSheet(f"color:{theme.farbe_fehler(dlg)};")
                 status_lbl.setText(f"❌ Fehler: {ex}")

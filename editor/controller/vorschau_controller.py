@@ -63,6 +63,8 @@ class Vorschau:
         self._vorschau_letzter_fehler: str | None = None
         self._vorschau_letzter_code:   str | None = None
         self._letzter_exec_ausgabe:    str        = ""
+        self._exec_laeuft:             bool       = False
+        self._exec_abbruch:            bool       = False
 
         self._e._editor_tab_widget.tabCloseRequested.connect(
             self._vorschau_tab_close_requested)
@@ -101,12 +103,159 @@ class Vorschau:
         self._vorschau_log_box    = None
         self._e._set_status("👁 Vorschau geschlossen")
 
+    # ── Abbruch laufender Ausführung ──────────────────────────────────────
+    def exec_laeuft(self) -> bool:
+        return getattr(self, "_exec_laeuft", False)
+
+    def abbruch_anfordern(self):
+        """⏹-Button bzw. F5/F9 während eines Laufs — der Wächter in
+        _vorschau_exec stoppt an der nächsten Python-Zeile."""
+        if self.exec_laeuft():
+            self._exec_abbruch = True
+            self._e._set_status(
+                "⏹ Abbruch angefordert — stoppt an der nächsten Python-Zeile",
+                ms=0)
+
+    def _lauf_ui_setzen(self, laeuft: bool) -> None:
+        """Schaltet den ▶-Button im Vorschau-Tab in den Stopp-Modus und
+        zurück (ein Button, zwei Zustände — kein zusätzliches Element)."""
+        btn = getattr(self, "_btn_vp_aus", None)
+        if btn is not None:
+            if laeuft:
+                btn.setText("⏹  Stopp")
+                btn.setToolTip(
+                    "Laufende Ausführung abbrechen — stoppt an der nächsten\n"
+                    "Python-Zeile (eine laufende FreeCAD-Operation selbst\n"
+                    "ist nicht unterbrechbar)")
+            else:
+                btn.setText("▶  Ausführen")
+                btn.setToolTip("Code ausführen und 3D-Viewport einbetten")
+        for name in ("_btn_vp_akt", "_btn_vp_fit"):
+            b = getattr(self, name, None)
+            if b is not None:
+                b.setEnabled(not laeuft)
+
+    # ── Auswahl ausführen (F9) ────────────────────────────────────────────
+    def auswahl_ausfuehren(self):
+        """F9 — führt nur die markierten Zeilen (oder die aktuelle Zeile)
+        in FreeCAD aus. Die Selektion wird auf ganze Zeilen erweitert und
+        der Code mit Leerzeilen auf seine Originalposition aufgefüllt,
+        damit Fehler-Zeilennummern weiter auf die Editor-Zeilen zeigen."""
+        e = self._e
+        if self.exec_laeuft():
+            self.abbruch_anfordern()
+            return
+        cursor = e._editor.textCursor()
+        doc    = e._editor.document()
+        if cursor.hasSelection():
+            block = doc.findBlock(cursor.selectionStart())
+            ende  = doc.findBlock(cursor.selectionEnd())
+            # Endet die Selektion genau am Zeilenanfang, zählt die Zeile nicht mit
+            if (ende.blockNumber() > block.blockNumber()
+                    and cursor.selectionEnd() == ende.position()):
+                ende = ende.previous()
+        else:
+            block = ende = cursor.block()
+        start_zeile = block.blockNumber()
+        zeilen = []
+        b = block
+        while b.isValid():
+            zeilen.append(b.text())
+            if b.blockNumber() >= ende.blockNumber():
+                break
+            b = b.next()
+        text = "\n".join(zeilen)
+        if not text.strip():
+            e._set_status("⚠ Keine ausführbaren Zeilen markiert (F9)")
+            return
+        import textwrap
+        code = "\n" * start_zeile + textwrap.dedent(text)
+        n = len(zeilen)
+        if (self.ausfuehren_ohne_vorschau(code, transaktion="Auswahl (F9)")
+                and not self._letzter_exec_ausgabe.strip()):
+            e._set_status(f"✅ Auswahl ausgeführt ({n} Zeile{'' if n == 1 else 'n'}) "
+                          "— Ergebnis im FreeCAD-Fenster")
+
+    # ── Stilles Ausführen (F5 / F9 — ohne Vorschau-Tab) ───────────────────
+    def ausfuehren_ohne_vorschau(self, code: str = None,
+                                 transaktion: str = "Makro (F5)") -> bool:
+        """Führt Code in FreeCAD aus, ohne Vorschau-Tab oder Viewport-
+        Einbettung — das Ergebnis zeigt das FreeCAD-Hauptfenster.
+        Nur bei Fehlern öffnet sich das Fehler-Panel. True bei Erfolg."""
+        e = self._e
+        if self.exec_laeuft():
+            e._set_status("⏳ Es läuft bereits eine Ausführung — F5 bricht sie ab")
+            return False
+        if code is None:
+            code = e._editor.toPlainText().strip()
+        if not code:
+            e._set_status("⚠ Editor ist leer")
+            return False
+
+        try:
+            ast.parse(code)
+        except SyntaxError as ex:
+            if hasattr(e._editor, "setze_fehler_zeilen") and ex.lineno:
+                e._editor.setze_fehler_zeilen([ex.lineno - 1])
+            self._stiller_fehler(f"SyntaxError Zeile {ex.lineno}: {ex.msg}", code)
+            return False
+        if hasattr(e._editor, "setze_fehler_zeilen"):
+            e._editor.setze_fehler_zeilen([])
+
+        # Auto-Backup wie bei der KI-Vorschau
+        try:
+            import FreeCAD as _App
+            _doc = _App.ActiveDocument
+            if _doc and _doc.FileName:
+                import shutil as _sh
+                _sh.copy2(_doc.FileName, _doc.FileName + ".vorschau-backup")
+        except Exception:
+            pass
+
+        e._set_status("⏳ Führe aus … (F5 = Abbrechen)", ms=0)
+        fehler = self._vorschau_exec(code, transaktion=transaktion)
+        if fehler:
+            if fehler.startswith("⏹"):
+                # Absichtlicher Abbruch ist kein Fehler — Dock bleibt zu
+                e._set_status(fehler, ms=0)
+                return False
+            import re as _re
+            _m = _re.search(r"Zeile (\d+)", fehler)
+            if _m and hasattr(e._editor, "setze_fehler_zeilen"):
+                e._editor.setze_fehler_zeilen([int(_m.group(1)) - 1])
+            self._stiller_fehler(fehler, code)
+            return False
+
+        ausgabe = getattr(self, "_letzter_exec_ausgabe", "").strip()
+        if ausgabe:
+            # print()-Ausgabe still ins Fehler-Panel parken (Dock bleibt zu)
+            panel = getattr(e, "_fehler_inhalt", None)
+            if panel is not None:
+                panel.ausgabe_starten(code)
+                panel.ausgabe_anhaengen(ausgabe)
+                panel._sb_status.setText("✅ Erfolgreich ausgeführt")
+                panel._sb_rahmen("ok")
+            e._set_status("✅ Ausgeführt — Ausgabe liegt im ⚠ Fehler-Panel")
+        else:
+            e._set_status("✅ Ausgeführt — Ergebnis im FreeCAD-Fenster")
+        return True
+
+    def _stiller_fehler(self, fehler: str, code: str) -> None:
+        """Fehler aus dem stillen Lauf: Panel befüllen und Dock öffnen."""
+        self._vorschau_letzter_fehler = fehler
+        self._vorschau_letzter_code   = code
+        self._vorschau_fehler_panel_befuellen(fehler)
+        if hasattr(self._e, "_dock_fehler"):
+            self._e._dock_fehler.show()
+            self._e._dock_fehler.raise_()
+        self._e._set_status(f"❌ {fehler}", ms=0)
+
     # ── Tab-UI ────────────────────────────────────────────────────────────
     def _baue_vorschau_tab(self) -> QtWidgets.QWidget:
         w = QtWidgets.QWidget()
         root = QtWidgets.QVBoxLayout(w)
-        root.setContentsMargins(6, 4, 6, 4)
-        root.setSpacing(4)
+        root.setContentsMargins(theme.ABST_L, theme.ABST_M, theme.ABST_L, theme.ABST_M)
+        root.setSpacing(theme.ABST_M)
 
         # Titelzeile
         tz = QtWidgets.QHBoxLayout()
@@ -115,7 +264,7 @@ class Vorschau:
         tz.addWidget(tl)
         tz.addStretch()
         bx = QtWidgets.QPushButton("✕  Schließen")
-        bx.setFixedHeight(22)
+        bx.setFixedHeight(theme.VORSCHAU_CLOSE_BTN_H)
         bx.setStyleSheet(theme.STY_VORSCHAU_CLOSE_BTN(schrift.pt(schrift.STUFE_BASE)))
         bx.clicked.connect(self.vorschau_schliessen)
         tz.addWidget(bx)
@@ -131,10 +280,10 @@ class Vorschau:
         # Container für den eingebetteten View
         self._vorschau_container = QtWidgets.QWidget()
         self._vorschau_container.setObjectName("VorschauContainer")
-        self._vorschau_container.setMinimumHeight(80)
+        self._vorschau_container.setMinimumHeight(theme.VORSCHAU_CONTAINER_MIN_H)
         self._vorschau_container.setStyleSheet(theme.STY_VORSCHAU_CONTAINER)
         container_lay = QtWidgets.QVBoxLayout(self._vorschau_container)
-        container_lay.setContentsMargins(0, 0, 0, 0)
+        container_lay.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
 
         # Platzhalter-Label (wird ersetzt sobald der View eingebettet ist)
         self._vorschau_placeholder = QtWidgets.QLabel(
@@ -149,22 +298,23 @@ class Vorschau:
 
         # Buttons
         bz = QtWidgets.QHBoxLayout()
-        bz.setSpacing(6)
+        bz.setSpacing(theme.ABST_L)
 
         def _btn(label, slot, tip=""):
             b = QtWidgets.QPushButton(label)
-            b.setMinimumHeight(30)
+            b.setMinimumHeight(theme.VORSCHAU_BTN_H)
             b.setToolTip(tip)
             b.clicked.connect(slot)
             bz.addWidget(b)
             return b
 
         self._btn_vp_aus  = _btn("▶  Ausführen",
-                                  self._vorschau_ausfuehren,
+                                  self._vorschau_ausfuehren_oder_stopp,
                                   "Code ausführen und 3D-Viewport einbetten")
         self._btn_vp_akt  = _btn("🔄  Aktualisieren",
                                   self._vorschau_ausfuehren,
-                                  "Code erneut ausführen (Viewport bleibt eingebettet)")
+                                  "Code erneut ausführen — das vorherige Vorschau-\n"
+                                  "Ergebnis wird ersetzt (keine doppelten Körper)")
         self._btn_vp_fit  = _btn("⊡  Einpassen",
                                   self._vorschau_fit_all,
                                   "fitAll() — Modell ins Bild einpassen")
@@ -181,7 +331,17 @@ class Vorschau:
         return w
 
     # ── Ausführen ────────────────────────────────────────────────────────
+    def _vorschau_ausfuehren_oder_stopp(self):
+        """▶-Button im Vorschau-Tab: startet einen Lauf — oder bricht den
+        laufenden ab (der Button zeigt dann ⏹ Stopp)."""
+        if self.exec_laeuft():
+            self.abbruch_anfordern()
+        else:
+            self._vorschau_ausfuehren()
+
     def _vorschau_ausfuehren(self):
+        if self.exec_laeuft():
+            return
         # Priorität: override (KI-Code) → Editor
         code = getattr(self, "_vorschau_code_override", None) or self._e._editor.toPlainText().strip()
         self._vorschau_code_override = None
@@ -199,9 +359,6 @@ class Vorschau:
                 self._e._editor.setze_fehler_zeilen([e.lineno - 1])
             if panel is not None:
                 panel._sandbox_ergebnis(False, f"❌ SyntaxError Zeile {e.lineno}: {e.msg}", code)
-                panel._stack.setCurrentIndex(1)
-                panel._ist_sandbox = True
-                panel._btn_toggle.setText("🔍 Fehler-Übersetzer")
                 if hasattr(self._e, "_dock_fehler"):
                     self._e._dock_fehler.show()
                     self._e._dock_fehler.raise_()
@@ -218,6 +375,10 @@ class Vorschau:
                 self._e._dock_fehler.raise_()
             panel.ausgabe_anhaengen("✅ Syntax korrekt")
         self._vorschau_status("⏳ Code wird ausgeführt …")
+
+        # Vorherige Vorschau-Läufe zurücknehmen — sonst erzeugt jedes
+        # 🔄 Aktualisieren neue Körper statt das Ergebnis zu ersetzen
+        self._vorherige_vorschau_zuruecknehmen(panel)
 
         # Auto-Backup
         try:
@@ -236,10 +397,22 @@ class Vorschau:
             panel.ausgabe_anhaengen("▶ Führe Code aus …")
 
         fehler = self._vorschau_exec(code)
+        if fehler and fehler.startswith("⏹"):
+            # Absichtlicher Abbruch ist kein Fehler
+            self._vorschau_status(fehler)
+            if panel is not None:
+                panel.ausgabe_anhaengen(fehler)
+                panel._sb_status.setText("⏹ Abgebrochen")
+            self._e._set_status(fehler, ms=0)
+            return
         if fehler:
             self._vorschau_status(f"❌ {fehler}")
             self._vorschau_letzter_fehler = fehler
             self._vorschau_letzter_code   = code
+            import re as _re
+            _m = _re.search(r"Zeile (\d+)", fehler)
+            if _m and hasattr(self._e._editor, "setze_fehler_zeilen"):
+                self._e._editor.setze_fehler_zeilen([int(_m.group(1)) - 1])
             self._vorschau_fehler_panel_befuellen(fehler)
             if hasattr(self._e, "_dock_fehler"):
                 self._e._dock_fehler.show()
@@ -267,12 +440,42 @@ class Vorschau:
         self._vorschau_shot_timer.timeout.connect(self._view_einbetten)
         self._vorschau_shot_timer.start(200)
 
-    def _vorschau_exec(self, code: str, nur_pruefen: bool = False):
+    def _vorherige_vorschau_zuruecknehmen(self, panel=None) -> None:
+        """Nimmt alle direkt aufeinanderfolgenden „KI-Vorschau"-Transactions
+        per Undo zurück, damit ein neuer Lauf das Ergebnis ERSETZT statt
+        Duplikate zu erzeugen. Fremde Transactions (manuelle Änderungen,
+        F5-Läufe) haben andere Namen und bleiben unangetastet."""
+        try:
+            import FreeCAD as App
+            doc = App.ActiveDocument
+            if doc is None:
+                return
+            zurueck = 0
+            while (getattr(doc, "UndoNames", None)
+                   and doc.UndoNames[0] == "KI-Vorschau"
+                   and zurueck < 20):          # Sicherheitsgrenze
+                doc.undo()
+                zurueck += 1
+            if zurueck:
+                doc.recompute()
+                if panel is not None:
+                    panel.ausgabe_anhaengen(
+                        f"↩ Vorheriges Vorschau-Ergebnis ersetzt "
+                        f"({zurueck} Lauf{'' if zurueck == 1 else 'e'} zurückgenommen)")
+        except Exception:
+            pass
+
+    def _vorschau_exec(self, code: str, nur_pruefen: bool = False,
+                       transaktion: str = "KI-Vorschau"):
         """exec() im echten FreeCAD-Namespace. Gibt None oder Fehlermeldung zurück.
 
         nur_pruefen=True: Transaction wird auch bei Erfolg abgebrochen — keine
         dauerhaften FreeCAD-Änderungen. Zum Laufzeit-Check vor dem Einfügen in den Editor.
+        transaktion: Name der Undo-Transaction — die Vorschau nimmt vor einem
+        neuen Lauf nur ihre eigenen „KI-Vorschau"-Transactions zurück.
         """
+        if self.exec_laeuft():
+            return "⏳ Es läuft bereits eine Ausführung — ⏹/F5 bricht sie ab"
         try:
             import FreeCAD as App
             import FreeCADGui as Gui
@@ -347,12 +550,57 @@ class Vorschau:
         doc = App.ActiveDocument
         in_transaction = False
         _stdout_buf = _io.StringIO()
+
+        # Abbruch-Wächter: exec() läuft im GUI-Thread und friert das Fenster
+        # ein. Der Trace-Hook pumpt deshalb alle ~0,1 s die Qt-Events, damit
+        # ⏹/F5 klickbar bleiben, und wirft bei angefordertem Abbruch einen
+        # KeyboardInterrupt (stoppt nur zwischen Python-Zeilen — eine
+        # laufende FreeCAD-C++-Operation ist nicht unterbrechbar).
+        import sys as _sys
+        import time as _time
+        self._exec_laeuft  = True
+        self._exec_abbruch = False
+        self._lauf_ui_setzen(True)
+        _pump = {"zaehler": 0, "letzter": _time.monotonic()}
+
+        def _trace_zeile(frame, event, arg):
+            if event == "line":
+                _pump["zaehler"] += 1
+                if _pump["zaehler"] >= 200:
+                    _pump["zaehler"] = 0
+                    jetzt = _time.monotonic()
+                    if jetzt - _pump["letzter"] >= 0.1:
+                        _pump["letzter"] = jetzt
+                        QtWidgets.QApplication.processEvents()
+                        if self._exec_abbruch:
+                            raise KeyboardInterrupt("Vom Benutzer abgebrochen")
+            return _trace_zeile
+
+        def _trace_start(frame, event, arg):
+            if frame.f_code.co_filename != "<vorschau>":
+                return None
+            return _trace_zeile
+
         try:
             if doc:
-                doc.openTransaction("KI-Prüflauf" if nur_pruefen else "KI-Vorschau")
+                doc.openTransaction("KI-Prüflauf" if nur_pruefen else transaktion)
                 in_transaction = True
+            _sys.settrace(_trace_start)
             with _cl.redirect_stdout(_stdout_buf):
                 exec(compile(code, "<vorschau>", "exec"), ns)  # noqa: S102
+        except KeyboardInterrupt:
+            if in_transaction:
+                try:
+                    doc.abortTransaction()
+                except Exception:
+                    pass
+            try:
+                if App.ActiveDocument:
+                    App.ActiveDocument.recompute()
+            except Exception:
+                pass
+            self._letzter_exec_ausgabe = _stdout_buf.getvalue()
+            return "⏹ Abgebrochen — FreeCAD-Änderungen wurden zurückgenommen"
         except Exception as e:
             if in_transaction:
                 try:
@@ -364,7 +612,20 @@ class Vorschau:
             log_text = (ausgabe + "\n" if ausgabe else "") + "\n".join(zeilen[-8:])
             self._vorschau_log(log_text.strip())
             self._letzter_exec_ausgabe = ""
+            # Zeilennummer aus dem Traceback holen (letzter Frame im User-Code)
+            zeile = None
+            tb = e.__traceback__
+            while tb is not None:
+                if tb.tb_frame.f_code.co_filename == "<vorschau>":
+                    zeile = tb.tb_lineno
+                tb = tb.tb_next
+            if zeile:
+                return f"{type(e).__name__} in Zeile {zeile}: {e}"
             return f"{type(e).__name__}: {e}"
+        finally:
+            _sys.settrace(None)
+            self._exec_laeuft = False
+            self._lauf_ui_setzen(False)
 
         self._letzter_exec_ausgabe = _stdout_buf.getvalue()
 
@@ -582,29 +843,14 @@ class Vorschau:
                 theme.STY_VORSCHAU_STATUS(schrift.pt(schrift.STUFE_BASE)))
 
     def _vorschau_fehler_panel_befuellen(self, fehlertext: str) -> None:
-        """Lädt Vorschau-Fehler in Fehler-Übersetzer + Sandbox (Dock bleibt zu)."""
-        # Fehler-Übersetzer (Seite 0) befüllen
-        if hasattr(self._e, "_fehler_eingabe"):
-            self._e._fehler_eingabe.setPlainText(fehlertext)
-        if hasattr(self._e, "_fehler_ausgabe"):
-            try:
-                from ui.fehler import uebersetze_text
-                self._e._fehler_ausgabe.setPlainText(uebersetze_text(fehlertext))
-            except Exception:
-                pass
-
-        # Sandbox in Fehlerzustand versetzen über die offizielle API (_sandbox_ergebnis).
-        # Dock bleibt zu — Zustand ist bereit wenn der User ihn öffnet.
+        """Lädt den Vorschau-Fehler ins Fehler-Panel (Dock bleibt zu — der
+        Zustand ist bereit, wenn der User ihn öffnet). Übersetzen erledigt
+        der User dort per 🔍-Button im selben Feld."""
         panel = getattr(self._e, "_fehler_inhalt", None)
         if panel is not None:
             code = getattr(self, "_vorschau_letzter_code", "") or ""
             # _sandbox_ergebnis setzt: Ausgabe, roter Rahmen, KI-Button, Code
             panel._sandbox_ergebnis(False, fehlertext, code)
-            # Stack auf Sandbox-Seite stellen OHNE zeige_seite() —
-            # das würde _sandbox_toggle_cb auslösen und den Dock aufmachen
-            panel._stack.setCurrentIndex(1)
-            panel._ist_sandbox = True
-            panel._btn_toggle.setText("🔍 Fehler-Übersetzer")
 
     def _vorschau_fehler_oeffnen(self) -> None:
         """Öffnet den Fehler-Übersetzer-Dock mit dem letzten Vorschau-Fehler."""

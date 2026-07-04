@@ -1,35 +1,47 @@
 [← Back: Macro Library](makro-bibliothek.md) | [Back to README](../README.md) | Next: [Ollama – Field Report →](OLLAMA_ERFAHRUNGEN.md)
 
-# Error Translator
+# Error Panel & Sandbox
 
-Explain FreeCAD error messages in plain language:
+The **⚠ Error** panel (bottom edge) is **one single surface** — output, runtime
+errors and the test sandbox all share the same field. There is no more page
+switching. The error sits in the output field; every action is a button above it:
+
+| Button | Function |
+|--------|----------|
+| 🧪 Test | Syntax check + trial run of the loaded (AI) code — no real document changes |
+| 🔧 AI fix | Send error + code to the AI and get corrected code back (max. 3 attempts) |
+| 🔍 Translate | Translate the error message into German **1:1, in place** — the text is *replaced*, not duplicated. The button then becomes 🔙 **Original** and switches back (one button, two states — like a browser) |
+| 🐛 AI explains | Detailed AI explanation of the error in German (answer streams into the 🤖 AI panel) |
+| 🗑 Clear | Reset the field and its state |
 
 ```
-Copy an error message (e.g. from the FreeCAD console):
+Output / Error:
 
   AttributeError: 'NoneType' object has no attribute 'Shape'
 
-→ Paste it into the input field
-→ 🔍 Translate  (or Ctrl+Enter)
-→ Explanation:
-   "The object does not exist or has not been fully built yet …"
-→ Suggested fix:
-   "Check whether doc.getObject('...') returns None …"
+→ 🔍 Translate  →  same field now shows:
+
+  ❌ Object is None
+  »Shape« was called on None.
+  Possible causes: function returns None instead of an object …
+
+→ 🔙 Original   →  back to the English message
 ```
 
-For more complex errors: **🔧 AI Fix** sends the error + current code directly to the AI.
+Recognised error types when translating: `AttributeError` · `TypeError` ·
+`NameError` · `ImportError` · `No active document` · Shape errors · Constraint errors.
 
-Split into two areas: **Error Tab** (in the dock) + **Error Panel** (bottom edge, always visible).
+**Good to know:** 🐛 AI explains and 🔧 AI fix always use the **real English
+error** — even while the German translation is on screen.
 
-**Error Tab in the dock:**
-1. Paste an English error message / traceback
-2. **🔍 Translate** or **Ctrl+Enter**
-3. Plain-language explanation + suggested fix appears
+Double-click a `»line N«` reference in the field to jump to that line in the editor.
 
-Recognised error types: `AttributeError` · `TypeError` · `NameError` · `ImportError` · `No active document` · Shape errors · Constraint errors
+**Where the errors come from:**
+- **F5 / F9** runs and the **👁 Preview** place runtime errors here automatically and open the panel.
+- AI-generated code lands here for a 🧪 trial run before you replace your code.
 
-**🔧 AI Fix:**
-Error + current code are sent directly to the AI → corrected code appears in the sandbox (max. 3 attempts).
+> A separate **error-translator tab** lives in the left dock (Snippets area):
+> paste any English error and press **Ctrl+Enter** for a quick standalone translation.
 
 ---
 

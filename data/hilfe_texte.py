@@ -20,9 +20,29 @@ Neu mit natürlicher Sprache arbeiten?
     ("🏗️ Layout – Übersicht", """\
 Der Editor besteht aus 11 frei anordenbaren Panels (Docks).
 
-TOOLBAR OBEN  –  alle Panels ein-/ausschalten:
+TOOLBAR OBEN  –  links: 💾 Speichern (Strg+S)
+
+Editor-Code ausführen — drei Wege:
+  F5              speichert + führt den GANZEN Code direkt
+                  in FreeCAD aus. Ergebnis im FreeCAD-Fenster;
+                  nur bei Fehlern öffnet sich das ⚠ Panel.
+                  Läuft schon etwas → F5 bricht es ab.
+  F9              führt NUR die markierten Zeilen aus
+                  (ohne Markierung: die aktuelle Zeile).
+                  Ideal zum schrittweisen Ausprobieren.
+  👁 KI-Vorschau  führt aus UND zeigt den 3D-Viewport
+                  als Tab im Editor (mit eigenem ▶ / 🔄).
+                  Während ein Lauf läuft, wird ▶ zu ⏹ Stopp.
+
+Abbrechen: F5 (bzw. der ⏹-Button) stoppt einen laufenden
+Lauf an der nächsten Python-Zeile. Eine bereits laufende
+FreeCAD-Operation selbst ist nicht unterbrechbar.
+
+Daneben alle Panels ein-/ausschalten:
   ⚙  Einst.      KI-Quelle, Modell, Preset, Temperatur, API-Schlüssel
-  🤖 KI           Eingabefeld, KI-Antwort, Projekt-Kontext, Suche/Ersetzen
+  🤖 KI           Ein kombiniertes Feld: Frage · Code-Block
+                  · KI-Antwort (durch Labels getrennt),
+                  Suche/Ersetzen, Projekt-Kontext (aufklappbar)
   🎛 Akt.         Alle Aktions-Buttons (Laden, Fragen, Ersetzen, Datei …)
   📦 Snip         Code-Snippets nach Kategorie (lokal + Online-GitHub)
   💡 API          FreeCAD API-Kurzreferenz
@@ -30,8 +50,11 @@ TOOLBAR OBEN  –  alle Panels ein-/ausschalten:
   🛠 Tools        FreeCAD-Dokumentkontext, Direkt-Werkzeuge, Protokoll
   📚 Bib.         Makro-Bibliothek
   🔧 Werkz.       Code-Baum, Navigation, Edit-Funktionen, Bereinigung
-  ⚠  Fehler       Fehler-Übersetzer + KI-Selbstkorrektur
-  ♿ Hilfe+Zugang  Assistent (🤝) + Barrierefreiheits-Einstellungen
+  ⚠  Fehler       Fehler & Sandbox in EINER Fläche:
+                  Ausgabe/Fehler, 🔍 Übersetzen, 🐛 KI erklärt,
+                  🔧 KI korrigieren, 🧪 Testen
+  ♿ Hilfe+Zugang  4 Tabs: 🤝 Assist. · 🔧 Helfer
+                  · ♿ Zugang · ❓ Hilfe (diese Doku)
 
 MITTE  –  Editor (immer sichtbar)
   Mehrere Dateien gleichzeitig als Tabs.
@@ -55,6 +78,11 @@ Standard-Workflow (Code ändern):
   5. 🔍 Markieren
   6. ✅ Ersetzen  (Backup wird automatisch erstellt)
 
+Anfrage stoppen:
+  Während die KI antwortet, wird 🤖 Fragen zu ⏹ Stopp.
+  Ein Klick (oder erneut Strg+Umsch+K) bricht die
+  laufende Anfrage ab — die bisherige Antwort bleibt.
+
 Plan-Modus (Code vor dem Einfügen prüfen):
   🔍 Plan  aktivieren  →  🤖 Fragen  →  ✅ Ersetzen
   → Dialog zeigt neuen Code zur Bestätigung
@@ -70,7 +98,26 @@ Auto-Einfügen:
   → deaktivieren wenn du erst prüfen möchtest
 
 Schnell-Analyse (ohne Markierung):
-  🔎 Auto-Analyse (Aktionen-Panel) → ganzen Code erklären
+  🔎 Analyse (Aktionen-Panel) → ganzen Code erklären
+
+3D-Vorschau (👁 KI-Vorschau, Aktionen-Panel):
+  Führt die KI-Antwort (oder den Editor-Code) direkt
+  in FreeCAD aus und zeigt den 3D-Viewport als
+  eigenen Tab „👁 Vorschau" im Editor.
+  Tipp: Den eigenen Editor-Code führst du mit F5
+  direkt aus (ohne Vorschau-Tab).
+  Buttons im Tab: ▶ Ausführen · 🔄 Aktualisieren
+                  · ⊡ Einpassen
+  Während ein Lauf läuft, wird ▶ zu ⏹ Stopp.
+  🔄 ERSETZT das vorherige Vorschau-Ergebnis
+  (per Undo) — es entstehen keine doppelten
+  Körper. Eigene manuelle Änderungen in
+  FreeCAD bleiben dabei erhalten.
+  ⚠ Code wird real ausgeführt — Änderungen am
+  FreeCAD-Dokument sind echt.
+  Bei Laufzeitfehlern öffnet sich das ⚠ Fehler-Panel
+  mit dem Fehler — dort 🔍 Übersetzen, 🐛 KI erklärt
+  oder 🔧 KI korrigieren.
 
 Chat-Verlauf:
   Bleibt zwischen Fragen erhalten (Folgefragen möglich).
@@ -97,6 +144,16 @@ Suche/Ersetzen im KI-Panel:
 Panel „⚙ Einst." öffnen (Toolbar).
 Das Panel ist scrollbar — alle Abschnitte erreichbar.
 
+SCHNELLSTART
+  Drei Profil-Buttons setzen Vorlage, Temperatur,
+  Modus und Thinking mit einem Klick:
+    🎯 FreeCAD Code – Part-Script-Vorlage,
+       Temp 0.2, Experte
+    💬 Erklärung    – Python-Experte,
+       Temp 0.7, Anfänger
+    🧠 Thinking     – Part-Script + Extended
+       Thinking (nur Anthropic)
+
 KI-QUELLE
   Dropdown mit allen Anbietern (19+):
     Ollama (Lokal)  – kostenlos, läuft auf deinem PC
@@ -104,6 +161,14 @@ KI-QUELLE
   🔄 Modelle neu laden  – frische Liste vom Anbieter
   🔌 Verbindungstest    – prüft ob Ollama erreichbar
     oder API-Key hinterlegt ist; Ergebnis als Label
+
+PRESET
+  Menü-Button „── Preset wählen ──":
+  ★ Schnell-Presets stehen direkt oben,
+  weitere Kategorien als Untermenüs:
+    🔧 Code · ⚡ FC: Performance
+    🧱 FreeCAD: Erstellen (inkl. FC11–FC14)
+    🔍 FreeCAD: Analysieren · 📦 FreeCAD: Erweitern
 
 MODELL-PARAMETER
   Temperatur  0.0–2.0
@@ -154,7 +219,7 @@ THINKING (nur Anthropic)
   → temperature und top_p werden automatisch weggelassen
   → nur wirksam bei Anthropic-Modellen"""),
 
-    ("🗣️ FC11, FC12 & FC13 – Makro aus Beschreibung", """\
+    ("🗣️ FC11–FC14 – Makro aus Beschreibung", """\
 Natürlichsprache direkt in FreeCAD-Code umwandeln.
 
 ── FC11 · Makro aus Beschreibung (Part-WB) ──────────
@@ -189,6 +254,20 @@ Natürlichsprache direkt in FreeCAD-Code umwandeln.
     den vorhandenen Kontext nicht zuverlässig
     weiterführen (falsche Variablen, doppelte Imports)
   Empfohlen: Claude · GPT-4o · Groq · Llama API (70B)
+
+── FC14 · Objekt-Befehle (lokal) ────────────────────
+  Erzeugt Makros nur mit einfachen Part-Befehlen
+  (Box, Cylinder, Sphere, Cut, Fuse) — kein
+  PartDesign, kein Sketch, keine Dialoge.
+  → Ideal für lokale Modelle (Ollama) und für
+    KI-Tool-Calling mit strukturierten Befehlen.
+
+Skills – Fachwissen automatisch anhängen:
+  Erwähnt deine Beschreibung Schrauben, Gewinde,
+  Löcher oder M-Größen (M3, M6 …), wird die
+  Maßtabelle aus data/skills/fastener-hole.md
+  automatisch an den Prompt angehängt
+  (Durchgangs-, Kern- und Senklöcher).
 
 AGENTS.md – Projektanweisungen:
   Eine Datei „AGENTS.md" neben deiner geöffneten
@@ -250,10 +329,11 @@ Panel „📂 Dateien" öffnen (Toolbar):
 Das Panel ist frei skalierbar (Rand ziehen).
 
 Navigation:
-  ^    – Einen Ordner nach oben
-  Hom  – Home-Verzeichnis
-  Makr – Aktueller Makro-Ordner
-  Pfad-Feld + GO – Direkt zu einem Pfad springen
+  ⬆   – Einen Ordner nach oben
+  🏠  – Home-Verzeichnis
+  📁  – Aktueller Makro-Ordner
+  Pfad-Feld (eigene Zeile) – Pfad eingeben,
+    Enter springt direkt dorthin
 
 Filter:
   Nur .py / Nur .FCMacro / Alle Dateien
@@ -261,6 +341,11 @@ Filter:
 Aktionen per Doppelklick:
   .py / .FCMacro → Im Editor öffnen
   andere Dateien → Pfad ins KI-Eingabefeld kopieren
+
+Rechtsklick auf Datei/Ordner → Kontextmenü:
+  📂 Im Editor öffnen · 📁 Hier navigieren
+  🗂 Als Makro-Pfad setzen · 📄 Neue Datei
+  📋 Pfad kopieren · ★ Als Lesezeichen
 
 Lesezeichen:
   ☆-Button → aktuellen Ordner merken
@@ -328,34 +413,46 @@ Makro löschen:
 Bibliothek wird dauerhaft in FreeCAD-Einstellungen
 gespeichert und beim nächsten Start wiederhergestellt."""),
 
-    ("⚠ Fehler-Übersetzer & KI-Korrektur", """\
+    ("⚠ Fehler & Sandbox", """\
 Panel „⚠ Fehler" öffnen (Toolbar):
 
-── FEHLER-ÜBERSETZER ────────────────────────────────
-  Englische Fehlermeldung / Traceback einfügen
-  → 🔍 Übersetzen  (oder Strg+Enter)
-  → Deutsche Erklärung + Lösungsvorschlag erscheint
+EINE Fläche für alles — kein Umschalten mehr zwischen
+Seiten. Der Fehler steht im Ausgabefeld; alle Aktionen
+liegen als Buttons darüber:
 
-  Vollständige Tracebacks einfügen —
-  Fehlertyp wird automatisch erkannt:
-    AttributeError · TypeError · NameError
-    ImportError · No active document
-    Shape-Fehler · Constraint-Fehler u.v.m.
+  🧪 Testen        Syntax-Prüfung + Probelauf des
+                   geladenen (KI-)Codes ohne echte
+                   Dokument-Änderungen
+  🔧 KI korrigieren Fehler + Code an die KI schicken,
+                   korrigierten Code zurückholen
+                   (max. 3 Versuche automatisch)
+  🔍 Übersetzen    übersetzt die Fehlermeldung 1:1 ins
+                   Deutsche — IM SELBEN Feld (der Text
+                   wird ersetzt, nicht verdoppelt).
+                   Der Button wird danach zu 🔙 Original
+                   und schaltet zurück (ein Button,
+                   zwei Zustände — wie ein Browser).
+  🐛 KI erklärt    ausführliche KI-Erklärung des Fehlers
+                   auf Deutsch (Antwort im 🤖 KI-Panel)
+  🗑 Leeren        Feld und Zustand zurücksetzen
 
-── KI-KORREKTUR ─────────────────────────────────────
-  🔧 KI korrigieren
-  → Fehler + aktueller Code werden an die KI geschickt
-  → Korrigierter Code erscheint in der Sandbox
-  → max. 3 Versuche automatisch
+Automatisch erkannte Fehlertypen beim Übersetzen:
+  AttributeError · TypeError · NameError · ImportError
+  No active document · Shape- / Constraint-Fehler u.v.m.
 
-── VORSCHAU-FEHLER (Vorschau-Tab) ───────────────────
-  Tritt beim Vorschau-Test ein Laufzeitfehler auf,
-  erscheinen zwei Buttons direkt im Vorschau-Tab:
-    ⚠ Fehler erklären  – öffnet Fehler-Panel mit
-      Fehlertext + Übersetzung vorausgefüllt
-    🔧 KI korrigieren  – schickt Fehler + Code
-      direkt an die KI-Selbstkorrektur
-  Panels bleiben dabei im gewohnten Layout."""),
+Doppelklick auf »Zeile N« im Feld springt zur Zeile
+im Editor.
+
+Gut zu wissen:
+  🐛 KI erklärt und 🔧 KI korrigieren verwenden immer
+  den echten englischen Fehler — auch wenn gerade die
+  deutsche Übersetzung angezeigt wird.
+
+── WOHER DIE FEHLER KOMMEN ──────────────────────────
+  F5 / F9-Läufe und die 👁 Vorschau legen Laufzeit-
+  fehler automatisch hier ab und öffnen das Panel.
+  Von der KI generierter Code landet über 🔧 zum
+  Testen ebenfalls hier."""),
 
     ("🔍 Suche & Ersetzen im Editor", """\
 Im KI-Panel (🤖 KI) ganz unten:
@@ -466,12 +563,10 @@ OpenRouter:
 Schlüssel bleiben zwischen FreeCAD-Sitzungen erhalten."""),
 
     ("⌨️ Tastenkürzel", """\
-IM EDITOR
-  Strg + S        Speichern
+IM EDITOR (eingebaut)
   Strg + A        Alles auswählen
   Strg + Z        Rückgängig
   Strg + Y        Wiederherstellen
-  Strg + F        Suche/Ersetzen-Leiste ein-/ausblenden
   Tab             Autovervollständigung bestätigen
   Escape          Autovervollständigung schließen
 
@@ -487,8 +582,14 @@ PANELS (Tastaturmodus, im ♿ Zugang aktivieren)
   Alt + 9         🔧 Werkzeuge
   Alt + 0         ⚠ Fehler
 
-IM FEHLER-PANEL
-  Strg + Return   Sofort übersetzen"""),
+IM FEHLER-ÜBERSETZER-TAB (linke Leiste)
+  Strg + Return   Sofort übersetzen
+
+Hinweis: Die zentralen Kürzel (F5, F9, Strg+S,
+Strg+Umsch+K …) stehen ganz oben in diesem Abschnitt
+unter „ZENTRALE AKTIONEN" — sie werden automatisch
+aus der Aktions-Registry erzeugt und bleiben so
+immer aktuell."""),
 
     ("📦 Installation – Optionale Pakete", """\
 Der Editor startet auch ohne diese Pakete –
@@ -558,7 +659,7 @@ Ausgabe (strukturierte Fachsprache):
   Code als aus freiem Deutsch direkt."""),
 
     ("🔧 Helfer-Panel & Vision", """\
-Panel „♿ Hilfe+Zugang" öffnen → Tab „♿ Helfer":
+Panel „♿ Hilfe+Zugang" öffnen → Tab „🔧 Helfer":
 
 ── LEGASTHENIKER-ASSISTENT ──────────────────────────
 Frei schreiben, Rechtschreibung egal:

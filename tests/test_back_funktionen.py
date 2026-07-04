@@ -511,12 +511,12 @@ class TestNlGenerator(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        projektpfad = os.path.join(
-            os.path.dirname(__file__), "..", "data"
+        projektpfad = os.path.normpath(
+            os.path.join(os.path.dirname(__file__), "..")
         )
         if projektpfad not in sys.path:
             sys.path.insert(0, projektpfad)
-        import nl_generator as nlg
+        from editor.ki import nl_generator as nlg
         cls.nlg = nlg
 
     def test_preset_schluessel_existieren(self):

@@ -3,8 +3,9 @@ import os
 import shutil
 import re
 
-from core.qt_compat import QtWidgets, QtCore, QtGui
+from core.qt_compat import QtWidgets, QtCore, QtGui, single_shot_sicher
 from core import theme
+from core import schrift
 
 import FreeCADGui as Gui
 
@@ -29,7 +30,7 @@ class MakroLeiste(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         # Ubuntu-Schrift + Emoji einmalig für das gesamte Widget setzen
-        _f = QtGui.QFont("Ubuntu", 10)
+        _f = schrift.ui_font()
         try:
             from main import emoji_font
             _f = emoji_font(_f)
@@ -56,19 +57,19 @@ class MakroLeiste(QtWidgets.QWidget):
 
     def _baue_ui(self):
         root = QtWidgets.QVBoxLayout(self)
-        root.setContentsMargins(6, 6, 6, 6)
-        root.setSpacing(6)
+        root.setContentsMargins(theme.ABST_L, theme.ABST_L, theme.ABST_L, theme.ABST_L)
+        root.setSpacing(theme.ABST_L)
 
         row = QtWidgets.QHBoxLayout()
         btn_mgr = QtWidgets.QPushButton("⚙  Macro-Manager öffnen")
         btn_mgr.setToolTip("FreeCAD Makro-Manager aufrufen")
-        btn_mgr.setMinimumHeight(34)
+        btn_mgr.setMinimumHeight(theme.MGR_BTN_H)
         btn_mgr.clicked.connect(self._oeffne_macro_manager)
         row.addWidget(btn_mgr, stretch=1)
         btn_r = QtWidgets.QPushButton("↺")
         btn_r.setToolTip("Makroliste neu laden")
-        btn_r.setMinimumHeight(34)
-        btn_r.setFixedWidth(36)
+        btn_r.setMinimumHeight(theme.MGR_BTN_H)
+        btn_r.setFixedWidth(theme.MGR_RELOAD_BTN_B)
         btn_r.setStyleSheet(theme.STY_REFRESH_BTN())
         btn_r.clicked.connect(self._manueller_refresh)
         row.addWidget(btn_r)
@@ -83,7 +84,7 @@ class MakroLeiste(QtWidgets.QWidget):
         self.suche = SuchFeld()
         self.suche.setPlaceholderText("🔍  Makro oder Ordner suchen …")
         self.suche.setClearButtonEnabled(True)
-        self.suche.setMinimumHeight(28)
+        self.suche.setMinimumHeight(theme.MGR_SUCHE_H)
         self.suche.setStyleSheet(theme.STY_MAKRO_SUCHE)
         self.suche.textChanged.connect(self._filter_makros)
         root.addWidget(self.suche)
@@ -93,8 +94,8 @@ class MakroLeiste(QtWidgets.QWidget):
         scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
         self._btn_container = QtWidgets.QWidget()
         self._btn_layout = QtWidgets.QVBoxLayout(self._btn_container)
-        self._btn_layout.setContentsMargins(0, 4, 0, 0)
-        self._btn_layout.setSpacing(6)
+        self._btn_layout.setContentsMargins(theme.ABST_KEIN, theme.ABST_M, theme.ABST_KEIN, theme.ABST_KEIN)
+        self._btn_layout.setSpacing(theme.ABST_L)
         self._btn_layout.setAlignment(QtCore.Qt.AlignTop)
         scroll.setWidget(self._btn_container)
         root.addWidget(scroll, stretch=1)
@@ -197,7 +198,7 @@ class MakroLeiste(QtWidgets.QWidget):
                 
                 b = QtWidgets.QPushButton(name_anzeige)
                 b.setToolTip(pfad)
-                b.setMinimumHeight(26)
+                b.setMinimumHeight(theme.MGR_LISTE_BTN_H)
                 b.setStyleSheet(theme.STY_MAKRO_BTN(indent_btn))
                 b.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
                 b.clicked.connect(lambda c=False, p=pfad, n=name: self._button_klick(p, n))
@@ -524,5 +525,5 @@ class MakroLeiste(QtWidgets.QWidget):
             self.pfad_feld.setStyleSheet(
                 f"border:1px solid {_err_col};"
             )
-            QtCore.QTimer.singleShot(
-                2000, lambda: self.pfad_feld.setStyleSheet(""))
+            single_shot_sicher(
+                2000, self.pfad_feld, lambda: self.pfad_feld.setStyleSheet(""))

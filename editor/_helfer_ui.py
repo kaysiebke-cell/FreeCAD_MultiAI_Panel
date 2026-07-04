@@ -51,8 +51,8 @@ class DiffBlase(QtWidgets.QFrame):
     def __init__(self, original: str, korrigiert: str, parent=None):
         super().__init__(parent)
         layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(12, 6, 12, 6)
-        layout.setSpacing(2)
+        layout.setContentsMargins(*theme.HELFER_DIFF_RAND)
+        layout.setSpacing(theme.ABST_XS)
 
         kopf = QtWidgets.QLabel("✏️ Deine Korrekturen:")
         kopf.setStyleSheet(theme.STY_HELFER_BLASE_KOPF())
@@ -94,18 +94,18 @@ class ChatBubble(QtWidgets.QFrame):
         self._text  = text
 
         outer = QtWidgets.QHBoxLayout(self)
-        outer.setContentsMargins(0, 4, 0, 4)
-        outer.setSpacing(8)
+        outer.setContentsMargins(theme.ABST_KEIN, theme.ABST_M, theme.ABST_KEIN, theme.ABST_M)
+        outer.setSpacing(theme.ABST_XL)
 
         avatar = QtWidgets.QLabel("🤖" if rolle == "ki" else "🧑")
-        avatar.setFixedSize(32, 32)
+        avatar.setFixedSize(theme.HELFER_AVATAR_GROESSE, theme.HELFER_AVATAR_GROESSE)
         avatar.setAlignment(QtCore.Qt.AlignCenter)
         outer.addWidget(avatar) if rolle == "ki" else outer.addSpacing(40)
 
         bubble = QtWidgets.QFrame()
         blay   = QtWidgets.QVBoxLayout(bubble)
-        blay.setContentsMargins(12, 8, 12, 8)
-        blay.setSpacing(4)
+        blay.setContentsMargins(*theme.HELFER_BLASE_RAND)
+        blay.setSpacing(theme.ABST_M)
 
         self._lbl = QtWidgets.QLabel(text)
         self._lbl.setWordWrap(True)
@@ -171,11 +171,11 @@ class BildVorschau(QtWidgets.QFrame):
     def __init__(self, pixmap: QtGui.QPixmap, parent=None):
         super().__init__(parent)
         layout = QtWidgets.QHBoxLayout(self)
-        layout.setContentsMargins(8, 6, 8, 6)
-        layout.setSpacing(10)
+        layout.setContentsMargins(theme.ABST_XL, theme.ABST_L, theme.ABST_XL, theme.ABST_L)
+        layout.setSpacing(theme.ABST_XXL)
 
         thumb = QtWidgets.QLabel()
-        thumb.setFixedSize(72, 72)
+        thumb.setFixedSize(theme.HELFER_THUMB_GROESSE, theme.HELFER_THUMB_GROESSE)
         thumb.setAlignment(QtCore.Qt.AlignCenter)
         thumb.setPixmap(pixmap.scaled(
             72, 72,
@@ -184,14 +184,14 @@ class BildVorschau(QtWidgets.QFrame):
         layout.addWidget(thumb)
 
         rechts = QtWidgets.QVBoxLayout()
-        rechts.setSpacing(4)
+        rechts.setSpacing(theme.ABST_M)
 
         info = QtWidgets.QLabel(f"📎  {pixmap.width()} × {pixmap.height()} px")
         info.setStyleSheet(theme.STY_HELFER_BLASE_KOPF())
         rechts.addWidget(info)
 
         entf = QtWidgets.QPushButton("✕  Bild entfernen")
-        entf.setFixedHeight(26)
+        entf.setFixedHeight(theme.HELFER_ENTF_BTN_H)
         entf.setToolTip("Angehängtes Bild entfernen")
         entf.clicked.connect(self.entfernt)
         rechts.addWidget(entf)

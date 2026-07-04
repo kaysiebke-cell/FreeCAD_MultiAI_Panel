@@ -15,7 +15,7 @@ from core.params import (KI_PRESETS, KI_PRESET_KATEGORIEN,
                          lade_api_key, speichere_api_key, speichere_quelle, lade_quelle,
                          speichere_modell, lade_modell_params, speichere_modell_params,
                          lade_ki_modus, speichere_ki_modus)
-from core.theme_styles import (PARAM_SPINBOX_BREITE_SCHMAL, PARAM_SPINBOX_BREITE_BREIT,
+from core.theme_stylesheets import (PARAM_SPINBOX_BREITE_SCHMAL, PARAM_SPINBOX_BREITE_BREIT,
                                CFG_KEY_FELD_MIN_H)
 
 

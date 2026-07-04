@@ -39,47 +39,45 @@ class Browser:
         w.setMinimumWidth(0)
         w.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
         layout = QtWidgets.QVBoxLayout(w)
-        layout.setContentsMargins(2, 4, 2, 2)
-        layout.setSpacing(3)
+        layout.setContentsMargins(theme.ABST_XS, theme.ABST_M, theme.ABST_XS, theme.ABST_XS)
+        layout.setSpacing(theme.ABST_S)
 
-        # ── Zeile 1: Schnell-Navigation ──────────────────────────────
+        # ── Zeile 1: Schnell-Navigation (Symbol-Buttons) ─────────────
         nav1 = QtWidgets.QHBoxLayout()
-        nav1.setSpacing(3)
+        nav1.setSpacing(theme.ABST_S)
 
-        self._db_zurueck = QtWidgets.QPushButton("^")
-        self._db_zurueck.setFixedSize(26, 22)
+        self._db_zurueck = QtWidgets.QPushButton("⬆")
+        self._db_zurueck.setFixedSize(theme.DB_NAV_BTN_BREITE, theme.DB_NAV_BTN_HOEHE)
         self._db_zurueck.setToolTip("Übergeordneter Ordner (eine Ebene hoch)")
         nav1.addWidget(self._db_zurueck)
 
-        self._db_home = QtWidgets.QPushButton("Hom")
-        self._db_home.setFixedSize(36, 22)
+        self._db_home = QtWidgets.QPushButton("🏠")
+        self._db_home.setFixedSize(theme.DB_NAV_BTN_BREITE, theme.DB_NAV_BTN_HOEHE)
         self._db_home.setToolTip("Home-Verzeichnis öffnen")
         nav1.addWidget(self._db_home)
 
-        self._db_makro = QtWidgets.QPushButton("Makr")
-        self._db_makro.setFixedSize(38, 22)
+        self._db_makro = QtWidgets.QPushButton("📁")
+        self._db_makro.setFixedSize(theme.DB_NAV_BTN_BREITE, theme.DB_NAV_BTN_HOEHE)
         self._db_makro.setToolTip("Makro-Ordner öffnen")
         nav1.addWidget(self._db_makro)
 
+        nav1.addStretch()
+        layout.addLayout(nav1)
+
+        # ── Zeile 2: Pfadfeld (volle Breite, Enter navigiert) ────────
         self._db_pfad_feld = QtWidgets.QLineEdit()
-        self._db_pfad_feld.setPlaceholderText("Pfad …")
+        self._db_pfad_feld.setPlaceholderText("Pfad …  (Enter = hinspringen)")
         self._db_pfad_feld.setMinimumWidth(0)
+        self._db_pfad_feld.setClearButtonEnabled(True)
+        self._db_pfad_feld.setToolTip("Pfad eingeben und Enter drücken")
         self._db_pfad_feld.setStyleSheet(
             theme.STY_DB_PFAD_FELD(schrift.pt(schrift.STUFE_SM)))
         self._db_pfad_feld.returnPressed.connect(self._db_gehe_zu_pfad)
-        nav1.addWidget(self._db_pfad_feld, stretch=1)
+        layout.addWidget(self._db_pfad_feld)
 
-        btn_go = QtWidgets.QPushButton("GO")
-        btn_go.setFixedSize(28, 22)
-        btn_go.setToolTip("Zu diesem Pfad navigieren")
-        btn_go.clicked.connect(self._db_gehe_zu_pfad)
-        nav1.addWidget(btn_go)
-
-        layout.addLayout(nav1)
-
-        # ── Zeile 2: Filter ──────────────────────────────────────────
+        # ── Zeile 3: Filter ──────────────────────────────────────────
         filter_row = QtWidgets.QHBoxLayout()
-        filter_row.setSpacing(3)
+        filter_row.setSpacing(theme.ABST_S)
 
         self._db_filter = QtWidgets.QLineEdit()
         self._db_filter.setPlaceholderText("Dateiname filtern …")
@@ -103,7 +101,7 @@ class Browser:
         # ── Neue Datei anlegen ───────────────────────────────────────
         btn_neu = QtWidgets.QPushButton("＋  Neue Datei anlegen")
         btn_neu.setToolTip("Neue .py-Datei im aktuellen Ordner anlegen")
-        btn_neu.setMinimumHeight(26)
+        btn_neu.setMinimumHeight(theme.DB_NEU_BTN_H)
         btn_neu.setStyleSheet(theme.STY_DB_NEU_BTN(schrift.pt(schrift.STUFE_BASE)))
         btn_neu.clicked.connect(self._db_neue_datei)
         layout.addWidget(btn_neu)
@@ -111,8 +109,8 @@ class Browser:
         # ── Lesezeichen ──────────────────────────────────────────────
         self._db_lz_widget = QtWidgets.QWidget()
         lz_layout = QtWidgets.QHBoxLayout(self._db_lz_widget)
-        lz_layout.setContentsMargins(0, 0, 0, 0)
-        lz_layout.setSpacing(2)
+        lz_layout.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+        lz_layout.setSpacing(theme.ABST_XS)
 
         self._db_lz_combo = QtWidgets.QComboBox()
         self._db_lz_combo.setStyleSheet(
@@ -122,14 +120,14 @@ class Browser:
         lz_layout.addWidget(self._db_lz_combo, stretch=1)
 
         btn_lz_add = QtWidgets.QPushButton("★")
-        btn_lz_add.setFixedSize(22, 22)
+        btn_lz_add.setFixedSize(theme.DB_LZ_BTN_GROESSE, theme.DB_LZ_BTN_GROESSE)
         btn_lz_add.setToolTip("Aktuellen Ordner als Lesezeichen speichern")
         btn_lz_add.setStyleSheet(theme.STY_DB_LZ_BTN(schrift.pt(schrift.STUFE_LG)))
         btn_lz_add.clicked.connect(self._db_lz_hinzufuegen)
         lz_layout.addWidget(btn_lz_add)
 
         btn_lz_del = QtWidgets.QPushButton("✕")
-        btn_lz_del.setFixedSize(22, 22)
+        btn_lz_del.setFixedSize(theme.DB_LZ_BTN_GROESSE, theme.DB_LZ_BTN_GROESSE)
         btn_lz_del.setToolTip("Ausgewähltes Lesezeichen entfernen")
         btn_lz_del.setStyleSheet(theme.STY_DB_LZ_BTN(schrift.pt(schrift.STUFE_BASE)))
         btn_lz_del.clicked.connect(self._db_lz_entfernen)
@@ -150,7 +148,7 @@ class Browser:
         self._db_tree.setSortingEnabled(True)
         self._db_tree.sortByColumn(0, QtCore.Qt.AscendingOrder)
         self._db_tree.setHeaderHidden(True)
-        self._db_tree.setColumnWidth(0, 160)
+        self._db_tree.setColumnWidth(0, theme.DB_BAUM_SPALTE_B)
         self._db_tree.setMinimumWidth(0)
         self._db_tree.setSizePolicy(
             QtWidgets.QSizePolicy.Ignored,
@@ -167,29 +165,13 @@ class Browser:
 
         layout.addWidget(self._db_tree, stretch=1)
 
-        # ── Status & Aktions-Zeile ───────────────────────────────────
+        # ── Status-Zeile ─────────────────────────────────────────────
+        # Aktions-Buttons gibt es hier bewusst nicht mehr: Öffnen, Pfad
+        # kopieren und Makro-Pfad setzen sind über Doppelklick bzw. das
+        # Rechtsklick-Kontextmenü des Baums erreichbar.
         self._db_status = QtWidgets.QLabel("")
         self._db_status.setStyleSheet(theme.STY_DB_STATUS(schrift.pt(schrift.STUFE_SM)))
         layout.addWidget(self._db_status)
-
-        btn_row = QtWidgets.QHBoxLayout()
-        btn_row.setSpacing(3)
-        btn_oeffnen = QtWidgets.QPushButton("Öffnen")
-        btn_oeffnen.setToolTip("Ausgewählte Datei im Editor öffnen")
-        btn_oeffnen.clicked.connect(self._db_ausgewaehlte_oeffnen)
-        btn_row.addWidget(btn_oeffnen)
-
-        btn_pfad = QtWidgets.QPushButton("Pfad")
-        btn_pfad.setToolTip("Pfad in Zwischenablage kopieren")
-        btn_pfad.clicked.connect(self._db_pfad_kopieren)
-        btn_row.addWidget(btn_pfad)
-
-        btn_explorer = QtWidgets.QPushButton("Manager")
-        btn_explorer.setToolTip("Ordner im Makro-Manager setzen")
-        btn_explorer.clicked.connect(self._db_als_makro_pfad)
-        btn_row.addWidget(btn_explorer)
-
-        layout.addLayout(btn_row)
 
         # ── Initialisieren ───────────────────────────────────────────
         self._db_lesezeichen: list = []   # [(name, pfad)]
@@ -277,13 +259,6 @@ class Browser:
         else:
             QtWidgets.QApplication.clipboard().setText(pfad)
             self._db_status.setText(f"📋 Pfad kopiert: {os.path.basename(pfad)}")
-
-    def _db_ausgewaehlte_oeffnen(self):
-        pfad = self._db_aktueller_pfad()
-        if pfad and os.path.isfile(pfad):
-            self._db_datei_oeffnen(pfad)
-        else:
-            self._db_status.setText("⚠ Keine Datei ausgewählt")
 
     def _db_pfad_kopieren(self):
         pfad = self._db_aktueller_pfad()

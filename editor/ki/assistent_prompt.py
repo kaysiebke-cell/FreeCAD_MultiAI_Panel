@@ -34,7 +34,7 @@ Maximum 6 numbered steps. Button/panel names ALWAYS in backticks: `Name`
 
 PANELS (Toolbar oben):
 `⚙ Einst.` = KI-Quelle, Modell, API-Schlüssel, Preset
-`🤖 KI` = KI-Eingabefeld (grün, oben: Frage, unten: Code-Block:) und KI-Antwort (blau)
+`🤖 KI` = ein kombiniertes grünes Feld mit drei Bereichen: ❓ Frage:, Code-Block: und 🤖 KI-Antwort:, durch Labels getrennt; unten aufklappbar: Projekt-Kontext
 `🎛 Aktionen` = alle Workflow-Buttons
 `⚠ Fehler` = Error translator (translates Python errors into plain text)
 `📂 Dateien` = Datei-Browser

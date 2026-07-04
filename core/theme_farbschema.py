@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Farbschema, semantische Tints, Syntax-Highlight-Farben, Status-Farben."""
 
-from core.qt_compat import QtWidgets, QtCore, QtGui
+from core.qt_compat import QtWidgets, QtCore, QtGui, single_shot_sicher
 from core import schrift
-from core import farben as _farben_mod
+from core import farbwerte as _farben_mod
 
 # Standard Dunkelmod; wird beim Start aus Prefs geladen
 _FARBSCHEMA_DUNKEL: bool = True
@@ -49,7 +49,7 @@ def _apply_semantik_tint(widget: "QtWidgets.QWidget", schluessel: str) -> None:
         if not hasattr(widget, "_tint_basis"):
             widget._tint_basis = widget.styleSheet()
         widget.setStyleSheet((widget._tint_basis + "\n" + snippet) if widget._tint_basis else snippet)
-    QtCore.QTimer.singleShot(50, _do)
+    single_shot_sicher(50, widget, _do)
 
 
 def apply_input_bg_suche(widget: "QtWidgets.QWidget") -> None:
@@ -66,11 +66,9 @@ def apply_trenner_lbl_style(widget: "QtWidgets.QWidget") -> None:
         if not hasattr(widget, "_tint_basis"):
             widget._tint_basis = widget.styleSheet()
         widget.setStyleSheet((widget._tint_basis + "\n" + snippet) if widget._tint_basis else snippet)
-    QtCore.QTimer.singleShot(50, _do)
+    single_shot_sicher(50, widget, _do)
 
 
-def apply_input_bg_ki(widget: "QtWidgets.QWidget") -> None:
-    _apply_semantik_tint(widget, "tint_ki")
 
 
 def apply_input_bg_kontext(widget: "QtWidgets.QWidget") -> None:
@@ -162,5 +160,3 @@ farben = {
     "fstring":    "#D19A66",
     "triple":     "#D19A66",
 }
-SYNTAX_FARBEN     = farben
-SYNTAX_TEXT_FARBE = "#D4D4D4"

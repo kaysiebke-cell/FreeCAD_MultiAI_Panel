@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re as _re
+
 import FreeCAD as App
 from data.freecad_data import FC_KI_PRESETS
 
@@ -174,16 +176,23 @@ KI_PRESET_KATEGORIEN: dict[str, dict[str, str]] = {
 
 # FC_KI_PRESETS aus freecad_data in passende Kategorie einsortieren
 # (für Rückwärts-Kompatibilität mit bestehendem Code)
+# FC-Nummer exakt matchen — Substring-Vergleich würde z. B. FC10 als FC1 werten.
+_FC_KATEGORIE_NACH_NUMMER = {
+    1: "🧱 FreeCAD: Erstellen", 2: "🧱 FreeCAD: Erstellen",
+    3: "🧱 FreeCAD: Erstellen", 11: "🧱 FreeCAD: Erstellen",
+    12: "🧱 FreeCAD: Erstellen", 13: "🧱 FreeCAD: Erstellen",
+    14: "🧱 FreeCAD: Erstellen",
+    4: "🔍 FreeCAD: Analysieren", 6: "🔍 FreeCAD: Analysieren",
+    7: "🔍 FreeCAD: Analysieren",
+    8: "📦 FreeCAD: Erweitern", 9: "📦 FreeCAD: Erweitern",
+    10: "📦 FreeCAD: Erweitern",
+}
 for _k, _v in FC_KI_PRESETS.items():
     if not _v or _k.startswith("──"):
         continue
-    _kat = "🧱 FreeCAD: Erstellen"
-    if "FC1" in _k or "FC2" in _k or "FC3" in _k or "FC11" in _k or "FC12" in _k or "FC13" in _k:
-        _kat = "🧱 FreeCAD: Erstellen"
-    elif "FC4" in _k or "FC6" in _k or "FC7" in _k:
-        _kat = "🔍 FreeCAD: Analysieren"
-    elif "FC8" in _k or "FC9" in _k or "FC10" in _k:
-        _kat = "📦 FreeCAD: Erweitern"
+    _m = _re.match(r"FC(\d+)", _k)
+    _nr = int(_m.group(1)) if _m else 0
+    _kat = _FC_KATEGORIE_NACH_NUMMER.get(_nr, "🧱 FreeCAD: Erstellen")
     if _k not in KI_PRESET_KATEGORIEN.get(_kat, {}):
         KI_PRESET_KATEGORIEN.setdefault(_kat, {})[_k] = _v
 

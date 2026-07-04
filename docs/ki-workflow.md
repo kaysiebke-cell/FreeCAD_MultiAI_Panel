@@ -12,6 +12,10 @@
 6. ✅ Replace  →  backup is created, code is replaced
 ```
 
+**Stop a request:** while the AI is streaming, **🤖 Ask** turns into **⏹ Stop**.
+Click it (or press Ctrl+Shift+K again) to cancel the running request — the partial
+answer is kept.
+
 ## Quick Analysis (without selection)
 ```
 🔎 Auto-Analyze  →  entire code is explained immediately
@@ -40,6 +44,29 @@ Disable this if you want to review the response before it is inserted.
    → ❌ Cancel  →  nothing changes, no backup created
 ```
 Ideal for critical sections — no accidental overwriting of important code.
+
+## Run editor code (F5 / F9)
+```
+F5  →  save + run the WHOLE macro directly in FreeCAD
+       (result in the FreeCAD window; only errors open the ⚠ panel)
+F9  →  run ONLY the selected lines (or the current line)
+       — ideal for trying things out step by step
+```
+**Abort:** press **F5** again (or the ⏹ button) to stop a running execution at
+the next Python line. A FreeCAD C++ operation already in progress cannot be
+interrupted — the abort takes effect at the next line.
+
+## 👁 Preview (run code in FreeCAD)
+```
+👁 Preview  (button in the Actions panel)
+→ Runs the AI response (or the editor code) directly in FreeCAD
+→ The embedded 3D viewport opens as a "👁 Preview" tab in the editor
+→ Buttons in the tab: ▶ Run · 🔄 Refresh · ⊡ Fit
+   (▶ Run turns into ⏹ Stop while a run is in progress)
+```
+⚠️ The code is really executed — changes to the FreeCAD document are real.
+If a runtime error occurs, the **⚠ Error panel** opens with the error, where you
+can 🔍 Translate, 🐛 have the AI explain it, or 🔧 AI-fix it.
 
 ## Save & restore session
 ```
@@ -77,7 +104,9 @@ After 5,000 characters the oldest part is automatically compressed (summarised).
 
 # AI Presets
 
-Over 40 predefined task templates in 7 categories:
+Over 40 predefined task templates in 6 categories, selected via the preset
+**menu button** in the ⚙ Settings panel — the ★ Quick presets appear at the
+top level, all other categories as submenus:
 
 ## ★ Quick
 - What does this code do?
@@ -94,11 +123,11 @@ Over 40 predefined task templates in 7 categories:
 - Performance analysis · Check transactions · Optimise loops
 
 ## 🧱 FreeCAD: Create
-- Create macro · Parametric model · PartDesign script
+- Create macro · Parametric model · PartDesign script · Add GUI dialog
 - **FC11** – Macro from description (Natural language → Part code)
 - **FC12** – PartDesign from description (Natural language → Body/Sketch/Pad)
 - **FC13** – Build step by step (extend a model incrementally)
-- Add GUI dialog
+- **FC14** – Object commands (local) — simple Part commands only, ideal for Ollama and JSON tool-calling
 
 → Details on FC11/FC12/FC13: [Macro from Description](makro-generator.md)  
 → Ollama experiences & model comparison: [Ollama Field Report](OLLAMA_ERFAHRUNGEN.md)
@@ -113,9 +142,6 @@ from structured input than from free-form text.
 
 ## 📦 FreeCAD: Extend
 - Workbench class · STEP/IGES export · Batch processing · Backup extension
-
-## ✍ Documentation
-- Generate docstrings · Inline comments · README section
 
 ---
 

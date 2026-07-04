@@ -112,8 +112,8 @@ class FreecadHelferPanel(QtWidgets.QWidget):
 
     def _build_ui(self):
         root = QtWidgets.QVBoxLayout(self)
-        root.setContentsMargins(8, 8, 8, 8)
-        root.setSpacing(6)
+        root.setContentsMargins(theme.ABST_XL, theme.ABST_XL, theme.ABST_XL, theme.ABST_XL)
+        root.setSpacing(theme.ABST_L)
 
         # Kopfzeile
         kopf = QtWidgets.QHBoxLayout()
@@ -142,8 +142,8 @@ class FreecadHelferPanel(QtWidgets.QWidget):
 
         self._chat_widget = QtWidgets.QWidget()
         self._chat_layout = QtWidgets.QVBoxLayout(self._chat_widget)
-        self._chat_layout.setContentsMargins(4, 4, 4, 4)
-        self._chat_layout.setSpacing(6)
+        self._chat_layout.setContentsMargins(theme.ABST_M, theme.ABST_M, theme.ABST_M, theme.ABST_M)
+        self._chat_layout.setSpacing(theme.ABST_L)
         self._chat_layout.addStretch()
         self._scroll.setWidget(self._chat_widget)
 
@@ -161,8 +161,8 @@ class FreecadHelferPanel(QtWidgets.QWidget):
 
         _unten = QtWidgets.QWidget()
         _unten_lay = QtWidgets.QVBoxLayout(_unten)
-        _unten_lay.setContentsMargins(0, 4, 0, 0)
-        _unten_lay.setSpacing(4)
+        _unten_lay.setContentsMargins(theme.ABST_KEIN, theme.ABST_M, theme.ABST_KEIN, theme.ABST_KEIN)
+        _unten_lay.setSpacing(theme.ABST_M)
 
         # Eingabefeld
         self._eingabe = QtWidgets.QPlainTextEdit()
@@ -170,7 +170,7 @@ class FreecadHelferPanel(QtWidgets.QWidget):
             "z.B.  ich brauch einen kasten mit loch zum anschrauben an die wand …\n"
             "(Shift+Enter = neue Zeile  |  Enter = Senden)\n"
             "Bild hierher ziehen oder Strg+V zum Einfügen")
-        self._eingabe.setMinimumHeight(30)
+        self._eingabe.setMinimumHeight(theme.HELFER_EINGABE_MIN_H)
         self._eingabe.setAcceptDrops(True)
         self._eingabe.installEventFilter(self)
         self._highlighter = RechtschreibHighlighter(self._eingabe.document())
@@ -180,7 +180,7 @@ class FreecadHelferPanel(QtWidgets.QWidget):
 
         # Bild-Buttons
         bild_reihe = QtWidgets.QHBoxLayout()
-        bild_reihe.setSpacing(6)
+        bild_reihe.setSpacing(theme.ABST_L)
 
         _fmt_info = format_info(_aktueller_anbieter())
 
@@ -188,7 +188,7 @@ class FreecadHelferPanel(QtWidgets.QWidget):
         self._bild_btn.setToolTip(
             f"Bilddatei auswählen\n\nUnterstützte Formate ({_aktueller_anbieter()}):\n"
             f"{_fmt_info}")
-        self._bild_btn.setFixedHeight(28)
+        self._bild_btn.setFixedHeight(theme.HELFER_BTN_H)
         self._bild_btn.clicked.connect(self._lade_bild)
         bild_reihe.addWidget(self._bild_btn)
 
@@ -196,7 +196,7 @@ class FreecadHelferPanel(QtWidgets.QWidget):
         self._clip_btn.setToolTip(
             f"Bild aus Zwischenablage einfügen (Strg+V)\n\n"
             f"Unterstützte Formate ({_aktueller_anbieter()}):\n{_fmt_info}")
-        self._clip_btn.setFixedHeight(28)
+        self._clip_btn.setFixedHeight(theme.HELFER_BTN_H)
         self._clip_btn.clicked.connect(self._bild_aus_zwischenablage)
         bild_reihe.addWidget(self._clip_btn)
 
@@ -213,13 +213,13 @@ class FreecadHelferPanel(QtWidgets.QWidget):
         # Bild-Vorschau-Container
         self._vorschau_container = QtWidgets.QWidget()
         self._vorschau_container.setLayout(QtWidgets.QVBoxLayout())
-        self._vorschau_container.layout().setContentsMargins(0, 0, 0, 0)
+        self._vorschau_container.layout().setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
         self._vorschau_container.setVisible(False)
         _unten_lay.addWidget(self._vorschau_container)
 
         # Senden-Button
         self._senden_btn = QtWidgets.QPushButton("➤  Senden")
-        self._senden_btn.setFixedHeight(32)
+        self._senden_btn.setFixedHeight(theme.HELFER_SENDEN_BTN_H)
         self._senden_btn.setToolTip("Senden (Enter)")
         self._senden_btn.clicked.connect(self._senden)
         _unten_lay.addWidget(self._senden_btn)

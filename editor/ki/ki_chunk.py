@@ -71,7 +71,13 @@ class KIChunkUI:
 
     def on_stream_done(self):
         """Nach dem letzten Chunk: Code-Fences entfernen, Buttons aktivieren."""
+        # Vom User abgebrochen: der Worker läuft evtl. noch bis zur nächsten
+        # Zeile weiter und meldet dann fertig — dieses späte Ergebnis darf
+        # den bereits gesetzten Abbruch-Zustand NICHT überschreiben.
+        if getattr(self._c, "_ki_stop", False):
+            return
         self.stop_stream_timers()
+        self._c._ki_lauf_ui(False)
         elapsed = time.monotonic() - self._c._stream_start_time
         full    = self._c._ki_area.toPlainText()
 

@@ -14,7 +14,7 @@ import py_compile
 import re
 import tempfile
 
-from core.qt_compat import QtWidgets, QtCore, QtGui
+from core.qt_compat import QtWidgets, QtCore, QtGui, single_shot_sicher
 from core import theme
 from core import schrift
 
@@ -79,7 +79,7 @@ class _LZModell(QtCore.QAbstractListModel):
 def _btn(text, tooltip="", small=False):
     b = QtWidgets.QPushButton(text)
     b.setToolTip(tooltip or text)
-    b.setMinimumHeight(24 if small else 27)
+    b.setMinimumHeight(theme.WERKZ_BTN_H_KLEIN if small else theme.WERKZ_BTN_H)
     b.setMinimumWidth(0)
     b.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     return b
@@ -112,7 +112,7 @@ class WerkzeugLeiste(QtWidgets.QWidget):
 
     def __init__(self, editor: QtWidgets.QPlainTextEdit, parent=None):
         super().__init__(parent)
-        _f = QtGui.QFont("Ubuntu", 10)
+        _f = schrift.ui_font()
         try:
             from main import emoji_font
             _f = emoji_font(_f)
@@ -133,8 +133,8 @@ class WerkzeugLeiste(QtWidgets.QWidget):
 
     def _baue_ui(self):
         root = QtWidgets.QVBoxLayout(self)
-        root.setContentsMargins(2, 2, 2, 2)
-        root.setSpacing(2)
+        root.setContentsMargins(theme.ABST_XS, theme.ABST_XS, theme.ABST_XS, theme.ABST_XS)
+        root.setSpacing(theme.ABST_XS)
 
         btn_nav  = QtWidgets.QPushButton("📍 Nav")
         btn_edit = QtWidgets.QPushButton("✏ Edit & Check")
@@ -145,8 +145,8 @@ class WerkzeugLeiste(QtWidgets.QWidget):
         btn_nav.setChecked(True)
 
         tab_grid = QtWidgets.QGridLayout()
-        tab_grid.setSpacing(0)
-        tab_grid.setContentsMargins(0, 0, 0, 0)
+        tab_grid.setSpacing(theme.ABST_KEIN)
+        tab_grid.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
         tab_grid.addWidget(btn_nav,  0, 0)
         tab_grid.addWidget(btn_edit, 0, 1)
         root.addLayout(tab_grid)
@@ -180,14 +180,14 @@ class WerkzeugLeiste(QtWidgets.QWidget):
     def _tab_nav(self):
         w = QtWidgets.QWidget()
         v = QtWidgets.QVBoxLayout(w)
-        v.setContentsMargins(4, 4, 4, 4)
-        v.setSpacing(3)
+        v.setContentsMargins(theme.ABST_M, theme.ABST_M, theme.ABST_M, theme.ABST_M)
+        v.setSpacing(theme.ABST_S)
 
         v.addWidget(_section("Zeile anspringen"))
         row = QtWidgets.QHBoxLayout()
         self._zeile_edit = QtWidgets.QLineEdit()
         self._zeile_edit.setPlaceholderText("Nr.")
-        self._zeile_edit.setFixedWidth(52)
+        self._zeile_edit.setFixedWidth(theme.WERKZ_ZEILE_EDIT_B)
         self._zeile_edit.setStyleSheet(
             theme.STY_ZEILE_EDIT(schrift.pt(schrift.STUFE_XL)))
         self._zeile_edit.setValidator(QtGui.QIntValidator(1, 99999))
@@ -213,13 +213,13 @@ class WerkzeugLeiste(QtWidgets.QWidget):
         v.addWidget(_section("Lesezeichen"))
         self._lz_view = QtWidgets.QListView()
         self._lz_view.setModel(self._lzm)
-        self._lz_view.setMinimumHeight(55)
-        self._lz_view.setMaximumHeight(110)
+        self._lz_view.setMinimumHeight(theme.WERKZ_LZ_MIN_H)
+        self._lz_view.setMaximumHeight(theme.WERKZ_LZ_MAX_H)
         self._lz_view.doubleClicked.connect(self._lz_sprung)
         v.addWidget(self._lz_view, stretch=1)
 
         gr = QtWidgets.QGridLayout()
-        gr.setSpacing(2)
+        gr.setSpacing(theme.ABST_XS)
         lz_daten = [
             ("＋ Setzen",      "Lesezeichen setzen / entfernen", self._lz_toggle),
             ("↑ Vorige",       "Zum vorigen Lesezeichen",         self._lz_vor),
@@ -228,7 +228,7 @@ class WerkzeugLeiste(QtWidgets.QWidget):
         ]
         for i, (txt, tip, fn) in enumerate(lz_daten):
             b = _btn(txt, tip, small=True)
-            b.setFixedHeight(24)
+            b.setFixedHeight(theme.WERKZ_LZ_BTN_H)
             b.clicked.connect(fn)
             gr.addWidget(b, i // 2, i % 2)
         v.addLayout(gr)
@@ -240,12 +240,12 @@ class WerkzeugLeiste(QtWidgets.QWidget):
     def _tab_edit_clean(self):
         w = QtWidgets.QWidget()
         v = QtWidgets.QVBoxLayout(w)
-        v.setContentsMargins(4, 4, 4, 4)
-        v.setSpacing(3)
+        v.setContentsMargins(theme.ABST_M, theme.ABST_M, theme.ABST_M, theme.ABST_M)
+        v.setSpacing(theme.ABST_S)
 
         v.addWidget(_section("Einrücken"))
         gr1 = QtWidgets.QGridLayout()
-        gr1.setSpacing(2)
+        gr1.setSpacing(theme.ABST_XS)
         for i, (txt, tip, fn) in enumerate([
             ("→ Einrücken", "4 Leerzeichen vorne hinzufügen", self._einruecken),
             ("← Ausrücken", "4 Leerzeichen vorne entfernen",  self._ausruecken),
@@ -262,7 +262,7 @@ class WerkzeugLeiste(QtWidgets.QWidget):
 
         v.addWidget(_section("Zeilen"))
         gr2 = QtWidgets.QGridLayout()
-        gr2.setSpacing(2)
+        gr2.setSpacing(theme.ABST_XS)
         for i, (txt, tip, fn) in enumerate([
             ("⧉ Duplizieren", "Zeile darunter kopieren",     self._duplizieren),
             ("✂ Löschen",     "Aktuelle Zeile löschen",       self._zeile_loeschen),
@@ -276,7 +276,7 @@ class WerkzeugLeiste(QtWidgets.QWidget):
 
         v.addWidget(_section("Text-Transformation"))
         gr3 = QtWidgets.QGridLayout()
-        gr3.setSpacing(2)
+        gr3.setSpacing(theme.ABST_XS)
         for i, (txt, tip, fn) in enumerate([
             ("ABC → GROSS",  "Auswahl → GROSS",   self._gross),
             ("abc → klein",  "Auswahl → klein",   self._klein),
@@ -290,7 +290,7 @@ class WerkzeugLeiste(QtWidgets.QWidget):
 
         v.addWidget(_section("Bereinigung"))
         gr4 = QtWidgets.QGridLayout()
-        gr4.setSpacing(2)
+        gr4.setSpacing(theme.ABST_XS)
         for i, (txt, tip, fn) in enumerate([
             ("␣ Trailing WS", "Leerzeichen am Zeilenende entfernen", self._trailing_ws),
             ("⬜ Max. 2 LZ",  "Mehr als 2 Leerzeilen → 2",          self._leerzeilen),
@@ -310,7 +310,7 @@ class WerkzeugLeiste(QtWidgets.QWidget):
         v.addWidget(self._info)
 
         gr5 = QtWidgets.QGridLayout()
-        gr5.setSpacing(2)
+        gr5.setSpacing(theme.ABST_XS)
         b_info = _btn("↺ Statistiken",   "Code analysieren",             small=True)
         b_syn  = _btn("▶ Syntax prüfen", "Datei auf Syntaxfehler prüfen", small=True)
         b_info.clicked.connect(self._code_info)
@@ -339,13 +339,13 @@ class WerkzeugLeiste(QtWidgets.QWidget):
         self._status.setStyleSheet(
             theme.STY_WERKZEUG_STATUS(schrift.pt(schrift.STUFE_LG)))
         self._status.setText(text)
-        QtCore.QTimer.singleShot(3500, lambda: self._status.setText(""))
+        single_shot_sicher(3500, self._status, lambda: self._status.setText(""))
 
     def _err(self, text):
         self._status.setStyleSheet(
             theme.STY_WERKZEUG_STATUS(schrift.pt(schrift.STUFE_LG)))
         self._status.setText(text)
-        QtCore.QTimer.singleShot(5000, lambda: self._status.setText(""))
+        single_shot_sicher(5000, self._status, lambda: self._status.setText(""))
 
     def _cursor_sync(self):
         z = self._ed.textCursor().blockNumber() + 1

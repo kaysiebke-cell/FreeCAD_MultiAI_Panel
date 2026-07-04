@@ -38,8 +38,23 @@ def init_toolbar(editor) -> None:
     _fs = schrift.pt(schrift.STUFE_BASE)
     editor._panel_btns           = []
     editor._panel_btns_optional  = []
+    editor._aktions_btns         = []
     editor._animationen_reduziert = False
     editor._tastatur_shortcuts   = []
+
+    def _aktions_btn(name, icon_text, label):
+        btn = QtWidgets.QPushButton(icon_text)
+        btn.setFixedHeight(theme.TOOLBAR_PANEL_BTN_HOEHE)
+        btn.setFixedWidth(theme.TOOLBAR_PANEL_BTN_BREITE)
+        btn.setStyleSheet(theme.STY_PANEL_BTN(_fs))
+        editor._aktionen.verbinde_button(name, btn)
+        editor._aktions_btns.append((btn, icon_text, label))
+        _tb.addWidget(btn)
+        return btn
+
+    # Nur 💾 als Button — Ausführen läuft über F5 bzw. die KI-Vorschau
+    # (User-Wunsch: kein doppelter Ausführen-Button in der Toolbar)
+    _aktions_btn("speichern", "💾", "Speichern")
 
     def _panel_btn(dock, icon_text, label, standard_area=_L, optional=False):
         btn = QtWidgets.QPushButton(icon_text)
@@ -83,7 +98,7 @@ def init_toolbar(editor) -> None:
 
     from ui.barrierefreiheit import _get_bool as _bf_bool
     if _bf_bool("BF_IconText", False):
-        for _pb, _ico, _lbl in editor._panel_btns:
+        for _pb, _ico, _lbl in editor._aktions_btns + editor._panel_btns:
             _pb.setText(f"{_ico}  {_lbl}")
             _pb.setMinimumWidth(theme.BF_ICON_TEXT_MIN_W)
             _pb.setMaximumWidth(theme.FEHLER_MAX_H)

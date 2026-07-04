@@ -48,6 +48,8 @@ if _DIR not in sys.path:
 _EIGENE_MODULE = [
     # core
     "core.params", "core.qt_compat", "core.theme", "core.highlighter", "core.schrift",
+    "core.farbwerte", "core.theme_farbschema", "core.theme_schriftanwendung",
+    "core.theme_stylesheets",
     # editor (Haupt)
     "editor.panel", "editor.editor", "editor.widgets.editor_widgets",
     # editor/ki

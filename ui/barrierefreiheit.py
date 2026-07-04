@@ -49,8 +49,8 @@ class BarrierefreiheitPanel(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(6, 6, 6, 6)
-        layout.setSpacing(4)
+        layout.setContentsMargins(theme.ABST_L, theme.ABST_L, theme.ABST_L, theme.ABST_L)
+        layout.setSpacing(theme.ABST_M)
 
         # ── 1. SEHSCHWÄCHE ────────────────────────────────────────────────────
         layout.addWidget(_abschnitt("👁  Sehschwäche"))
@@ -64,7 +64,7 @@ class BarrierefreiheitPanel(QtWidgets.QWidget):
         self._schrift_slider.setTickInterval(2)
         self._schrift_slider.setTickPosition(QtWidgets.QSlider.TicksBelow)
         self._schrift_lbl = QtWidgets.QLabel(f"{self._schrift_slider.value()} pt")
-        self._schrift_lbl.setFixedWidth(36)
+        self._schrift_lbl.setFixedWidth(theme.BF_WERT_LBL_B)
         _r_schrift.addWidget(self._schrift_slider, stretch=1)
         _r_schrift.addWidget(self._schrift_lbl)
         layout.addLayout(_r_schrift)
@@ -79,7 +79,7 @@ class BarrierefreiheitPanel(QtWidgets.QWidget):
         self._editor_slider.setTickInterval(2)
         self._editor_slider.setTickPosition(QtWidgets.QSlider.TicksBelow)
         self._editor_lbl = QtWidgets.QLabel(f"{self._editor_slider.value()} pt")
-        self._editor_lbl.setFixedWidth(36)
+        self._editor_lbl.setFixedWidth(theme.BF_WERT_LBL_B)
         _r_editor.addWidget(self._editor_slider, stretch=1)
         _r_editor.addWidget(self._editor_lbl)
         layout.addLayout(_r_editor)

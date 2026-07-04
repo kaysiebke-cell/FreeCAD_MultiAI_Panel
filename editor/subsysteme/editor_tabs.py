@@ -10,6 +10,7 @@ import os
 from core.qt_compat import QtWidgets, QtCore, QtGui
 
 from core import theme
+from core import schrift
 from core.highlighter import PythonHighlighter
 from ui.fehler import uebersetze_fehler
 from editor.widgets.editor_widgets import JediEditor
@@ -31,10 +32,10 @@ class TabLogik:
                 return
         container = QtWidgets.QWidget()
         lay = QtWidgets.QVBoxLayout(container)
-        lay.setContentsMargins(0, 0, 0, 0)
-        lay.setSpacing(0)
+        lay.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+        lay.setSpacing(theme.ABST_KEIN)
         editor = JediEditor()
-        editor.setFont(QtGui.QFont("Courier New", 10))
+        editor.setFont(schrift.mono_font())
         editor.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
         editor.setStyleSheet(theme.STY_CODE_EDITOR())
         opt = editor.document().defaultTextOption()

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""UI-Texte, Stylesheet-Konstanten und alle STY_*-Funktionen."""
+"""UI-Texte, Layout-Maße, Stylesheet-Konstanten und alle STY_*-Funktionen."""
 
 from core.qt_compat import QtWidgets, QtCore, QtGui
 from core import schrift
@@ -35,13 +35,6 @@ HILFE_FARBE_DEFAULT: tuple[str, str] = ("", "")
 # ═══════════════════════════════════════════════════════════════════════════════
 # HILFE-TAB STYLESHEET-KONSTANTEN
 # ═══════════════════════════════════════════════════════════════════════════════
-STY_PLAIN_TEXT_BODY: str = (
-    "QPlainTextEdit{"
-    f"font-family:'{_FONT_MONO_FAMILY}', monospace; font-size:{schrift.pt(schrift.STUFE_BASE)}pt;"
-    "text-align:left;"
-    "border-radius:0 0 4px 4px;"
-    "border:1px solid palette(shadow);}"
-)
 
 STY_HILFE_BODY: str = (
     "QLabel{"
@@ -51,10 +44,6 @@ STY_HILFE_BODY: str = (
     "border:1px solid palette(shadow);}"
 )
 
-STY_SEARCH_LINE: str = (
-    "QLineEdit{ "
-    "border:1px solid palette(shadow); border-radius:3px; padding:3px;}"
-)
 
 
 def STY_VERSION_LABEL() -> str:
@@ -72,20 +61,11 @@ _STY_ABSCHNITT_BTN_TMPL: str = (
 )
 
 
-def abschnitt_btn_style(fg: str, bg: str) -> str:
-    """Gibt das Stylesheet für einen Hilfe-Abschnitts-Button zurück."""
-    return _STY_ABSCHNITT_BTN_TMPL.format(
-        ui_family=_FONT_UI_FAMILY,
-        fg=fg,
-        bg=bg,
-    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # STRUKTURELLE HINTERGRÜNDE
 # ═══════════════════════════════════════════════════════════════════════════════
-STY_SCROLL_AREA_BG: str = "QScrollArea{}"
-STY_CONTAINER_BG:   str = ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -113,8 +93,6 @@ def STY_TAB_BTN() -> str:
     )
 
 
-def apply_klappsektion_style(btn: "QtWidgets.QPushButton") -> None:
-    btn.setStyleSheet(STY_TAB_BTN())
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -224,22 +202,142 @@ DOCK_KI_RAND              = 4
 DOCK_KI_ABSTAND           = 3
 DOCK_KI_PRESET_ABST       = 3
 DOCK_KI_INPUT_ABST        = 2
-DOCK_KI_OUTPUT_ABST       = 2
-DOCK_KI_KONTEXT_ABST      = 2
-DOCK_KI_FRAGE_MIN_H       = 30   # Mindesthöhe Frage-Eingabefeld (legacy, nicht mehr direkt genutzt)
 DOCK_KI_KONTEXT_MIN_H     = 80   # Mindesthöhe Kontext-Bereich
 
 # KI-Eingabefelder: Zeilen-Grenzen für Auto-Resize
 DOCK_KI_FRAGE_MIN_ZEILEN  = 2    # Frage-Feld: mindestens 2 Zeilen
-DOCK_KI_FRAGE_MAX_ZEILEN  = 8    # Frage-Feld: maximal 8 Zeilen
 DOCK_KI_CODE_MIN_ZEILEN   = 3    # Code-Feld: mindestens 3 Zeilen
-DOCK_KI_CODE_MAX_ZEILEN   = 20   # Code-Feld: maximal 20 Zeilen
 DOCK_KI_FELD_RAND_EXTRA   = 4    # Höhenberechnung: Puffer für Rahmen/Innenabstand
 DOCK_KI_CODE_LABEL_ABST   = 8    # Abstand zwischen "Code-Block:"-Label und Code-Feld
 
 # KI-Eingaberahmen (Frage + Code)
 DOCK_KI_RAHMEN_RAND  = 0
 DOCK_KI_RAHMEN_ABST  = 0
+
+# Innerer Splitter im kombinierten KI-Feld (Frage | Code-Block | Antwort)
+DOCK_KI_SPLITTER_GRIFF = 6                 # Breite der Splitter-Griffe (px)
+DOCK_KI_SPLITTER_START = [100, 200, 240]   # Start-Aufteilung der drei Bereiche
+
+# Datei-Browser: Navigations-Buttons (⬆ 🏠 📁)
+DB_NAV_BTN_BREITE = 28
+DB_NAV_BTN_HOEHE  = 22
+
+# Aufklappbare Sektionen (KlappSektion): Kopf-Button
+KLAPP_BTN_MIN_H = 28
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GENERISCHE LAYOUT-SKALA — Ränder & Abstände (px)
+# Einzige Quelle für Zwischenräume in Layouts.
+# ═══════════════════════════════════════════════════════════════════════════════
+ABST_KEIN = 0
+ABST_MINI = 1
+ABST_XS   = 2
+ABST_S    = 3
+ABST_M    = 4
+ABST_L    = 6
+ABST_XL   = 8
+ABST_XXL  = 10
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# KOMPONENTEN-MASSE — aus den Widget-Dateien zentralisiert (px)
+# ═══════════════════════════════════════════════════════════════════════════════
+# Editor-Hauptfenster
+EDITOR_MIN_BREITE = 600
+EDITOR_MIN_HOEHE  = 400
+
+# FC-Prompt-Regeln-Dialog
+FCREGELN_DLG_BREITE = 680
+FCREGELN_DLG_HOEHE  = 560
+
+# Assistent-Panel
+ASSIST_EINGABE_MIN_H = 30
+
+# Bibliothek-Tab
+BIB_BTN_NEU_B      = 30
+BIB_LISTE_MIN_H    = 120
+BIB_VORSCHAU_MAX_H = 130
+BIB_BTN_H          = 28
+BIB_BTN_LOESCHEN_B = 34
+BIB_DLG_MIN_B      = 440
+BIB_DLG_CODE_MIN_H = 150
+BIB_DLG_BTN_H      = 30
+
+# Datei-Browser
+DB_NEU_BTN_H      = 26
+DB_LZ_BTN_GROESSE = 22    # ☆/🗑 Lesezeichen-Buttons (quadratisch)
+DB_BAUM_SPALTE_B  = 160
+
+# KI-Tools-Tab
+KITOOLS_ANZEIGE_H      = 100   # Kontext-Anzeige & Protokoll
+KITOOLS_BTN_H          = 26
+KITOOLS_DLG_MIN_B      = 420
+KITOOLS_DLG_MIN_H      = 300
+KITOOLS_DLG_RAND       = 10
+KITOOLS_FELD_MIN       = 120
+KITOOLS_ERGEBNIS_LBL_H = 24
+KITOOLS_DLG_BTN_H      = 32
+KITOOLS_ABBRECHEN_B    = 36
+
+# Snippets-Tab
+SNIP_VORSCHAU_MAX_H     = 90
+SNIP_BTN_H              = 28
+SNIP_FTAB_EINGABE_MAX_H = 120
+SNIP_FTAB_BTN_H         = 32
+
+# 👁 Vorschau-Tab
+VORSCHAU_CLOSE_BTN_H     = 22
+VORSCHAU_CONTAINER_MIN_H = 80
+VORSCHAU_BTN_H           = 30
+
+# Werkzeuge-Panel
+WERKZ_BTN_H        = 27
+WERKZ_BTN_H_KLEIN  = 24
+WERKZ_ZEILE_EDIT_B = 52
+WERKZ_LZ_MIN_H     = 55
+WERKZ_LZ_MAX_H     = 110
+WERKZ_LZ_BTN_H     = 24
+
+# Helfer-Panel (Legastheniker-Assistent + Vision)
+HELFER_AVATAR_GROESSE = 32
+HELFER_THUMB_GROESSE  = 72
+HELFER_ENTF_BTN_H     = 26
+HELFER_EINGABE_MIN_H  = 30
+HELFER_BTN_H          = 28
+HELFER_SENDEN_BTN_H   = 32
+HELFER_DIFF_RAND      = (12, 6, 12, 6)   # DiffBlase außen
+HELFER_BLASE_RAND     = (12, 8, 12, 8)   # Sprechblase innen
+
+# Plan-Modus-Dialog
+PLAN_DLG_BREITE = 700
+PLAN_DLG_HOEHE  = 450
+PLAN_DLG_BTN_H  = 30
+
+# Barrierefreiheit
+BF_PANEL_BTN_MIN_B = 44
+BF_PANEL_BTN_B     = 32
+BF_BTN_HOEHEN      = (26, 34, 42)   # Button-Größe: Normal / Groß / Sehr groß
+BF_MAX_BREITE      = 16777215       # Qt: QWIDGETSIZE_MAX
+BF_WERT_LBL_B      = 36
+
+# Begrüßungsdialog
+BEGR_DIALOG_B        = 460
+BEGR_GIF_H           = 220
+BEGR_SEP_H           = 1
+BEGR_KARTEN_SCROLL_H = 300
+BEGR_KEY_FELD_H      = 38
+BEGR_BTN_H           = 36
+BEGR_KARTE_H         = 54
+BEGR_KARTE_RAND      = (10, 6, 10, 6)
+BEGR_RAND_INFO       = (28, 18, 28, 20)
+BEGR_RAND_ANBIETER   = (20, 20, 20, 16)
+BEGR_RAND_APIKEY     = (28, 28, 28, 24)
+BEGR_RAND_FERTIG     = (28, 40, 28, 32)
+
+# Makro-Manager
+MGR_BTN_H        = 34
+MGR_RELOAD_BTN_B = 36
+MGR_SUCHE_H      = 28
+MGR_LISTE_BTN_H  = 26
 
 # Aktionen-Dock
 DOCK_AKT_RAND        = 4
@@ -346,18 +444,8 @@ def STY_ICON_BTN_BORDERLESS(fs: int) -> str:
     return f"QPushButton{{border:none;padding:0px;margin:0px;font-size:{fs}pt;}}"
 
 
-def STY_KI_INPUT_FIELD() -> str:
-    return (
-        "QPlainTextEdit{font-family:'Courier New',monospace;"
-        "border:1px solid palette(shadow); border-radius:3px;}"
-        "QPlainTextEdit:focus{border:1px solid palette(highlight);}"
-    )
 
 
-def STY_KI_OUTPUT_FIELD() -> str:
-    return ("QPlainTextEdit{font-family:'Courier New',monospace;"
-            "border:1px solid palette(shadow);"
-            "background:palette(base);color:palette(text);}")
 
 
 STY_TOOLBAR: str = "QToolBar { border: none; spacing: 2px; padding: 2px 4px; }"
@@ -568,14 +656,8 @@ STY_VORSCHAU_CONTAINER: str = (
 STY_VORSCHAU_PLACEHOLDER: str = "QLabel { border:none; }"
 
 
-def STY_VORSCHAU_LOG_LABEL(fs: int) -> str:
-    return f"QLabel {{ font-size:{fs}pt; font-weight:bold; letter-spacing:1px; }}"
 
 
-STY_VORSCHAU_LOG_BOX: str = (
-    "QPlainTextEdit{font-family:'Courier New',monospace;"
-    "border:1px solid palette(shadow);border-radius:3px;}"
-)
 
 
 def STY_VORSCHAU_WARN(fs: int) -> str:
@@ -636,54 +718,18 @@ def STY_SECTION_HEAD_BTN(fs: int) -> str:
     )
 
 
-def STY_SECTION_BTN(fs: int) -> str:
-    return (
-        f"QPushButton{{text-align:left;padding:3px 8px;font-size:{fs}pt;"
-        "border:none;border-radius:4px;background:transparent;color:palette(text);}"
-        "QPushButton:hover{background:palette(alternateBase);}"
-        "QPushButton:pressed{background:palette(mid);}"
-        "QPushButton:disabled{color:palette(mid);}"
-    )
 
 
-def STY_GRID_BTN(fs: int) -> str:
-    return (
-        f"QPushButton{{text-align:center;padding:2px 4px;font-size:{fs}pt;"
-        "border:1px solid palette(mid);border-radius:4px;"
-        "background:palette(button);color:palette(text);}"
-        "QPushButton:hover{background:palette(alternateBase);}"
-        "QPushButton:pressed{background:palette(mid);}"
-        "QPushButton:disabled{color:palette(mid);}"
-    )
 
 
-def STY_RAIL_BTN(fs: int) -> str:
-    return (
-        f"QPushButton{{border:none;border-radius:5px;background:transparent;"
-        f"font-size:{fs}pt;font-weight:bold;color:palette(buttonText);}}"
-        f"QPushButton:hover{{background:palette(midlight);}}"
-        f"QPushButton:checked{{background:palette(midlight);"
-        f"border:1px solid palette(highlight);}}"
-    )
 
 
-def STY_NAV_BAUM_SIDEBAR(fs: int) -> str:
-    return (
-        f"QTreeWidget{{font-size:{fs}pt;border:1px solid palette(mid);border-radius:3px;}}"
-        "QTreeWidget::item{padding:2px;}"
-    )
 
 
-def STY_STATISTIKEN_LBL_SIDEBAR(fs: int) -> str:
-    return _lbl(fs, "5px", border="border:1px solid palette(mid);", radius=3)
 
 
-def STY_CHECK_LBL_SIDEBAR(fs: int) -> str:
-    return _lbl(fs, "5px", radius=3)
 
 
-def STY_SIDEBAR_STATUS(fs: int) -> str:
-    return _lbl(fs, "2px 4px", extra="border-top:1px solid palette(mid);")
 
 
 def STY_JEDI_POPUP(fs: int) -> str:
@@ -700,7 +746,6 @@ def STY_BF_HINWEIS(fs: int) -> str:
 
 STY_HILFE_SUCHE: str = "QLineEdit{border:1px solid palette(shadow);border-radius:3px;padding:3px;}"
 
-STY_SEPARATOR:       str = "QFrame { color:palette(mid); margin:2px 0; }"
 STY_SEPARATOR_TIGHT: str = "QFrame { color:palette(mid); margin:0; }"
 STY_BORDER_NONE:     str = "border:none;"
 

@@ -34,10 +34,10 @@ FreeCAD automation.
 - [The User Interface](docs/oberflaeche.md)
 - [Panels in Detail](docs/panels.md)
 - [AI Workflow & Presets](docs/ki-workflow.md)
-- [FC11, FC12 & FC13 – Macro from Description](docs/makro-generator.md)
+- [FC11–FC14 – Macro from Description](docs/makro-generator.md)
 - [Snippets, API Hints & Tools Panel](docs/snippets-und-werkzeuge.md)
 - [Macro Library](docs/makro-bibliothek.md)
-- [Error Translator & Backup System](docs/fehler-und-backup.md)
+- [Error Panel & Backup System](docs/fehler-und-backup.md)
 - [Ollama – Field Report](docs/OLLAMA_ERFAHRUNGEN.md)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
 - [Project Structure](#project-structure)
@@ -54,22 +54,27 @@ FreeCAD automation.
 - Line numbers, indent guides, cursor position
 - Jedi-based autocomplete (optional)
 - Search & replace with Ctrl+F
+- **Run code in FreeCAD** — **F5** runs the whole macro (saves first), **F9** runs only the selected lines (or the current line) for quick iteration
+- **Abort a run** — press F5 again (or the ⏹ button) to stop a running execution at the next Python line
 - Unlimited undo/redo transactions
 - Automatic backups before every AI replacement (max. 3 per file)
 - autopep8 formatting (optional)
 
 ### AI Integration
 - **19 AI providers** supported (Ollama, Claude, ChatGPT, Gemini, DeepSeek, Groq …)
-- **40+ presets** for all common coding tasks
-- Streaming responses in real time (50 ms chunk batching)
+- **40+ presets** in 6 categories, selectable via a menu button (★ Quick presets on top)
+- **Quick-start profiles** in settings — 🎯 FreeCAD Code / 💬 Explanation / 🧠 Thinking set template, temperature, mode and thinking with one click
+- Streaming responses in real time (50 ms chunk batching) — the **🤖 Ask** button turns into **⏹ Stop** while streaming, so a running request can be cancelled (the partial answer is kept)
 - Chat history with auto-compacting after 5,000 characters
 - Two modes: 🟢 Beginner (detailed, plain language) / 🔵 Expert (concise, technical) — **selection is saved**
 - Generate macros from natural-language descriptions (FC11 / FC12 / FC13)
-- AI tool-calling for structured FreeCAD operations (FC14 JSON)
+- AI tool-calling for structured FreeCAD operations (FC14 JSON / "FC14 · Object commands (local)" preset)
+- **Skills** — domain knowledge (e.g. screw-hole dimension tables from `data/skills/`) is appended to the prompt automatically when keywords like "M6", "thread" or "hole" appear in the description
 - Ask the AI without any code in the editor (pure Q&A mode)
 - **FreeCAD document state** automatically included in the prompt — compact for Ollama, full for cloud models
 - **AGENTS.md support** — project-specific instructions next to the open file or in the home directory are loaded automatically
-- **Preview errors → AI sandbox** — runtime errors from the preview can be resolved directly with "⚠ Explain error" or "🔧 AI fix"
+- **👁 3D preview tab** — run the AI response (or the editor code) directly in FreeCAD and see the embedded 3D viewport as an editor tab (▶ Run · 🔄 Refresh · ⊡ Fit; ▶ turns into ⏹ Stop while running)
+- **Unified ⚠ error panel** — one surface combining output, runtime errors and the test sandbox. 🔍 **Translate** replaces the error text with a German explanation *in place* (same field, no duplication) and toggles back to 🔙 **Original** — one button, two states. 🐛 **AI explains** streams a detailed explanation, 🔧 **AI fix** returns corrected code (max. 3 attempts). Errors from F5/F9 runs and the preview land here automatically
 - **🔌 Connection test** — checks Ollama reachability or API key status without an AI request
 - **Auto-insert** — AI response is automatically inserted into the editor after stream end (optional)
 - **Thinking mode** (Anthropic) — Extended Thinking with 8,000 budget tokens
@@ -81,8 +86,9 @@ FreeCAD automation.
 - 11 freely arrangeable dock panels (move, detach, merge into tabs)
 - **Light and dark mode** switchable via 🌙/☀ button in settings, selection is saved
 - Every panel individually toggleable via toolbar
-- Welcome dialog on first start (set up AI provider immediately)
+- Welcome dialog on first start (provider cards for all 19 providers, set up immediately or skip)
 - **🤝 Interactive assistant** — ask questions, AI responds with step-by-step instructions and highlights buttons
+- **❓ Built-in help** — searchable, collapsible documentation as a tab in the ♿ Help+Access panel
 - **♿ Accessibility** — font size, contrast, keyboard mode (Alt+1–0), simplified view, tooltip delay, animations
 
 ---
@@ -224,14 +230,23 @@ export OPENROUTER_API_KEY=sk-or-...
 
 | Shortcut | Action |
 |----------|--------|
+| **F5** | Save + run the whole macro in FreeCAD (while running: abort) |
+| **F9** | Run only the selected lines (or the current line) |
 | **Ctrl+S** | Save |
+| **Ctrl+Shift+K** | Ask AI (while streaming: stop the request) |
+| **Ctrl+Shift+F** | Format code |
+| **Ctrl+Shift+R** | Reload last saved version |
 | **Ctrl+A** | Select all |
 | **Ctrl+Z** | Undo |
 | **Ctrl+Y** | Redo |
 | **Ctrl+F** | Toggle search/replace |
+| **F3** | Find next |
+| **F1** | Open help |
 | **Tab** | Accept autocomplete suggestion |
 | **Escape** | Close autocomplete |
-| **Ctrl+Enter** | Error translator: translate immediately |
+| **Ctrl+Enter** | Error-translator tab (left panel): translate immediately |
+
+> The central shortcuts (F5, F9, Ctrl+Shift+K …) come from a single action registry, so the in-app help under **⌨️ Tastenkürzel → ZENTRALE AKTIONEN** always stays in sync.
 
 ---
 
@@ -247,22 +262,28 @@ FreeCAD_MultiAI_Panel/
 ├── README.md
 │
 ├── core/
-│   ├── params.py        # Settings persistence (FreeCAD params + API keys)
+│   ├── params.py        # Settings persistence (FreeCAD params, API keys, presets)
 │   ├── qt_compat.py     # PySide6/PySide2 compatibility layer + requests export
-│   ├── theme.py         # Stylesheets & design functions (light/dark adaptive)
-│   ├── farben.py        # Colour definitions for light and dark mode
-│   ├── highlighter.py   # Python syntax highlighter
-│   └── schrift.py       # Font size constants
+│   ├── theme.py                   # Public design-system API (re-exports the theme_* modules)
+│   ├── theme_schriftanwendung.py  # Emoji-safe fonts, global font application
+│   ├── theme_farbschema.py        # Colour scheme logic, light/dark switching
+│   ├── theme_stylesheets.py       # UI texts, layout constants + all STY_* stylesheet functions
+│   ├── farbwerte.py               # Raw colour values for light and dark mode
+│   ├── highlighter.py             # Python syntax highlighter
+│   └── schrift.py                 # Font families & fluid size scale
 │
 ├── editor/
-│   ├── editor.py        # Coordinator (QMainWindow, delegates to intern/)
-│   ├── freecad_helfer_panel.py
+│   ├── editor.py        # Coordinator (QMainWindow, delegates to builders/, subsysteme/)
+│   ├── panel.py         # Helper panel (dyslexia assistant + vision)
+│   ├── _helfer_ui.py    # Helper panel UI parts
+│   ├── _helfer_rechtschreibung.py  # Spell checking (pyspellchecker)
 │   │
-│   ├── intern/          # Editor build and logic modules
+│   ├── builders/        # UI construction
 │   │   ├── central_widget_builder.py  # Central widget + status bar
-│   │   ├── dock_builder.py            # All 13 dock panels
-│   │   ├── toolbar_builder.py         # Toolbar
-│   │   ├── ki_widget_builder.py       # AI panel (provider, model, presets, temp.)
+│   │   ├── dock_builder.py            # All 11 dock panels
+│   │   └── toolbar_builder.py         # Panel toolbar
+│   │
+│   ├── subsysteme/      # Editor logic modules
 │   │   ├── editor_datei.py            # File logic (save, backup, reload)
 │   │   ├── editor_suche.py            # Search & replace
 │   │   ├── editor_code.py             # Formatting, indentation, selection
@@ -280,43 +301,50 @@ FreeCAD_MultiAI_Panel/
 │   │   ├── ki_tools_tab.py       # AI tools tab (direct operations)
 │   │   ├── snippet_controller.py # Snippets tab controller (local + online)
 │   │   ├── snippet_widgets.py    # Helper widgets: SnipCommandEdit, Worker, Banner
-│   │   ├── vorschau_controller.py
+│   │   ├── vorschau_controller.py# 👁 3D preview tab (embedded FreeCAD viewport)
 │   │   └── werkzeuge.py          # Tools panel (code tree, navigation, edit)
 │   │
 │   ├── fehler/
 │   │   └── fehler_panel.py       # Error panel + AI self-correction + sandbox
 │   │
-│   └── ki/
+│   └── ki/                       # AI implementation modules
 │       ├── ki_controller.py      # AI coordinator (delegates to composition objects)
+│       ├── ki_widget_builder.py  # AI settings widgets (provider, model, preset menu)
+│       ├── provider_daten.py     # Provider URLs + model lists (19 providers)
+│       ├── ki_streaming.py       # HTTP streaming for all providers + worker threads
+│       ├── ki_anfrage.py         # Prompt building + AI requests (AGENTS.md, skills)
+│       ├── ki_verlauf.py         # Chat history + context compacting
+│       ├── ki_chunk.py           # Chunk buffer + stream-done processing
+│       ├── ki_sitzung.py         # Save/load sessions (JSON)
+│       ├── ki_fehler.py          # Error panel integration + self-correction
 │       ├── ki_werkzeuge.py       # AI tool-calling
+│       ├── fc14_tool_calling.py  # FC14 JSON tool calls → Python code
+│       ├── verbindungstest.py    # 🔌 Connection test (Ollama / API key)
+│       ├── ki_modi.py            # AI modes (beginner / expert)
+│       ├── nl_generator.py       # System prompts for FC11/FC12/FC13
 │       ├── assistent_prompt.py   # Assistant system prompt
 │       ├── dokument_kontext.py   # Document context preparation
-│       │
-│       └── intern/               # AI implementation modules
-│           ├── provider_daten.py      # Provider URLs + model lists (19 providers)
-│           ├── ki_streaming.py        # HTTP streaming for all providers + worker threads
-│           ├── ki_anfrage.py          # Prompt building + AI requests
-│           ├── ki_verlauf.py          # Chat history + context compacting
-│           ├── ki_chunk.py            # Chunk buffer + stream-done processing
-│           ├── ki_sitzung.py          # Save/load sessions (JSON)
-│           ├── ki_fehler.py           # Error panel integration + self-correction
-│           ├── kod_analyse.py         # AST analysis (pure functions)
-│           └── kod_korrektor.py       # FreeCAD code correction + NL filter
+│       ├── kod_analyse.py        # AST analysis (pure functions)
+│       └── kod_korrektor.py      # FreeCAD code correction + NL filter
 │
 ├── ui/
 │   ├── manager.py       # FreeCAD macro manager (sidebar)
-│   ├── begruessung.py   # Welcome dialog (first start)
+│   ├── begruessung.py   # Welcome dialog (first start, provider cards)
 │   ├── barrierefreiheit.py  # Accessibility panel
 │   └── fehler.py        # Error translator (EN→DE) + error display
 │
 ├── data/
-│   ├── freecad_data.py       # Snippets (6 categories) + API hints
-│   ├── nl_generator.py       # System prompts for FC11/FC12/FC13
-│   ├── ki_modi.py            # AI modes (beginner / expert)
+│   ├── freecad_data.py       # Aggregator (re-exports snippets, hints, presets)
+│   ├── freecad_snippets.py   # Snippets (6 categories)
+│   ├── freecad_api_hints.py  # FreeCAD API quick reference
+│   ├── freecad_ki_presets.py # FC1–FC14 presets
+│   ├── freecad_beispiele.py  # FreeCAD example code
+│   ├── anbieter_formate.py   # Provider formats (vision models & image formats)
 │   ├── bibliothek.py         # Macro library data
-│   ├── anbieter_formate.py   # Provider formats
+│   ├── hilfe.py              # ❓ Help tab widget
 │   ├── hilfe_texte.py        # Built-in help texts
-│   └── hilfe.py              # Help panel
+│   └── skills/               # Domain knowledge, auto-appended to prompts
+│       └── fastener-hole.md  # Screw hole dimension tables (M2–M12)
 │
 ├── assets/
 │   └── icons/           # SVG icons for AI providers, demo GIF
@@ -349,5 +377,7 @@ FreeCAD_MultiAI_Panel/
 | **Large files (>2,000 lines)** | AI context window is limited | Load only relevant sections into the input field |
 | **Ollama not found** | Service is not running | Run `ollama serve` in the terminal |
 | **Ollama produces poor FreeCAD code** | General model without code focus | Install `ollama pull qwen2.5-coder:7b` |
+| **Aborting a run only stops between Python lines** | A running FreeCAD C++ operation cannot be interrupted | Wait for the current operation; the abort takes effect at the next line |
+| **Stopping an AI request waits for the next chunk** | The stream breaks at the next received line, not mid-socket | A fully stalled provider still ends via the 120 s timeout |
 
 ---

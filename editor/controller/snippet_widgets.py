@@ -14,7 +14,7 @@ import os
 import time
 import urllib.request
 
-from core.qt_compat import QtWidgets, QtCore, QtGui
+from core.qt_compat import QtWidgets, QtCore, QtGui, single_shot_sicher
 from core import theme
 from core import schrift
 
@@ -191,7 +191,7 @@ class SnipCommandEdit(QtWidgets.QPlainTextEdit):
 
     def focusOutEvent(self, event):
         if self._popup.isVisible():
-            QtCore.QTimer.singleShot(250, self._verberge_popup)
+            single_shot_sicher(250, self, self._verberge_popup)
         super().focusOutEvent(event)
 
     def _ist_popup_widget(self, widget) -> bool:

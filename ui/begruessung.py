@@ -33,7 +33,7 @@ _GIF  = next(
 # ── Hilfsfunktion: einheitliche Buttons ───────────────────────────────────────
 def _mkbtn(text, primary=False, parent=None):
     b = QtWidgets.QPushButton(text, parent)
-    b.setMinimumHeight(36)
+    b.setMinimumHeight(theme.BEGR_BTN_H)
     b.setCursor(QtCore.Qt.PointingHandCursor)
     if primary:
         b.setStyleSheet(theme.STY_PRIMARY_BTN(schrift.pt(schrift.STUFE_XL)))
@@ -95,17 +95,17 @@ class AnbieterKarte(QtWidgets.QFrame):
         super().__init__(parent)
         self._id = aid
         self.setCursor(QtCore.Qt.PointingHandCursor)
-        self.setFixedHeight(54)
+        self.setFixedHeight(theme.BEGR_KARTE_H)
         self._set_aktiv(False)
 
         row = QtWidgets.QHBoxLayout(self)
-        row.setContentsMargins(10, 6, 10, 6)
-        row.setSpacing(10)
+        row.setContentsMargins(*theme.BEGR_KARTE_RAND)
+        row.setSpacing(theme.ABST_XXL)
 
         row.addWidget(_anbieter_icon(svg, emoji, 28))
 
         txt = QtWidgets.QVBoxLayout()
-        txt.setSpacing(1)
+        txt.setSpacing(theme.ABST_MINI)
         n = QtWidgets.QLabel(name)
         n.setStyleSheet(theme.STY_ANBIETER_NAME(schrift.pt(schrift.STUFE_BASE)))
         s = QtWidgets.QLabel(sub)
@@ -141,7 +141,7 @@ class BegrüssungsDialog(QtWidgets.QDialog):
         super().__init__(parent)
         self.setWindowTitle("Willkommen beim FreeCAD MultiAI Panel")
         self.setModal(True)
-        self.setFixedWidth(460)
+        self.setFixedWidth(theme.BEGR_DIALOG_B)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowFlags(
             QtCore.Qt.Dialog | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint
@@ -159,27 +159,27 @@ class BegrüssungsDialog(QtWidgets.QDialog):
         self._stack.addWidget(self._seite_fertig())
 
         root = QtWidgets.QVBoxLayout(self)
-        root.setContentsMargins(0, 0, 0, 0)
-        root.setSpacing(0)
+        root.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+        root.setSpacing(theme.ABST_KEIN)
         root.addWidget(self._stack)
 
     # ── Seite 0: GIF-Intro ────────────────────────────────────────────────────
     def _seite_demo(self) -> QtWidgets.QWidget:
         w = QtWidgets.QWidget()
         v = QtWidgets.QVBoxLayout(w)
-        v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(0)
+        v.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
+        v.setSpacing(theme.ABST_KEIN)
 
         # ── GIF-Bereich ──────────────────────────────────────────────────────
         gif_wrap = QtWidgets.QWidget()
-        gif_wrap.setFixedHeight(220)
+        gif_wrap.setFixedHeight(theme.BEGR_GIF_H)
         gif_box = QtWidgets.QVBoxLayout(gif_wrap)
-        gif_box.setContentsMargins(0, 0, 0, 0)
+        gif_box.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_KEIN)
         gif_box.setAlignment(QtCore.Qt.AlignCenter)
 
         self._gif_label = QtWidgets.QLabel()
         self._gif_label.setAlignment(QtCore.Qt.AlignCenter)
-        self._gif_label.setFixedSize(460, 220)
+        self._gif_label.setFixedSize(theme.BEGR_DIALOG_B, theme.BEGR_GIF_H)
 
         if os.path.isfile(_GIF):
             self._movie = QtGui.QMovie(_GIF)
@@ -202,7 +202,7 @@ class BegrüssungsDialog(QtWidgets.QDialog):
         # ── Trennlinie ───────────────────────────────────────────────────────
         sep = QtWidgets.QFrame()
         sep.setFrameShape(QtWidgets.QFrame.HLine)
-        sep.setFixedHeight(1)
+        sep.setFixedHeight(theme.BEGR_SEP_H)
         sep.setStyleSheet(theme.STY_BORDER_NONE)
         v.addWidget(sep)
 
@@ -210,8 +210,8 @@ class BegrüssungsDialog(QtWidgets.QDialog):
         info = QtWidgets.QWidget()
         info.setStyleSheet(theme.STY_BORDER_NONE)
         ib = QtWidgets.QVBoxLayout(info)
-        ib.setContentsMargins(28, 18, 28, 20)
-        ib.setSpacing(0)
+        ib.setContentsMargins(*theme.BEGR_RAND_INFO)
+        ib.setSpacing(theme.ABST_KEIN)
 
         titel = QtWidgets.QLabel("⚙️  FreeCAD MultiAI Panel")
         titel.setStyleSheet(theme.STY_ABSCHNITT_LABEL_LG(schrift.pt(schrift.STUFE_XL)))
@@ -234,7 +234,7 @@ class BegrüssungsDialog(QtWidgets.QDialog):
 
         # Buttons
         btn_row = QtWidgets.QHBoxLayout()
-        btn_row.setSpacing(8)
+        btn_row.setSpacing(theme.ABST_XL)
         btn_skip = _mkbtn("Überspringen")
         btn_los  = _mkbtn("Einrichten →", primary=True)
         btn_row.addWidget(btn_skip)
@@ -258,8 +258,8 @@ class BegrüssungsDialog(QtWidgets.QDialog):
     def _seite_anbieter(self) -> QtWidgets.QWidget:
         w = QtWidgets.QWidget()
         v = QtWidgets.QVBoxLayout(w)
-        v.setContentsMargins(20, 20, 20, 16)
-        v.setSpacing(0)
+        v.setContentsMargins(*theme.BEGR_RAND_ANBIETER)
+        v.setSpacing(theme.ABST_KEIN)
 
         schritt = QtWidgets.QLabel("SCHRITT 1 VON 2")
         schritt.setStyleSheet(theme.STY_ABSCHNITT_LABEL(schrift.pt(schrift.STUFE_BASE)))
@@ -277,12 +277,12 @@ class BegrüssungsDialog(QtWidgets.QDialog):
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
         scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        scroll.setFixedHeight(300)
+        scroll.setFixedHeight(theme.BEGR_KARTEN_SCROLL_H)
 
         container = QtWidgets.QWidget()
         grid = QtWidgets.QGridLayout(container)
-        grid.setContentsMargins(0, 0, 4, 0)
-        grid.setSpacing(6)
+        grid.setContentsMargins(theme.ABST_KEIN, theme.ABST_KEIN, theme.ABST_M, theme.ABST_KEIN)
+        grid.setSpacing(theme.ABST_L)
         grid.setColumnStretch(0, 1)
         grid.setColumnStretch(1, 1)
 
@@ -315,8 +315,8 @@ class BegrüssungsDialog(QtWidgets.QDialog):
     def _seite_apikey(self) -> QtWidgets.QWidget:
         w = QtWidgets.QWidget()
         v = QtWidgets.QVBoxLayout(w)
-        v.setContentsMargins(28, 28, 28, 24)
-        v.setSpacing(0)
+        v.setContentsMargins(*theme.BEGR_RAND_APIKEY)
+        v.setSpacing(theme.ABST_KEIN)
 
         schritt = QtWidgets.QLabel("SCHRITT 2 VON 2")
         schritt.setStyleSheet(theme.STY_ABSCHNITT_LABEL(schrift.pt(schrift.STUFE_BASE)))
@@ -338,7 +338,7 @@ class BegrüssungsDialog(QtWidgets.QDialog):
         self._key_feld = QtWidgets.QLineEdit()
         self._key_feld.setEchoMode(QtWidgets.QLineEdit.Password)
         self._key_feld.setPlaceholderText("sk-ant-api03-…")
-        self._key_feld.setMinimumHeight(38)
+        self._key_feld.setMinimumHeight(theme.BEGR_KEY_FELD_H)
 
         self._toggle_vis = QtWidgets.QCheckBox("Schlüssel anzeigen")
         self._toggle_vis.setStyleSheet(theme.STY_STATUS_LABEL(schrift.pt(schrift.STUFE_LG)))
@@ -380,8 +380,8 @@ class BegrüssungsDialog(QtWidgets.QDialog):
     def _seite_fertig(self) -> QtWidgets.QWidget:
         w = QtWidgets.QWidget()
         v = QtWidgets.QVBoxLayout(w)
-        v.setContentsMargins(28, 40, 28, 32)
-        v.setSpacing(0)
+        v.setContentsMargins(*theme.BEGR_RAND_FERTIG)
+        v.setSpacing(theme.ABST_KEIN)
         v.setAlignment(QtCore.Qt.AlignCenter)
 
         check = QtWidgets.QLabel("✅")
@@ -398,8 +398,9 @@ class BegrüssungsDialog(QtWidgets.QDialog):
         self._fertig_text.setWordWrap(True)
 
         tipp = QtWidgets.QLabel(
-            "💡 Tipp: Trage einmalig einen Projekt-Kontext\n"
-            "im gelben Feld ein — dann kennt die KI dein Projekt."
+            "💡 Tipp: Trage einmalig einen Projekt-Kontext ein\n"
+            "(🤖 KI-Panel → ▶ 📌 Projekt-Kontext unten aufklappen)\n"
+            "— dann kennt die KI dein Projekt."
         )
         tipp.setStyleSheet(theme.STY_TIPP_BOX(schrift.pt(schrift.STUFE_LG)))
         tipp.setAlignment(QtCore.Qt.AlignCenter)

@@ -14,9 +14,10 @@ import os
 import re
 import time
 
-from core.qt_compat import QtWidgets, QtCore, QtGui, requests, HAS_REQUESTS
+from core.qt_compat import QtWidgets, QtCore, QtGui, requests, HAS_REQUESTS, single_shot_sicher
 
 from core import theme
+from core import schrift
 from ui.fehler import uebersetze_fehler
 from core import params
 from editor.controller.werkzeuge import WerkzeugLeiste
@@ -33,6 +34,7 @@ from editor.ki.ki_widget_builder import init_ki_widgets, get_preset_prompt, baue
 from editor.builders.dock_builder import init_docks
 from editor.builders.toolbar_builder import init_toolbar
 
+from editor.subsysteme.editor_aktionen import AktionenLogik
 from editor.subsysteme.editor_datei import DateiLogik
 from editor.subsysteme.editor_suche import SucheLogik
 from editor.subsysteme.editor_code import CodeLogik
@@ -100,11 +102,11 @@ class MakroEditor(QtWidgets.QMainWindow):
             | QtCore.Qt.WindowMaximizeButtonHint
             | QtCore.Qt.WindowCloseButtonHint
         )
-        self.setMinimumSize(600, 400)
+        self.setMinimumSize(theme.EDITOR_MIN_BREITE, theme.EDITOR_MIN_HOEHE)
         self.setMaximumSize(16777215, 16777215)
         if self.layout():
-            self.layout().setContentsMargins(6, 6, 6, 6)
-        _f = QtGui.QFont("Ubuntu", 10)
+            self.layout().setContentsMargins(theme.ABST_L, theme.ABST_L, theme.ABST_L, theme.ABST_L)
+        _f = schrift.ui_font()
         try:
             from main import emoji_font
             _f = emoji_font(_f)
@@ -114,6 +116,8 @@ class MakroEditor(QtWidgets.QMainWindow):
         self.setStyleSheet(theme.STY_HAUPTFENSTER_FONT())
 
         self._alive   = True
+        self._ki_aktiv = False   # läuft gerade eine KI-Anfrage?
+        self._ki_stop  = False   # Abbruch angefordert (▶ Fragen → ⏹ Stopp)
         self._session = requests.Session() if HAS_REQUESTS else None
 
         self._chunk_buffer: list = []
@@ -159,6 +163,7 @@ class MakroEditor(QtWidgets.QMainWindow):
         self._browser    = Browser(self)
         self._snippets   = Snippets(self)
         self._ki         = Ki(self)
+        self._aktionen   = AktionenLogik(self)
 
         # Builder
         init_ki_widgets(self, _ICONS_DIR)
@@ -217,6 +222,23 @@ class MakroEditor(QtWidgets.QMainWindow):
 
     # ══ Öffentliche API ════════════════════════════════════════════════════
 
+    def ausfuehren(self):
+        """F5 — speichert implizit und führt den Editor-Inhalt in FreeCAD aus.
+        Still: kein Vorschau-Tab, das Ergebnis zeigt das FreeCAD-Hauptfenster;
+        nur Fehler öffnen das Fehler-Panel (3D-Ansicht im Editor: 👁 KI-Vorschau).
+        Läuft bereits eine Ausführung, fordert F5 stattdessen den Abbruch an."""
+        if self._vorschau.exec_laeuft():
+            self._vorschau.abbruch_anfordern()
+            return
+        if self._geaendert:
+            self.speichern()
+        self._vorschau.ausfuehren_ohne_vorschau()
+
+    def auswahl_ausfuehren(self):
+        """F9 — führt nur die markierten Zeilen (oder die aktuelle Zeile)
+        in FreeCAD aus, ohne zu speichern."""
+        self._vorschau.auswahl_ausfuehren()
+
     def insert_snippet(self, code: str):
         c = self._editor.textCursor()
         if not c.hasSelection() and c.columnNumber() > 0:
@@ -272,7 +294,7 @@ class MakroEditor(QtWidgets.QMainWindow):
     def _set_status(self, text, ms=4000):
         self._status.setText(text)
         if ms > 0:
-            QtCore.QTimer.singleShot(ms, self._loesche_status)
+            single_shot_sicher(ms, self, self._loesche_status)
 
     def _loesche_status(self):
         try:
@@ -390,6 +412,8 @@ class MakroEditor(QtWidgets.QMainWindow):
     def _flush_chunks(self):                        self._ki._flush_chunks()
     def _ki_fehler_erklaeren(self):                 self._ki._ki_fehler_erklaeren()
     def _ki_fragen(self):                           self._ki._ki_fragen()
+    def _ki_lauf_ui(self, laeuft: bool):            self._ki._ki_lauf_ui(laeuft)
+    def _ki_stoppen(self):                          self._ki._ki_stoppen()
     def _ki_verlauf_reset(self):                    self._ki._ki_verlauf_reset()
     def _on_ki_chunk(self, chunk: str):             self._ki._on_ki_chunk(chunk)
     def _on_ki_error(self, msg: str):                self._ki._on_ki_error(msg)
@@ -440,6 +464,17 @@ class MakroEditor(QtWidgets.QMainWindow):
                     hl.aktualisiere_theme()
 
     def closeEvent(self, event):
+        # KRITISCH: Eingebetteten FreeCAD-Viewport ZUERST an FreeCAD
+        # zurückgeben. Das Fenster hat WA_DeleteOnClose — beim Schließen
+        # würden alle Kind-Widgets zerstört, inklusive des ausgeliehenen
+        # View3DInventor → FreeCAD stürzt komplett ab.
+        try:
+            self._vorschau._view_zurueckgeben()
+            timer = self._vorschau._vorschau_shot_timer
+            if timer is not None:
+                timer.stop()
+        except Exception:
+            pass
         self._alive = False
         try:
             import json as _json
