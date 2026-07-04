@@ -4,12 +4,6 @@ A modern, AI-assisted Python editor as a FreeCAD plugin with freely arrangeable 
 syntax highlighting, 19 supported AI providers, and extensive tools for
 FreeCAD automation.
 
-## Audience & AI usage
-
-This application is intended equally for professionals, beginners, and people with disabilities. Its goal is to make FreeCAD more accessible through barrier-reduced tools and easy-to-understand AI assistance. The AI is treated as a tool—like an assistant or any other software tool. It should not do all the work for the user, but interact with them, answer questions, and suggest solutions. AI models are not error-free or perfect; please review generated suggestions carefully and apply only what fits your project.
-
-Workflow note: The integrated AI workflow (see "AI Workflow & Presets") shows how AI support can be embedded into your development process — from presets and streaming responses to tool-based FC14 calls.
-
 ---
 
 ## Preview
@@ -33,7 +27,6 @@ Workflow note: The integrated AI workflow (see "AI Workflow & Presets") shows ho
 
 ## Table of Contents
 
-- [Audience & AI usage](#audience--ai-usage)
 - [Feature Overview](#feature-overview)
 - [Requirements & Installation](#requirements--installation)
 - [Setting Up AI Providers](#setting-up-ai-providers)
@@ -271,15 +264,5 @@ FreeCAD_MultiAI_Panel/
 │
 ├── core/
 │   ├── params.py        # Settings persistence (FreeCAD params, API keys, presets)
-│   ├── qt_compat.py     # PySide6/PySide2 compatibility layer + requests export
-│   ├── theme.py                   # Public design-system API (re-exports the theme_* modules)
-│   ├── theme_schriftanwendung.py  # Emoji-safe fonts, global font application
-│   ├── theme_farbschema.py        # Colour scheme logic, light/dark switching
-│   ├── theme_stylesheets.py       # UI texts, layout constants + all STY_* stylesheet functions
-│   ├── farbwerte.py               # Raw colour values for light and dark mode
-│   ├── highlighter.py             # Python syntax highlighter
-│   └── schrift.py                 # Font families & fluid size scale
-│
 ├── editor/
 │   ├── editor.py        # Coordinator (QMainWindow, delegates to builders/, subsysteme/)
-│   ├── panel.py         # Helper panel (dyslexia assistant + vision)
