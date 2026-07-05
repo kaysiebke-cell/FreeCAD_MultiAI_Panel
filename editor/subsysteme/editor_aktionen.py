@@ -95,3 +95,6 @@ class AktionenLogik:
                          "Ctrl+Shift+F", "Code formatieren")
         self.registriere("hilfe", "❓  Hilfe", e._zeige_hilfe,
                          "F1", "Hilfe und Barrierefreiheit öffnen")
+        self.registriere("sprache_zuhoeren", "🎤  Sprache", e._sprache_umschalten,
+                         "F4", "Sprachsteuerung: Zuhören starten/stoppen "
+                               "(freihändig, ohne Maus)")

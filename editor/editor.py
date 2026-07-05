@@ -176,7 +176,7 @@ class MakroEditor(QtWidgets.QMainWindow):
         import json as _json
         _STATE_DATEI    = os.path.join(os.path.expanduser("~"), ".ki_makro_editor_layout.json")
         _GUARD_DATEI    = os.path.join(os.path.expanduser("~"), ".ki_makro_editor_restore_guard")
-        _LAYOUT_VERSION = "v12"
+        _LAYOUT_VERSION = "v13"
         self._layout_state_datei    = _STATE_DATEI
         self._layout_version        = _LAYOUT_VERSION
 
@@ -414,6 +414,11 @@ class MakroEditor(QtWidgets.QMainWindow):
     def _ki_fragen(self):                           self._ki._ki_fragen()
     def _ki_lauf_ui(self, laeuft: bool):            self._ki._ki_lauf_ui(laeuft)
     def _ki_stoppen(self):                          self._ki._ki_stoppen()
+
+    def _sprache_umschalten(self):
+        p = getattr(self, "_sprach_panel", None)
+        if p is not None:
+            p.taste_zuhoeren()
     def _ki_verlauf_reset(self):                    self._ki._ki_verlauf_reset()
     def _on_ki_chunk(self, chunk: str):             self._ki._on_ki_chunk(chunk)
     def _on_ki_error(self, msg: str):                self._ki._on_ki_error(msg)

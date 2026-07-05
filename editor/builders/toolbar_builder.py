@@ -24,7 +24,7 @@ def init_toolbar(editor) -> None:
 
     for _d in (editor._dock_cfg, editor._dock_ki, editor._dock_snip_api,
                editor._dock_files, editor._dock_werkzeugkasten,
-               editor._dock_akt, editor._dock_werkzeuge,
+               editor._dock_akt, editor._dock_werkzeuge, editor._dock_sprache,
                editor._dock_fehler):
         _d.hide()
 
@@ -91,6 +91,7 @@ def init_toolbar(editor) -> None:
     _panel_btn(editor._dock_files,     "📂", "Dat.",          _L, optional=True)
     _panel_btn(editor._dock_werkzeugkasten, "🧰", "Tools & Bib.", _R, optional=True)
     _panel_btn(editor._dock_werkzeuge, "🔧", "Werkz.",        _R, optional=True)
+    _panel_btn(editor._dock_sprache,   "🎤", "Sprache",       _R, optional=True)
     _panel_btn(editor._dock_fehler,    "⚠",  "Fehler",        _B)
     editor._btn_bf_gruppe = _panel_btn(editor._dock_bf_gruppe, "♿", "Hilfe+Zugang", _R)
 

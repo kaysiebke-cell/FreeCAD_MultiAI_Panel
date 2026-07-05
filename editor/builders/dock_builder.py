@@ -740,6 +740,13 @@ def init_docks(editor) -> None:
         editor._werkzeugkasten_tabs)
     editor.tabifyDockWidget(editor._dock_akt, editor._dock_werkzeugkasten)
 
+    # ── Sprachsteuerung (Prototyp, lokal/offline) ─────────────────────────
+    from editor.sprache import SprachPanel
+    editor._sprach_panel = SprachPanel(editor)
+    editor._dock_sprache = editor._make_dock(
+        "🎤  Sprache", "dock_sprache", _R, editor._sprach_panel)
+    editor.tabifyDockWidget(editor._dock_akt, editor._dock_sprache)
+
     # ── Hilfe + Barrierefreiheit Dock ─────────────────────────────────────
     _bf_gruppe_widget = QtWidgets.QWidget()
     _bg_lay = QtWidgets.QVBoxLayout(_bf_gruppe_widget)
