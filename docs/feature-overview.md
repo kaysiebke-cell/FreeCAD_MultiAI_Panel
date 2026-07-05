@@ -1,4 +1,4 @@
-[← Prev: Panels in Detail](panels.md) | [Home](../README.md) | [Next: AI Workflow & Presets →](ki-workflow.md)
+[← Prev: Panels in Detail](panels.md) | [Home](../README.md) | [Next: Voice Control →](sprachsteuerung.md)
 
 # Feature Overview
 
@@ -30,13 +30,14 @@ This file summarizes the main features of the FreeCAD MultiAI Panel: editor capa
 
 ## User Interface
 
-- 9 freely arrangeable dock panels
+- 10 freely arrangeable dock panels
 - Light/dark mode and per-panel toggles
 - Interactive assistant and built-in help panel
+- **🎤 Voice control** — operate panels/actions and dictate text fully offline (Vosk), see [Voice Control](sprachsteuerung.md)
 - Accessibility options: font size, contrast, keyboard mode, simplified view, tooltip delay, reduced animations
 
 For detailed workflows and presets see `docs/ki-workflow.md`.
 
 ---
 
-[← Prev: Panels in Detail](panels.md) | [Home](../README.md) | [Next: AI Workflow & Presets →](ki-workflow.md)
+[← Prev: Panels in Detail](panels.md) | [Home](../README.md) | [Next: Voice Control →](sprachsteuerung.md)

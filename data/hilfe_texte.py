@@ -18,7 +18,7 @@ Neu mit natürlicher Sprache arbeiten?
 → Fachsprache in FC11 einfügen → Code generieren"""),
 
     ("🏗️ Layout – Übersicht", """\
-Der Editor besteht aus 9 frei anordenbaren Panels (Docks).
+Der Editor besteht aus 10 frei anordenbaren Panels (Docks).
 
 TOOLBAR OBEN  –  links: 💾 Speichern (Strg+S)
 
@@ -53,6 +53,8 @@ Daneben alle Panels ein-/ausschalten:
                   🛠 KI-Tools (Dokumentkontext, Direkt-Werkzeuge,
                   Protokoll) und 📚 Bibliothek (Makro-Bibliothek)
   🔧 Werkz.       Code-Baum, Navigation, Edit-Funktionen, Bereinigung
+  🎤 Sprache      Sprachsteuerung (lokal/offline): Panels & Aktionen
+                  per Stimme + Diktat in Editor/KI (F4 = zuhören)
   ⚠  Fehler       Fehler & Sandbox in EINER Fläche:
                   Ausgabe/Fehler, 🔍 Übersetzen, 🐛 KI erklärt,
                   🔧 KI korrigieren, 🧪 Testen
@@ -457,6 +459,42 @@ Gut zu wissen:
   Von der KI generierter Code landet über 🔧 zum
   Testen ebenfalls hier."""),
 
+    ("🎤 Sprachsteuerung", """\
+Panel „🎤 Sprache" öffnen (Toolbar). Bedient den Editor per Stimme —
+komplett LOKAL/OFFLINE (Vosk), ohne externen Anbieter, ohne API-Schlüssel.
+
+── STARTEN ──────────────────────────────────────────
+  🎤 Zuhören klicken ODER F4 drücken → sprechen →
+  bei der Sprechpause stoppt es von selbst (kein Halten).
+  „Freihand" (Haken): hört nach jedem Befehl weiter.
+  Der Pegelbalken zeigt, ob dein Mikro Ton liefert.
+  (Ohne Mikro/Modell: Befehl unten ins Feld TIPPEN.)
+
+── MODUS (3 große Knöpfe) ───────────────────────────
+  🧭 Befehle · ✍ Editor · ✍ KI
+  Umschalten per Klick oder Sprache:
+  „diktat editor" · „diktat ki" · „befehle"
+
+── BEFEHLE ──────────────────────────────────────────
+  Panels:   „öffne/schließe Dateien | KI | Einstellungen …"
+  Aktionen: „speichern · ausführen · suche · hilfe · KI fragen"
+  „stop" (abbrechen) · „rückgängig"
+  Riskantes („neu laden"/„ausführen") fragt nach → „ja"
+
+── DIKTAT (Editor / KI) ─────────────────────────────
+  Gesprochenes wird als Text eingefügt.
+  Satzzeichen: „neue zeile" · „punkt" · „komma" · „klammer auf/zu"
+  „lösche" (letztes Wort korrigieren)
+  „abschicken" (diktierte KI-Frage senden)
+
+── EINRICHTUNG ──────────────────────────────────────
+  pip install vosk  (Aufnahme via parec/pw-record, kein PortAudio)
+  Deutsches Modell nach ~/.cache/vosk/ :
+    klein  vosk-model-small-de-0.15  (schnell)
+    groß   vosk-model-de-0.21        (genauer, wird bevorzugt)
+  Im Befehlsmodus ist der Wortschatz auf die bekannten
+  Kommandos eingeschränkt → sehr treffsicher."""),
+
     ("🔍 Suche & Ersetzen im Editor", """\
 Im KI-Panel (🤖 KI) ganz unten:
 
@@ -581,8 +619,9 @@ PANELS (Tastaturmodus, im ♿ Zugang aktivieren)
   Alt + 5         📂 Datei-Browser
   Alt + 6         🧰 Tools & Bibliothek
   Alt + 7         🔧 Werkzeuge
-  Alt + 8         ⚠ Fehler
-  Alt + 9         ♿ Hilfe+Zugang
+  Alt + 8         🎤 Sprache
+  Alt + 9         ⚠ Fehler
+  Alt + 0         ♿ Hilfe+Zugang
 (Die Alt-Nummern folgen der Reihenfolge der sichtbaren
  Toolbar-Knöpfe — bei ausgeblendeten Panels verschieben
  sie sich entsprechend.)

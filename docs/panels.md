@@ -288,6 +288,18 @@ See [Error Panel & Sandbox / Backup System](fehler-und-backup.md) for details.
 
 ---
 
+## 🎤 Voice Control Panel
+
+Operate the workbench by voice — fully local and offline (Vosk + PulseAudio),
+no external provider. Navigate panels, trigger actions, and dictate text into
+the editor or the AI question field. Click **🎤 Zuhören** or press **F4**; it
+stops automatically at the speech pause (no key to hold). Three big mode buttons
+switch between **🧭 Befehle**, **✍ Editor** and **✍ KI**.
+
+See [Voice Control](sprachsteuerung.md) for the full command list and setup.
+
+---
+
 ## 🤝 Assistant Panel
 
 An interactive step-by-step assistant with two modes:

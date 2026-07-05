@@ -14,6 +14,9 @@ FreeCAD_MultiAI_Panel/
 
 ├── core/                # Core helpers: params, theme, highlighter, etc.
 ├── editor/              # Editor implementation (UI builders, controllers, subsystems)
+│   ├── ki/              # AI modules (streaming, prompts, self-correction, tool-calling)
+│   ├── fehler/          # Error panel + sandbox
+│   └── sprache/         # 🎤 Voice control (Vosk, offline) — see docs/sprachsteuerung.md
 ├── ui/                  # Dialogs and UI helpers (welcome, accessibility, error translator)
 ├── data/                # Snippets, presets, API hints, skills
 ├── assets/              # Icons, demo GIF
@@ -21,7 +24,7 @@ FreeCAD_MultiAI_Panel/
 └── tests/               # Tests
 ```
 
-For a detailed view of files and responsibilities, consult the original full README content moved to `docs/full_readme.md`.
+For a per-file view of responsibilities, see the other pages in this documentation set (Panels, Voice Control, AI Workflow, …).
 
 ---
 

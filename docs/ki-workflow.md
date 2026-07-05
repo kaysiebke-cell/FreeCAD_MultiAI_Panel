@@ -1,4 +1,4 @@
-[← Prev: Feature Overview](feature-overview.md) | [Home](../README.md) | [Next: Setting Up AI Providers →](setting-up-ai-providers.md)
+[← Prev: Voice Control](sprachsteuerung.md) | [Home](../README.md) | [Next: Setting Up AI Providers →](setting-up-ai-providers.md)
 
 # AI Workflow & Presets
 
@@ -145,4 +145,4 @@ from structured input than from free-form text.
 
 ---
 
-[← Prev: Feature Overview](feature-overview.md) | [Home](../README.md) | [Next: Setting Up AI Providers →](setting-up-ai-providers.md)
+[← Prev: Voice Control](sprachsteuerung.md) | [Home](../README.md) | [Next: Setting Up AI Providers →](setting-up-ai-providers.md)

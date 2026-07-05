@@ -58,8 +58,9 @@ If the AI helps a beginner understand something new, enables an experienced user
 - **Run in FreeCAD** — F5 runs the whole macro, F9 runs the selection; press again to abort
 - **Generate macros from plain language** (FC11–FC14) and see the result in an embedded **👁 3D preview**
 - **Unified error panel** — translate errors to German in place, let the AI explain or auto-fix them
-- **9 dock panels**, freely arrangeable; interactive assistant and built-in searchable help
-- **Accessibility-first** — experience levels, keyboard mode, font/contrast options
+- **🎤 Voice control** — navigate panels/actions and dictate text, fully **offline** (Vosk), no external provider
+- **10 dock panels**, freely arrangeable; interactive assistant and built-in searchable help
+- **Accessibility-first** — experience levels, keyboard mode, font/contrast options, voice input
 - Runs on Linux (AppImage/Flatpak), Windows and macOS with FreeCAD 0.21+
 
 → Full list: **[Feature Overview](docs/feature-overview.md)**
@@ -78,16 +79,17 @@ The pages are ordered as a guided read — each one links to the previous and ne
 | 4 · The user interface | [oberflaeche.md](docs/oberflaeche.md) |
 | 5 · Panels in detail | [panels.md](docs/panels.md) |
 | 6 · Full feature overview | [feature-overview.md](docs/feature-overview.md) |
-| 7 · AI workflow & presets | [ki-workflow.md](docs/ki-workflow.md) |
-| 8 · AI provider setup (19) | [setting-up-ai-providers.md](docs/setting-up-ai-providers.md) |
-| 9 · FC11–FC14 – macro from description | [makro-generator.md](docs/makro-generator.md) |
-| 10 · Snippets, API hints & tools panel | [snippets-und-werkzeuge.md](docs/snippets-und-werkzeuge.md) |
-| 11 · Macro library | [makro-bibliothek.md](docs/makro-bibliothek.md) |
-| 12 · Error panel & backup system | [fehler-und-backup.md](docs/fehler-und-backup.md) |
-| 13 · Keyboard shortcuts | [keyboard-shortcuts.md](docs/keyboard-shortcuts.md) |
-| 14 · Ollama – field report | [OLLAMA_ERFAHRUNGEN.md](docs/OLLAMA_ERFAHRUNGEN.md) |
-| 15 · Project structure | [project-structure.md](docs/project-structure.md) |
-| 16 · Known limitations | [known-limitations.md](docs/known-limitations.md) |
+| 7 · Voice control (offline) | [sprachsteuerung.md](docs/sprachsteuerung.md) |
+| 8 · AI workflow & presets | [ki-workflow.md](docs/ki-workflow.md) |
+| 9 · AI provider setup (19) | [setting-up-ai-providers.md](docs/setting-up-ai-providers.md) |
+| 10 · FC11–FC14 – macro from description | [makro-generator.md](docs/makro-generator.md) |
+| 11 · Snippets, API hints & tools panel | [snippets-und-werkzeuge.md](docs/snippets-und-werkzeuge.md) |
+| 12 · Macro library | [makro-bibliothek.md](docs/makro-bibliothek.md) |
+| 13 · Error panel & backup system | [fehler-und-backup.md](docs/fehler-und-backup.md) |
+| 14 · Keyboard shortcuts | [keyboard-shortcuts.md](docs/keyboard-shortcuts.md) |
+| 15 · Ollama – field report | [OLLAMA_ERFAHRUNGEN.md](docs/OLLAMA_ERFAHRUNGEN.md) |
+| 16 · Project structure | [project-structure.md](docs/project-structure.md) |
+| 17 · Known limitations | [known-limitations.md](docs/known-limitations.md) |
 
 ---
 
