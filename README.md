@@ -95,4 +95,4 @@ The pages are ordered as a guided read — each one links to the previous and ne
 
 ## License
 
-See the repository for license information.
+MIT — see [LICENSE](LICENSE). Free to use, modify and share.

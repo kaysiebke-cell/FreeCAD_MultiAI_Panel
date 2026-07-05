@@ -9,7 +9,9 @@ FreeCAD_MultiAI_Panel/
 
 ├── main.py              # Entry point (FreeCAD macro / sidebar)
 ├── InitGui.py           # FreeCAD GUI integration (toolbar button)
-├── package.xml          # FreeCAD addon metadata
+├── Icon.svg             # Workbench icon
+├── package.xml          # FreeCAD addon metadata (Addon Manager)
+├── LICENSE              # MIT license
 ├── README.md            # Short entry README
 
 ├── core/                # Core helpers: params, theme, highlighter, etc.
