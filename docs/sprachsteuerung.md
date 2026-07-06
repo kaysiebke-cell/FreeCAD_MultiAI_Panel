@@ -8,12 +8,16 @@ Open it via the **🎤 Sprache** toolbar button.
 
 ## Setup
 
+Two recognition engines are supported (switch with the **🎯 Genauer (Whisper)** checkbox in the panel):
+
 ```bash
-pip install vosk        # recording uses the system tool parec / pw-record (no PortAudio needed)
+pip install vosk             # fast engine (small footprint)
+pip install faster-whisper   # accurate engine — much better with accents/dialects
 ```
-- **German model** into `~/.cache/vosk/`:
-  - small `vosk-model-small-de-0.15` (~45 MB, fast) — enough for commands
-  - large `vosk-model-de-0.21` (~1.9 GB, more accurate) — automatically preferred for dictation
+Recording uses the system tool `parec` / `pw-record` (no PortAudio needed).
+
+- **Vosk** — German model into `~/.cache/vosk/`: small `vosk-model-small-de-0.15` (~45 MB) or large `vosk-model-de-0.21` (~1.9 GB, preferred).
+- **Whisper** — the `small` model is downloaded automatically on first use (~0.5 GB, cached). This is the **default** when `faster-whisper` is installed, because it handles individual pronunciation and dialects far better.
 - **Flatpak:** FreeCAD needs microphone access (`--socket=pulseaudio`, usually already granted).
 - Without a model you can still **type** commands into the panel's text field.
 
@@ -51,9 +55,11 @@ Switch by clicking a button, or by voice: "diktat editor" · "diktat ki" · "bef
 
 ## Accuracy
 
-- In **Befehle** mode, recognition is **restricted to the known command vocabulary** — so misrecognitions on commands are very rare (Vosk can only pick a known command).
-- **Dictation** uses the full model; the large model gives noticeably better free text.
-- Vosk is not trained on your personal voice — accuracy comes from the vocabulary restriction (commands) and model size (dictation).
+- **Engine choice:** **Whisper** (default, if installed) handles individual pronunciation, accents and German dialects far better than **Vosk** — Vosk is faster but less robust. Switch anytime with the 🎯 checkbox.
+- In **Befehle** mode the recognition is biased toward the **known command vocabulary** (a hard word list for Vosk, a prompt hint for Whisper), so command misrecognitions are rare.
+- On top of that, commands and panel names use **fuzzy matching** — near-misses still hit the right command (e.g. "schliese"/"schlisse" → *schließen*, "ausfüren" → *ausführen*). Great for dialects and slightly-off recognition.
+- **Dictation** (free text) benefits most from Whisper or the large Vosk model.
+- Neither engine is trained on *your personal* voice — accuracy comes from the engine, the vocabulary bias, and fuzzy matching, not from a per-user training step.
 
 ## Notes & limits
 

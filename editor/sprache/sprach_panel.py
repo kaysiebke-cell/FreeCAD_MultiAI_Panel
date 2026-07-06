@@ -16,8 +16,9 @@ from __future__ import annotations
 from core.qt_compat import QtWidgets, QtCore
 
 from editor.sprache.sprach_kern import (
-    BefehlsGrammatik, SprachWorker, ModellLader, sprich, _normalisieren,
-    HAS_VOSK, finde_vosk_modell, aufnahme_moeglich,
+    BefehlsGrammatik, SprachWorker, ModellLader, sprich, _normalisieren, aehnlich,
+    HAS_VOSK, HAS_WHISPER, finde_vosk_modell, aufnahme_moeglich,
+    lade_modell, lade_whisper,
 )
 
 # ── Panels per Sprache öffnen ────────────────────────────────────────────────
@@ -81,6 +82,10 @@ class SprachPanel(QtWidgets.QWidget):
         self._worker: SprachWorker | None = None
         self._modell_pfad = finde_vosk_modell()
         self._pending: str | None = None   # wartende Bestätigung (Aktionsname)
+        # Standard-Engine: Whisper (genauer, v. a. bei Dialekt) wenn verfügbar,
+        # sonst Vosk (schnell). Umschaltbar im Panel.
+        self._engine = "whisper" if HAS_WHISPER else "vosk"
+        self._whisper_groesse = "small"
         self._baue_ui()
         self._grundstatus()
 
@@ -139,6 +144,18 @@ class SprachPanel(QtWidgets.QWidget):
             "automatisch weiter, bis du den Knopf wieder drückst.")
         lay.addWidget(self._chk_weiter)
 
+        # Engine: Whisper (genauer, bei Dialekt/Akzent) vs. Vosk (schneller)
+        self._chk_whisper = QtWidgets.QCheckBox(
+            "🎯 Genauer erkennen (Whisper) — etwas langsamer")
+        self._chk_whisper.setChecked(self._engine == "whisper")
+        self._chk_whisper.setEnabled(HAS_WHISPER)
+        self._chk_whisper.setToolTip(
+            "Whisper erkennt Aussprache/Dialekt deutlich besser, braucht aber\n"
+            "mehr Rechenzeit pro Satz. Aus = Vosk (schnell)."
+            + ("" if HAS_WHISPER else "\n(nicht installiert: pip install faster-whisper)"))
+        self._chk_whisper.toggled.connect(self._engine_gewechselt)
+        lay.addWidget(self._chk_whisper)
+
         self._status = QtWidgets.QLabel("")
         self._status.setWordWrap(True)
         lay.addWidget(self._status)
@@ -177,42 +194,57 @@ class SprachPanel(QtWidgets.QWidget):
     def _eingabe_senden(self):
         self._verarbeite(self._eingabe.text())
 
-    def _grundstatus(self):
+    def _engine_bereit(self):
+        """(ok, meldung) für die aktuell gewählte Engine."""
+        if not aufnahme_moeglich():
+            return False, ("🎙 Kein Aufnahme-Tool (parec/pw-record/ffmpeg) "
+                           "gefunden — oder Befehl unten tippen.")
+        if self._engine == "whisper":
+            if not HAS_WHISPER:
+                return False, ("🔌 Whisper nicht installiert — pip install "
+                               "faster-whisper (oder Befehl tippen).")
+            return True, None
         if not HAS_VOSK:
-            self._status.setText(
-                "🔌 Offline-Erkennung nicht installiert — Tippen funktioniert.\n"
-                "   pip install vosk sounddevice")
-        elif not self._modell_pfad:
-            self._status.setText(
-                "📦 Kein deutsches Modell gefunden — Tippen funktioniert.\n"
-                "   'vosk-model-small-de-0.15' nach ~/.cache/vosk/ legen")
-        else:
-            # Modell einmalig im Hintergrund vorladen (großes Modell ~16 s),
-            # damit das erste „Zuhören" nicht wartet.
-            self._status.setText("🧠 Sprachmodell wird geladen (einmalig) …")
-            self._lader = ModellLader(self._modell_pfad, self)
-            self._lader.fertig.connect(
-                lambda: self._status.setText("Bereit — Knopf klicken und Befehl sprechen."))
-            self._lader.start()
+            return False, "🔌 Vosk nicht installiert — pip install vosk (oder tippen)."
+        if not self._modell_pfad:
+            return False, ("📦 Kein deutsches Vosk-Modell — nach ~/.cache/vosk/ "
+                           "legen (oder Befehl tippen).")
+        return True, None
+
+    def _aktuelle_lade_fn(self):
+        if self._engine == "whisper" and HAS_WHISPER:
+            return lambda: lade_whisper(self._whisper_groesse)
+        return lambda: lade_modell(self._modell_pfad)
+
+    def _modell_vorladen(self):
+        """Gewähltes Modell einmalig im Hintergrund laden (Whisper lädt beim
+        ersten Mal ~0,5 GB herunter), damit das erste „Zuhören" nicht wartet."""
+        ok, msg = self._engine_bereit()
+        if not ok:
+            self._status.setText(msg)
+            return
+        name = "Whisper" if self._engine == "whisper" else "Vosk"
+        self._status.setText(f"🧠 {name}-Modell wird geladen (einmalig) …")
+        self._lader = ModellLader(self._aktuelle_lade_fn(), self)
+        self._lader.fertig.connect(
+            lambda: self._status.setText("Bereit — Knopf klicken und Befehl sprechen."))
+        self._lader.start()
+
+    def _grundstatus(self):
+        self._modell_vorladen()
+
+    def _engine_gewechselt(self, checked: bool):
+        self._engine = "whisper" if checked else "vosk"
+        self._modell_vorladen()
 
     # ── Toggle: starten / abbrechen ──────────────────────────────────────────
     def _umschalten(self):
         if self._btn.isChecked():
             # Statt totem, deaktiviertem Knopf: klarer Hinweis beim Klick.
-            if not HAS_VOSK:
+            ok, msg = self._engine_bereit()
+            if not ok:
                 self._btn.setChecked(False)
-                self._status.setText("🔌 Bitte erst: pip install vosk sounddevice "
-                                     "(oder Befehl unten tippen).")
-                return
-            if not self._modell_pfad:
-                self._btn.setChecked(False)
-                self._status.setText("📦 Kein deutsches Vosk-Modell gefunden "
-                                     "(oder Befehl unten tippen).")
-                return
-            if not aufnahme_moeglich():
-                self._btn.setChecked(False)
-                self._status.setText("🎙 Kein Aufnahme-Tool (parec/pw-record/ffmpeg) "
-                                     "gefunden (oder Befehl unten tippen).")
+                self._status.setText(msg)
                 return
             self._start_zuhoeren()
         else:
@@ -257,13 +289,21 @@ class SprachPanel(QtWidgets.QWidget):
         self._status.setText("🎙 Sprich jetzt deinen Befehl …")
         self._pegel.setValue(0)
         self._pegel.show()
-        # Befehlsmodus: Vosk auf den bekannten Wortschatz einschränken
-        # (treffsicherer). Diktatmodus: freies Modell (grammatik=None).
+        # Befehlsmodus: Erkennung auf den bekannten Wortschatz vorspannen
+        # (treffsicherer). Vosk: harte Grammatik. Whisper: Prompt-Bias.
         grammatik = None
+        hint = None
         if self._modus == 0:
-            import json
-            grammatik = json.dumps(self._befehls_wortschatz() + ["[unk]"])
-        self._worker = SprachWorker(self._modell_pfad, grammatik, self)
+            vocab = self._befehls_wortschatz()
+            if self._engine == "vosk":
+                import json
+                grammatik = json.dumps(vocab + ["[unk]"])
+            else:
+                hint = "Sprachbefehle: " + ", ".join(vocab)
+        self._worker = SprachWorker(
+            self._modell_pfad or "", grammatik,
+            engine=self._engine, whisper_groesse=self._whisper_groesse,
+            hint=hint, parent=self)
         self._worker.erkannt.connect(self._nach_erkennung)
         self._worker.fehler.connect(self._on_fehler)
         self._worker.pegel.connect(self._on_pegel)
@@ -479,7 +519,9 @@ class SprachPanel(QtWidgets.QWidget):
         woerter = set(t.split())
         best, best_score, best_area = None, 0, None
         for attr, (syn, area) in _PANELS.items():
-            score = sum(1 for s in syn if (s in t if " " in s else s in woerter))
+            score = sum(1 for s in syn
+                        if (s in t if " " in s
+                            else (s in woerter or any(aehnlich(w, s) for w in woerter))))
             if score > best_score:
                 best, best_score, best_area = attr, score, area
         if not best:

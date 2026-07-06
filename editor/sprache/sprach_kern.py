@@ -26,12 +26,18 @@ import subprocess
 
 from core.qt_compat import QtCore
 
-# ── Optionale Abhängigkeit: nur Vosk ────────────────────────────────────────
+# ── Optionale Engines ───────────────────────────────────────────────────────
 try:
     import vosk           # noqa: F401
     HAS_VOSK = True
 except Exception:
     HAS_VOSK = False
+
+try:
+    import faster_whisper  # noqa: F401
+    HAS_WHISPER = True
+except Exception:
+    HAS_WHISPER = False
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -60,6 +66,16 @@ def _normalisieren(text: str) -> str:
     text = text.lower()
     text = re.sub(r"[^a-zäöüß ]+", " ", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def aehnlich(a: str, b: str, schwelle: float = 0.82) -> bool:
+    """Unscharfer Wortvergleich (Levenshtein-Ähnlichkeit) — fängt Aussprache-/
+    Dialekt-/Erkennungsvarianten ab: „schliese"≈„schließe", „datein"≈„dateien".
+    Nur für längere Wörter (kurze wie „ja/da" wären sonst zu leicht verwechselt)."""
+    if len(a) < 4 or len(b) < 4:
+        return a == b
+    import difflib
+    return difflib.SequenceMatcher(None, a, b).ratio() >= schwelle
 
 
 class BefehlsGrammatik:
@@ -94,7 +110,8 @@ class BefehlsGrammatik:
                     if p in t:
                         score += 2
                 else:
-                    if any(w == p or (len(p) >= 4 and p in w) for w in woerter):
+                    if any(w == p or (len(p) >= 4 and p in w) or aehnlich(w, p)
+                           for w in woerter):
                         score += 1
             if score > best_score:
                 best, best_score = name, score
@@ -142,17 +159,31 @@ def lade_modell(pfad: str):
     return m
 
 
+_WHISPER_CACHE: dict[str, object] = {}
+
+
+def lade_whisper(groesse: str = "small"):
+    """Lädt (und lädt beim ersten Mal herunter) ein faster-whisper-Modell,
+    gecacht. „small" ist ein guter Kompromiss aus Genauigkeit und Tempo."""
+    m = _WHISPER_CACHE.get(groesse)
+    if m is None:
+        from faster_whisper import WhisperModel
+        m = WhisperModel(groesse, device="cpu", compute_type="int8")
+        _WHISPER_CACHE[groesse] = m
+    return m
+
+
 class ModellLader(QtCore.QThread):
-    """Lädt das Modell einmalig im Hintergrund vor (kein GUI-Freeze)."""
+    """Lädt das gewählte Modell einmalig im Hintergrund vor (kein GUI-Freeze)."""
     fertig = QtCore.Signal()
 
-    def __init__(self, pfad: str, parent=None):
+    def __init__(self, lade_fn, parent=None):
         super().__init__(parent)
-        self._pfad = pfad
+        self._fn = lade_fn
 
     def run(self):
         try:
-            lade_modell(self._pfad)
+            self._fn()
         except Exception:
             pass
         self.fertig.emit()
@@ -183,10 +214,15 @@ class SprachWorker(QtCore.QThread):
     fehler  = QtCore.Signal(str)
     pegel   = QtCore.Signal(float)   # 0.0–1.0 Mikrofonpegel („ich höre dich")
 
-    def __init__(self, modell_pfad: str, grammatik: str | None = None, parent=None):
+    def __init__(self, modell_pfad: str, grammatik: str | None = None,
+                 engine: str = "vosk", whisper_groesse: str = "small",
+                 hint: str | None = None, parent=None):
         super().__init__(parent)
         self._modell_pfad = modell_pfad
-        self._grammatik = grammatik   # JSON-Wortliste (Befehlsmodus) oder None
+        self._grammatik = grammatik      # Vosk: JSON-Wortliste (Befehlsmodus)
+        self._engine = engine            # "vosk" | "whisper"
+        self._whisper_groesse = whisper_groesse
+        self._hint = hint                # Whisper: Vokabular-Bias (Befehlsmodus)
         self._stop = False
         self._proc = None
 
@@ -199,44 +235,32 @@ class SprachWorker(QtCore.QThread):
             except Exception:
                 pass
 
+    def _pegel_von(self, data: bytes) -> float:
+        """RMS-Pegel (0..1) berechnen + für die „ich höre dich"-Anzeige senden."""
+        try:
+            import array, math
+            a = array.array("h"); a.frombytes(data)
+            if not a:
+                return 0.0
+            rms = math.sqrt(sum(x * x for x in a) / len(a)) / 32768.0
+            lvl = min(1.0, rms * 4.0)
+            self.pegel.emit(lvl)
+            return lvl
+        except Exception:
+            return 0.0
+
     def run(self):
         cmd = recorder_cmd()
         if cmd is None:
             self.fehler.emit("Kein Aufnahme-Tool gefunden (parec/pw-record/ffmpeg).")
             return
         try:
-            import vosk
-            modell = lade_modell(self._modell_pfad)   # aus dem Cache, nicht neu laden
-            # Befehlsmodus: nur den bekannten Wortschatz zulassen → treffsicher.
-            # Diktatmodus (grammatik=None): volles Modell für freien Text.
-            if self._grammatik:
-                rec = vosk.KaldiRecognizer(modell, 16000, self._grammatik)
-            else:
-                rec = vosk.KaldiRecognizer(modell, 16000)
             self._proc = subprocess.Popen(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-            import array, math
-            ergebnis = ""
-            while not self._stop:
-                data = self._proc.stdout.read(4000)
-                if not data:
-                    break
-                # Mikrofonpegel (RMS) für die „ich höre dich"-Anzeige
-                try:
-                    a = array.array("h"); a.frombytes(data)
-                    if a:
-                        rms = math.sqrt(sum(x * x for x in a) / len(a)) / 32768.0
-                        self.pegel.emit(min(1.0, rms * 4.0))
-                except Exception:
-                    pass
-                if rec.AcceptWaveform(data):          # Sprechpause → Äußerung fertig
-                    t = json.loads(rec.Result()).get("text", "").strip()
-                    if t:
-                        ergebnis = t
-                        break
-            if not ergebnis:
-                ergebnis = json.loads(rec.FinalResult()).get("text", "").strip()
-            self.erkannt.emit(ergebnis)
+            if self._engine == "whisper" and HAS_WHISPER:
+                self._run_whisper()
+            else:
+                self._run_vosk()
         except Exception as e:
             self.fehler.emit(str(e))
         finally:
@@ -248,6 +272,64 @@ class SprachWorker(QtCore.QThread):
                 except Exception:
                     pass
             self._proc = None
+
+    def _run_vosk(self):
+        import vosk
+        modell = lade_modell(self._modell_pfad)   # aus dem Cache
+        if self._grammatik:
+            rec = vosk.KaldiRecognizer(modell, 16000, self._grammatik)
+        else:
+            rec = vosk.KaldiRecognizer(modell, 16000)
+        ergebnis = ""
+        while not self._stop:
+            data = self._proc.stdout.read(4000)
+            if not data:
+                break
+            self._pegel_von(data)
+            if rec.AcceptWaveform(data):          # Sprechpause → Äußerung fertig
+                t = json.loads(rec.Result()).get("text", "").strip()
+                if t:
+                    ergebnis = t
+                    break
+        if not ergebnis:
+            ergebnis = json.loads(rec.FinalResult()).get("text", "").strip()
+        self.erkannt.emit(ergebnis)
+
+    def _run_whisper(self):
+        """Nimmt eine Äußerung auf (eigene Sprechpausen-Erkennung über den
+        Pegel), transkribiert sie dann mit faster-whisper — genauer bei
+        Akzent/Dialekt, dafür etwas langsamer."""
+        import numpy as np
+        modell = lade_whisper(self._whisper_groesse)   # aus dem Cache
+        puffer = bytearray()
+        begonnen = False
+        stille = 0
+        max_bytes = 16000 * 2 * 20   # 20 s Sicherheitslimit
+        while not self._stop:
+            data = self._proc.stdout.read(4000)   # ~0,125 s
+            if not data:
+                break
+            lvl = self._pegel_von(data)
+            if lvl > 0.06:                # Sprache
+                begonnen = True
+                stille = 0
+                puffer += data
+            elif begonnen:               # Stille nach Sprache
+                puffer += data
+                stille += 1
+                if stille >= 6:          # ~0,75 s Pause → Äußerung fertig
+                    break
+            if len(puffer) > max_bytes:
+                break
+        if self._stop or not puffer:
+            self.erkannt.emit("")
+            return
+        audio = np.frombuffer(bytes(puffer), dtype=np.int16).astype(np.float32) / 32768.0
+        segmente, _info = modell.transcribe(
+            audio, language="de", beam_size=1, vad_filter=False,
+            initial_prompt=self._hint or None)
+        text = " ".join(s.text for s in segmente).strip()
+        self.erkannt.emit(text)
 
 
 # ════════════════════════════════════════════════════════════════════════════

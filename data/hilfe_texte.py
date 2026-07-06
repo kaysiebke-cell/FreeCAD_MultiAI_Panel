@@ -488,7 +488,9 @@ komplett LOKAL/OFFLINE (Vosk), ohne externen Anbieter, ohne API-Schlüssel.
   „abschicken" (diktierte KI-Frage senden)
 
 ── EINRICHTUNG ──────────────────────────────────────
-  pip install vosk  (Aufnahme via parec/pw-record, kein PortAudio)
+  pip install vosk           (schnelle Engine)
+  pip install faster-whisper (genauer bei Dialekt/Akzent — Standard;
+                              Checkbox „🎯 Genauer" schaltet um)
   Deutsches Modell nach ~/.cache/vosk/ :
     klein  vosk-model-small-de-0.15  (schnell)
     groß   vosk-model-de-0.21        (genauer, wird bevorzugt)
