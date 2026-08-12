@@ -243,9 +243,8 @@ class MakroLeiste(QtWidgets.QWidget):
                 sichtbare_ordner.add(rel_low)
 
         anzahl = sum(1 for btn, *_ in self._makro_buttons if btn.isVisible())
-        if inhalt_modus:
-            self.status.setText(
-                f"{anzahl} Treffer  –  Klick öffnet Datei im Editor")
+        self.status.setText(
+            f"{anzahl} Treffer  –  Klick öffnet Datei im Editor")
 
         for rel_pfad, lbl in self._ordner_labels.items():
             rel_low = rel_pfad.lower()
