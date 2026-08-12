@@ -96,18 +96,6 @@ class KIChunkUI:
             self._c._btn_ki.setEnabled(True)
             return
 
-        # Projektordner: hat die KI Dateien angefordert, werden sie nachgeladen
-        # und die Anfrage läuft automatisch weiter (nur im normalen Chat-Modus).
-        if not (getattr(self._c, "_nl_antwort_aktiv", False)
-                or getattr(self._c, "_tc_modus_aktiv", False)
-                or getattr(self._c, "_sw_modus_aktiv", False)):
-            try:
-                from editor.ki.projekt_nachladen import nachladen_falls_angefordert
-                if nachladen_falls_angefordert(self._c, full):
-                    return
-            except Exception:
-                pass
-
         if getattr(self._c, "_nl_antwort_aktiv", False):
             self._c._nl_antwort_aktiv = False
             clean = extrahiere_code_aus_nl_antwort(clean)

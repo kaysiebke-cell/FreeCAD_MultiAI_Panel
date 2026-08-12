@@ -17,8 +17,6 @@ from core.params import (lade_kontext, speichere_kontext,
                          lade_auto_einfuegen, speichere_auto_einfuegen,
                          lade_thinking_modus, speichere_thinking_modus,
                          lade_plan_modus, speichere_plan_modus,
-                         lade_projektordner, speichere_projektordner,
-                         lade_projektkarte_aktiv, speichere_projektkarte_aktiv,
                          lade_api_key, SYSTEM_PROMPT_VORLAGEN)
 from ui.barrierefreiheit import BarrierefreiheitPanel
 from editor.panel import FreecadHelferPanel
@@ -609,80 +607,6 @@ def init_docks(editor) -> None:
     editor._kontext.textChanged.connect(
         lambda: speichere_kontext(editor._kontext.toPlainText()))
     _kontext_sek.addWidget(editor._kontext)
-
-    # ── Projektordner: ganzer Ordnerbaum als KI-Kontext ────────────────────
-    _ordner_zeile = QtWidgets.QHBoxLayout()
-    _ordner_zeile.setSpacing(theme.DOCK_KI_RAHMEN_ABST)
-
-    editor._projekt_pfad_feld = QtWidgets.QLineEdit(lade_projektordner())
-    editor._projekt_pfad_feld.setReadOnly(True)
-    editor._projekt_pfad_feld.setPlaceholderText(
-        "Kein Projektordner gewählt – nur die offene Datei geht an die KI")
-    editor._projekt_pfad_feld.setToolTip(
-        "Gewählter Projektordner. Die KI bekommt eine Übersicht aller\n"
-        "Dateien darin und kann einzelne Dateien gezielt nachfordern.")
-    _ordner_zeile.addWidget(editor._projekt_pfad_feld, stretch=1)
-
-    _btn_ordner = QtWidgets.QPushButton("📁 Wählen …")
-    _btn_ordner.setToolTip("Projektordner auswählen")
-    _ordner_zeile.addWidget(_btn_ordner)
-
-    _btn_ordner_weg = QtWidgets.QPushButton("✕")
-    _btn_ordner_weg.setFixedWidth(theme.DOCK_ICON_BTN_BREITE)
-    _btn_ordner_weg.setToolTip("Projektordner nicht mehr mitschicken")
-    _ordner_zeile.addWidget(_btn_ordner_weg)
-    _kontext_sek.addLayout(_ordner_zeile)
-
-    editor._projekt_karte_box = QtWidgets.QCheckBox(
-        "Projektübersicht bei jeder Anfrage mitschicken")
-    editor._projekt_karte_box.setChecked(lade_projektkarte_aktiv())
-    editor._projekt_karte_box.setToolTip(
-        "Sendet Ordnerbaum und Klassen-/Funktionsübersicht mit —\n"
-        "keinen Quelltext. Kostet nur wenige hundert Token.")
-    editor._projekt_karte_box.toggled.connect(speichere_projektkarte_aktiv)
-    _kontext_sek.addWidget(editor._projekt_karte_box)
-
-    editor._projekt_info_lbl = QtWidgets.QLabel("")
-    editor._projekt_info_lbl.setWordWrap(True)
-    _kontext_sek.addWidget(editor._projekt_info_lbl)
-
-    def _projekt_info_aktualisieren():
-        pfad = editor._projekt_pfad_feld.text().strip()
-        if not pfad:
-            editor._projekt_info_lbl.setText("")
-            return
-        try:
-            from editor.ki.projekt_kontext import projekt_statistik
-            anzahl, tokens = projekt_statistik(pfad)
-        except Exception as exc:
-            editor._projekt_info_lbl.setText(f"⚠  Ordner nicht lesbar: {exc}")
-            return
-        if not anzahl:
-            editor._projekt_info_lbl.setText(
-                "⚠  Keine lesbaren Textdateien in diesem Ordner gefunden")
-        else:
-            editor._projekt_info_lbl.setText(
-                f"📂 {anzahl} Datei(en) · Übersicht ≈ {tokens} Token je Anfrage")
-
-    def _projekt_ordner_waehlen():
-        start = editor._projekt_pfad_feld.text().strip() or ""
-        pfad = QtWidgets.QFileDialog.getExistingDirectory(
-            editor, "Projektordner wählen", start)
-        if not pfad:
-            return
-        editor._projekt_pfad_feld.setText(pfad)
-        speichere_projektordner(pfad)
-        _projekt_info_aktualisieren()
-
-    def _projekt_ordner_loeschen():
-        editor._projekt_pfad_feld.clear()
-        speichere_projektordner("")
-        _projekt_info_aktualisieren()
-
-    _btn_ordner.clicked.connect(_projekt_ordner_waehlen)
-    _btn_ordner_weg.clicked.connect(_projekt_ordner_loeschen)
-    # Beim Start nicht sofort durchsuchen — das Panel soll zügig aufgehen
-    QtCore.QTimer.singleShot(1500, _projekt_info_aktualisieren)
 
     ki_layout.addWidget(_input_w, stretch=1)
     ki_layout.addWidget(_kontext_sek)

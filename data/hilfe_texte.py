@@ -124,32 +124,6 @@ Schnell-Analyse (ohne Markierung):
   mit dem Fehler — dort 🔍 Übersetzen, 🐛 KI erklärt
   oder 🔧 KI korrigieren.
 
-Projektordner (ganzer Ordnerbaum als Kontext):
-  🤖 KI-Panel → ▶ 📌 Projekt-Kontext aufklappen
-  → 📁 Wählen … → Ordner deines Projekts auswählen
-
-  Mitgeschickt wird nur eine ÜBERSICHT, kein Quelltext:
-  der Ordnerbaum plus alle Klassen und Funktionen der
-  Python-Dateien. Das kostet meist nur ein paar hundert
-  Token, egal wie groß das Projekt ist.
-  Bei Ollama wird automatisch die sparsame Variante
-  (nur Ordnerbaum) verwendet.
-
-  Braucht die KI den Inhalt einer Datei, fordert sie ihn
-  selbst an — die Datei wird automatisch nachgeladen und
-  die Anfrage läuft weiter (max. 2 Runden pro Frage).
-  Im Statusfeld steht dann „📂 Lade nach …".
-
-  Der Haken „Projektübersicht bei jeder Anfrage
-  mitschicken" schaltet das Ganze ab, ohne dass du den
-  Ordner verlierst. ✕ entfernt den Ordner.
-
-  Ausgelassen werden: __pycache__, .git, node_modules,
-  venv, build, dist sowie Dateien über 200 KB und alles,
-  was kein Textformat ist.
-  Es wird ausschließlich gelesen — nie geschrieben, und
-  nie außerhalb des gewählten Ordners.
-
 Chat-Verlauf:
   Bleibt zwischen Fragen erhalten (Folgefragen möglich).
   Ab 5.000 Zeichen wird der älteste Teil automatisch
