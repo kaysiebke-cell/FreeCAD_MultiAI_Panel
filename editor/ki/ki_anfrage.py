@@ -79,6 +79,18 @@ def _relevante_api_hints(frage: str, max_hints: int = 5) -> str:
     return "\n".join(zeilen)
 
 
+def _projektkarte_block(kompakt: bool = False) -> str:
+    """Projektkarte des gewählten Ordners — "" wenn keiner gesetzt/aktiv ist."""
+    try:
+        from core.params import lade_projektordner, lade_projektkarte_aktiv
+        if not lade_projektkarte_aktiv():
+            return ""
+        from editor.ki.projekt_kontext import karte_als_prompt_block
+        return karte_als_prompt_block(lade_projektordner(), kompakt=kompakt)
+    except Exception:
+        return ""
+
+
 class KIAnfrage:
     """Baut KI-Prompts auf und startet Worker-Threads."""
 
@@ -266,6 +278,21 @@ class KIAnfrage:
         self._c._status.setText(
             f"🤖 Warte auf ersten Token … | Verlauf: {verlauf_kb} KB")
 
+        # Projektordner: kompakte Karte des ganzen Ordnerbaums (ohne Quelltext).
+        # Für Ollama nur der Ordnerbaum — die Struktur-Übersicht sprengt sonst
+        # das kleine Kontextfenster lokaler Modelle.
+        projekt_block = _projektkarte_block(
+            kompakt=self._c._src_box.currentText().startswith("Ollama"))
+        # Nachlade-Protokoll nur dort anbieten, wo die Folgeanfrage auch läuft
+        nachlade_hinweis = ""
+        if projekt_block and not (ist_nl_modus or ist_pd_modus
+                                  or ist_sw_modus or ist_tc_modus):
+            from editor.ki.projekt_nachladen import ANFORDERUNGS_HINWEIS
+            nachlade_hinweis = f"{ANFORDERUNGS_HINWEIS}\n"
+        self._c._projekt_nachlade_runde = 0
+        # Nur nachladen, wenn die KI das Protokoll auch erklärt bekommen hat
+        self._c._projekt_nachlade_erlaubt = bool(nachlade_hinweis)
+
         # Sitemap: nur Struktur-Übersicht, kein voller Code-Text
         sitemap = erstelle_code_sitemap(self._c._editor.toPlainText())
         sitemap_block = (
@@ -285,6 +312,7 @@ class KIAnfrage:
 
         if code_quelle == "nur_frage":
             full_prompt = (
+                f"{projekt_block}{nachlade_hinweis}"
                 f"{sitemap_block}"
                 f"{prompt}{_hints_section}\n\n"
                 f"{modus_prefix}"
@@ -292,6 +320,7 @@ class KIAnfrage:
         else:
             herkunft = "Markierter Block" if code_quelle == "suchfeld" else "Editor-Inhalt"
             full_prompt = (
+                f"{projekt_block}{nachlade_hinweis}"
                 f"{sitemap_block}"
                 f"Aufgabe: {prompt}\n\n"
                 f"{herkunft}:\n```python\n{code}\n```"
@@ -390,6 +419,11 @@ class KIAnfrage:
                     fc11_prompt = fc11_prompt + "\n━━━ PROJEKTANWEISUNGEN ━━━\n" + _agents_text
             except Exception:
                 pass
+
+            # Projektordner-Übersicht auch für FC11 (ohne Nachlade-Protokoll —
+            # FC11 darf ausschließlich Code zurückgeben)
+            if projekt_block:
+                fc11_prompt = fc11_prompt + "\n" + projekt_block
 
             # Skills: passende Skill-Dateien anhand von Stichwörtern anhängen
             try:
@@ -527,6 +561,8 @@ class KIAnfrage:
 
         aktueller_code  = self._c._editor.toPlainText()
         code_ausschnitt = extrahiere_fehler_kontext(aktueller_code, fehler_text)
+        # Fehler-Erklärung läuft ohne Projektkarte — also auch ohne Nachladen
+        self._c._projekt_nachlade_erlaubt = False
 
         if code_ausschnitt:
             system = (
