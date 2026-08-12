@@ -59,7 +59,6 @@ Get ready in just a few steps:
 *   **19 AI providers supported:** Use local models (via Ollama), Claude, ChatGPT, Gemini, DeepSeek, Groq, and many more (with over 40 presets).
 *   **Run directly in FreeCAD:** F5 runs the entire macro, F9 runs only the selection. Pressing again aborts execution.
 *   **Generate macros from plain language (FC11–FC14):** Describe your macro in natural language and see the result immediately in an embedded **👁 3D preview**.
-*   **Whole project as context:** Pick a project folder and the AI gets a compact map of all folders and files — and pulls in individual files by itself when it needs them.
 *   **Unified error panel:** Translate errors to your preferred language in place, have the AI explain them, or auto-fix them.
 *   **🎤 Voice control (offline):** Navigate panels/actions and dictate text, fully **offline** (via Vosk), without sending data to external providers.
 *   **Flexible UI:** 10 freely arrangeable dock panels, interactive assistant, and a built-in searchable help.

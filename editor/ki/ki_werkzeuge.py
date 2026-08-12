@@ -352,86 +352,6 @@ def _makro_ausfuehren(code: str) -> WerkzeugErgebnis:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Projektordner — die KI lädt sich Dateien selbst nach
-# ══════════════════════════════════════════════════════════════════════════════
-
-def _projekt_wurzel() -> str:
-    """Gewählter Projektordner aus den FreeCAD-Parametern ("" wenn keiner)."""
-    try:
-        from core.params import lade_projektordner
-        return lade_projektordner()
-    except Exception:
-        return ""
-
-
-def _ohne_projektordner() -> WerkzeugErgebnis:
-    return WerkzeugErgebnis(
-        erfolg=False, ausgabe="",
-        fehler=("Kein Projektordner gewählt. Im KI-Panel unter "
-                "„📌 Projekt-Kontext\" einen Ordner auswählen."))
-
-
-def _projekt_dateien_auflisten() -> WerkzeugErgebnis:
-    """Listet alle Textdateien des Projektordners auf."""
-    wurzel = _projekt_wurzel()
-    if not wurzel:
-        return _ohne_projektordner()
-    try:
-        from editor.ki.projekt_kontext import dateien_sammeln, ordnerbaum
-        rel_pfade = dateien_sammeln(wurzel)
-    except Exception as exc:
-        return WerkzeugErgebnis(erfolg=False, ausgabe="", fehler=str(exc))
-
-    if not rel_pfade:
-        return WerkzeugErgebnis(
-            erfolg=True, ausgabe="(keine lesbaren Dateien gefunden)",
-            daten={"count": 0, "files": []})
-
-    return WerkzeugErgebnis(
-        erfolg=True,
-        ausgabe=f"{len(rel_pfade)} Datei(en) in {wurzel}:\n"
-                + ordnerbaum(wurzel, rel_pfade),
-        daten={"count": len(rel_pfade), "files": rel_pfade})
-
-
-def _projekt_datei_lesen(pfad: str) -> WerkzeugErgebnis:
-    """Liest eine Datei aus dem Projektordner (nur lesend, nie außerhalb)."""
-    wurzel = _projekt_wurzel()
-    if not wurzel:
-        return _ohne_projektordner()
-    try:
-        from editor.ki.projekt_kontext import datei_lesen
-        inhalt = datei_lesen(wurzel, pfad)
-    except ValueError as exc:
-        return WerkzeugErgebnis(erfolg=False, ausgabe="", fehler=str(exc))
-    except Exception as exc:
-        return WerkzeugErgebnis(
-            erfolg=False, ausgabe="", fehler=f"Datei nicht lesbar: {exc}")
-
-    return WerkzeugErgebnis(
-        erfolg=True, ausgabe=f"── {pfad} ──\n{inhalt}",
-        daten={"path": pfad, "chars": len(inhalt)})
-
-
-def _projekt_suchen(muster: str) -> WerkzeugErgebnis:
-    """Sucht einen Text in allen Dateien des Projektordners."""
-    wurzel = _projekt_wurzel()
-    if not wurzel:
-        return _ohne_projektordner()
-    try:
-        from editor.ki.projekt_kontext import projekt_suchen
-        ausgabe = projekt_suchen(wurzel, muster)
-    except ValueError as exc:
-        return WerkzeugErgebnis(erfolg=False, ausgabe="", fehler=str(exc))
-    except Exception as exc:
-        return WerkzeugErgebnis(
-            erfolg=False, ausgabe="", fehler=f"Suche fehlgeschlagen: {exc}")
-
-    return WerkzeugErgebnis(erfolg=True, ausgabe=ausgabe,
-                            daten={"pattern": muster})
-
-
-# ══════════════════════════════════════════════════════════════════════════════
 # Werkzeug-Register
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -539,49 +459,6 @@ _registrieren(WerkzeugDefinition(
     parameter=[
         WerkzeugParam("code", "string",
                       "Vollständiger, ausführbarer Python/FreeCAD-Code ohne Markdown-Fences"),
-    ],
-))
-
-_registrieren(WerkzeugDefinition(
-    name="projekt_dateien_auflisten",
-    beschreibung=(
-        "Listet alle Textdateien des gewählten Projektordners als Ordnerbaum auf. "
-        "Verwende dies zuerst, um herauszufinden welche Dateien es gibt, "
-        "bevor du mit projekt_datei_lesen einzelne Dateien anforderst."
-    ),
-    kategorie="projekt",
-    handler=_projekt_dateien_auflisten,
-    parameter=[],
-))
-
-_registrieren(WerkzeugDefinition(
-    name="projekt_datei_lesen",
-    beschreibung=(
-        "Liest den Inhalt EINER Datei aus dem Projektordner, mit Zeilennummern. "
-        "Der Pfad ist relativ zum Projektordner, z.B. 'core/params.py'. "
-        "Nur lesend — außerhalb des Projektordners ist kein Zugriff möglich."
-    ),
-    kategorie="projekt",
-    handler=_projekt_datei_lesen,
-    parameter=[
-        WerkzeugParam("pfad", "string",
-                      "Pfad relativ zum Projektordner, z.B. 'editor/panel.py'"),
-    ],
-))
-
-_registrieren(WerkzeugDefinition(
-    name="projekt_suchen",
-    beschreibung=(
-        "Sucht einen Text in allen Dateien des Projektordners und gibt die "
-        "Fundstellen als 'pfad:zeile: inhalt' zurück. Groß-/Kleinschreibung "
-        "wird ignoriert. Nützlich um zu finden, wo eine Funktion definiert "
-        "oder verwendet wird."
-    ),
-    kategorie="projekt",
-    handler=_projekt_suchen,
-    parameter=[
-        WerkzeugParam("muster", "string",
-                      "Gesuchter Text, z.B. 'def lade_pfad' oder 'Placement'"),
     ],
 ))
 
