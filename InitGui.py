@@ -11,6 +11,8 @@ import sys
 
 # __file__ ist im FlatPak-FreeCAD nicht gesetzt → Fallback auf getUserAppDataDir.
 # globals() schreibt _MODDIR in exec-globals, damit Klassen-Methoden es sehen.
+# Statische Prüfer sehen diese Zuweisung nicht — jede Verwendung von _MODDIR
+# trägt deshalb ein "# noqa: F821". Zur Laufzeit ist der Name gesetzt.
 try:
     globals()['_MODDIR'] = os.path.dirname(os.path.abspath(__file__))
 except NameError:
@@ -25,7 +27,7 @@ class KiAssistentCommand:
     def GetResources(self):
         ki_path = os.path.join(os.path.expanduser("~"), "Schreibtisch",
                                "Macros", "KI Muli source Assistent")
-        assets  = os.path.join(_MODDIR, "assets")
+        assets  = os.path.join(_MODDIR, "assets")  # noqa: F821
         icon = ""
         for kandidat in (os.path.join(ki_path, "ki_icon.svg"),
                          os.path.join(assets, "Icon.svg")):
@@ -89,8 +91,8 @@ Gui.addCommand('Cmd_KiAssistent', KiAssistentCommand())
 
 # ── Pfade einrichten ───────────────────────────────────────────────────────────
 def _pfade_einrichten():
-    if _MODDIR not in sys.path:
-        sys.path.insert(0, _MODDIR)
+    if _MODDIR not in sys.path:  # noqa: F821
+        sys.path.insert(0, _MODDIR)  # noqa: F821
 
 
 def _panel_starten():
@@ -114,7 +116,7 @@ class MeineMakroWorkbench(Gui.Workbench):
 
     def __init__(self):
         super().__init__()
-        self.Icon = os.path.join(_MODDIR, "Icon.svg")
+        self.Icon = os.path.join(_MODDIR, "Icon.svg")  # noqa: F821
 
     def Initialize(self):
         # Immer aufgerufen wenn Workbench zum ersten Mal aktiviert wird

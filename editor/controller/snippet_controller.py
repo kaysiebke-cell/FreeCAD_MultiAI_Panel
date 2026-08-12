@@ -18,6 +18,7 @@ Snippets – linke Tab-Inhalte:
 """
 
 import os
+import json
 
 from core.qt_compat import QtWidgets, QtCore, QtGui
 from core import theme
