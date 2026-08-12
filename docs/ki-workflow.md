@@ -77,6 +77,42 @@ can 🔍 Translate, 🐛 have the AI explain it, or 🔧 AI-fix it.
 ```
 On the next FreeCAD start, simply load the `.json` file and continue seamlessly.
 
+## Project folder as context
+By default the AI only sees the file you have open. To give it a whole project — several
+folders and files — pick a project folder:
+
+```
+🤖 AI panel → ▶ 📌 Project context → 📁 Choose …
+```
+
+What is sent is a **map, not source code**: the folder tree plus every class and function of
+the Python files in it. This usually costs only a few hundred tokens no matter how large the
+project is. For Ollama the frugal variant (folder tree only) is used automatically, so the
+small context window of local models is not blown.
+
+When the AI needs the actual content of a file, it asks for it itself:
+
+```
+#DATEI: core/params.py     → the file is loaded and the request continues
+#SUCHE: Placement          → matches across the project are supplied
+```
+
+The file is fetched automatically and the request re-runs with that content (max. 2 rounds per
+question, max. 3 files per round). The status bar shows `📂 Lade nach …` while this happens.
+Because this uses plain text markers instead of a provider-specific tool API, it works with all
+19 providers — including local Ollama models without tool support.
+
+The same three operations are also available as manual buttons in the **🔧 Tools panel**
+(`projekt_dateien_auflisten`, `projekt_datei_lesen`, `projekt_suchen`).
+
+| Detail | Behaviour |
+|--------|-----------|
+| Checkbox "Projektübersicht … mitschicken" | Turns the map off without losing the folder |
+| ✕ button | Clears the project folder |
+| Skipped | `__pycache__`, `.git`, `node_modules`, `venv`, `build`, `dist`, files > 200 KB, non-text files |
+| Limits | 400 files, 12,000 characters of map |
+| Access | Read-only, and never outside the chosen folder |
+
 ## Using the chat history
 The chat history is kept between questions. Follow-up questions build on previous answers.
 After 5,000 characters the oldest part is automatically compressed (summarised).

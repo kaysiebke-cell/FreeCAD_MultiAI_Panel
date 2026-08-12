@@ -21,6 +21,21 @@ def lade_kontext() -> str:
 def speichere_kontext(text: str):
     App.ParamGet(PREF_KEY).SetString("ProjektKontext", text)
 
+# ── Projektordner: ganzer Ordnerbaum als KI-Kontext ────────────────────────
+
+def lade_projektordner() -> str:
+    return App.ParamGet(PREF_KEY).GetString("ProjektOrdner", "")
+
+def speichere_projektordner(pfad: str) -> None:
+    App.ParamGet(PREF_KEY).SetString("ProjektOrdner", pfad or "")
+
+def lade_projektkarte_aktiv() -> bool:
+    """Ob die Projektkarte bei jedem KI-Aufruf mitgeschickt wird."""
+    return App.ParamGet(PREF_KEY).GetBool("ProjektKarteAktiv", True)
+
+def speichere_projektkarte_aktiv(v: bool) -> None:
+    App.ParamGet(PREF_KEY).SetBool("ProjektKarteAktiv", bool(v))
+
 _KEY_NAMES = {
     "anthropic":   "ApiKeyAnthropic",
     "openai":      "ApiKeyOpenAI",
